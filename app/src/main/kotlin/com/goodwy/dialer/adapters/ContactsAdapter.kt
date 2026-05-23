@@ -406,13 +406,8 @@ class ContactsAdapter(
     private fun String.highlightTextFromNumbers(textToHighlight: String, primaryColor: Int, language: String): SpannableString {
         val spannableString = SpannableString(this)
         val digits = DialpadT9.convertLettersToNumbers(this.uppercase(), language)
-        if (digits.contains(textToHighlight)) {
-            //offsetting the characters to be extracted, by the number of first non-letter or non-numeric characters.
-            val lettersAndNumbers = Regex("[^A-Za-z0-9 ]")
-            val firstSymbol = lettersAndNumbers.replace(this, "").firstOrNull()
-            val offsetIndex = if (firstSymbol != null) this.indexOf(firstSymbol, 0, true) else 0
-
-            val startIndex = digits.indexOf(textToHighlight, 0, true) + offsetIndex
+        val startIndex = digits.indexOf(textToHighlight, 0, true)
+        if (startIndex >= 0) {
             val endIndex = (startIndex + textToHighlight.length).coerceAtMost(length)
             try {
                 spannableString.setSpan(ForegroundColorSpan(primaryColor), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
