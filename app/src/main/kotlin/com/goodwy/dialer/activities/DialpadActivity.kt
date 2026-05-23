@@ -1158,6 +1158,11 @@ class DialpadActivity : SimpleActivity() {
         val lang = if (isAutoLang) langLocale else langPref
 
         val collator = Collator.getInstance(sysLocale())
+        val callCounts = HashMap<String, Int>()
+        allRecentCalls.forEach { call ->
+            val key = call.phoneNumber.normalizePhoneNumber()
+            if (key.isNotEmpty()) callCounts[key] = (callCounts[key] ?: 0) + 1
+        }
         val filtered = allContacts.filter { contact ->
             val convertedName = DialpadT9.convertLettersToNumbers(
                 contact.name.normalizeString().uppercase(), lang)
@@ -1183,6 +1188,8 @@ class DialpadActivity : SimpleActivity() {
                     it.getNameToDisplay().normalizeString().uppercase(), lang)
                     .filterNot { c -> c.isWhitespace() }
                     .startsWith(text)
+            }.thenByDescending { contact ->
+                contact.phoneNumbers.maxOfOrNull { callCounts[it.value.normalizePhoneNumber()] ?: 0 } ?: 0
             }.thenBy(collator) { it.getNameToDisplay() }
         ).toMutableList() as ArrayList<Contact>
 
