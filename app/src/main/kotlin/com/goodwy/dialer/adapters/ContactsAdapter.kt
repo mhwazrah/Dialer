@@ -406,9 +406,21 @@ class ContactsAdapter(
     private fun String.highlightTextFromNumbers(textToHighlight: String, primaryColor: Int, language: String): SpannableString {
         val spannableString = SpannableString(this)
         val digits = DialpadT9.convertLettersToNumbers(this.uppercase(), language)
-        val startIndex = digits.indexOf(textToHighlight, 0, true)
-        if (startIndex >= 0) {
-            val endIndex = (startIndex + textToHighlight.length).coerceAtMost(length)
+
+        val compressed = StringBuilder(digits.length)
+        val originalPos = IntArray(digits.length)
+        var written = 0
+        digits.forEachIndexed { i, c ->
+            if (!c.isWhitespace()) {
+                compressed.append(c)
+                originalPos[written++] = i
+            }
+        }
+        val start = compressed.indexOf(textToHighlight, 0, ignoreCase = true)
+        if (start >= 0) {
+            val startIndex = originalPos[start]
+            val endCompressed = (start + textToHighlight.length - 1).coerceAtMost(written - 1)
+            val endIndex = (originalPos[endCompressed] + 1).coerceAtMost(length)
             try {
                 spannableString.setSpan(ForegroundColorSpan(primaryColor), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
             } catch (_: IndexOutOfBoundsException) {
