@@ -43,3 +43,7 @@ fun Call.hasCapability(capability: Int): Boolean = (details.callCapabilities and
 fun Call?.isConference(): Boolean = this?.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE) == true
 
 fun Call?.isHD(): Boolean = this?.details?.hasProperty(Call.Details.PROPERTY_HIGH_DEF_AUDIO) == true
+
+// True when the call is carried over Wi-Fi (VoWiFi / Wi-Fi calling) instead of the mobile
+// network. Set by the telephony framework; absent property means a cellular call.
+fun Call?.isWifiCall(): Boolean = this?.details?.hasProperty(Call.Details.PROPERTY_WIFI) == true

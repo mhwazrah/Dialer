@@ -95,6 +95,22 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <!-- Network-type indicator (Wi-Fi calling vs mobile), mirrors the note icon -->
+                <ImageView
+                    android:id="@+id/callNetworkType"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:alpha="0.8"
+                    android:contentDescription="@string/wifi_calling"
+                    android:elevation="@dimen/medium_margin"
+                    android:padding="@dimen/small_margin"
+                    android:src="@drawable/ic_cellular_vector"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:visibility="visible"/>
+
                 <com.goodwy.commons.views.MyTextView
                     android:id="@+id/callerNameLabel"
                     android:layout_width="0dp"
@@ -103,8 +119,9 @@
                     android:textSize="@dimen/caller_name_text_size_small"
                     android:textDirection="firstStrongLtr"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/callNetworkType"
                     app:layout_constraintEnd_toStartOf="@+id/addCallerNote"
+                    app:layout_goneMarginStart="0dp"
                     app:layout_goneMarginEnd="26dp"
                     tools:text="Caller name"/>
 

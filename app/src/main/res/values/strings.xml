@@ -16,6 +16,8 @@
     <string name="show_grouped_calls">Show grouped calls</string>
     <string name="clear_call_history">Clear call history</string>
     <string name="show_call_details">Show call details</string>
+    <string name="wifi_calling">Wi-Fi calling</string>
+    <string name="mobile_network_call">Mobile network</string>
 
     <!-- Dialpad -->
     <string name="dialpad">Dialpad</string>

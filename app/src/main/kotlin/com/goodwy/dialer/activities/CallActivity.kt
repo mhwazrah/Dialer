@@ -1455,6 +1455,23 @@ class CallActivity : SimpleActivity() {
                 setActionButtonEnabled(callMergeHolder, enabled = !isCallEnded && state == Call.STATE_ACTIVE)
             }
         }
+
+        updateCallNetworkType(call, state)
+    }
+
+    // Shows a Wi-Fi-calling or mobile-network indicator (top-left, mirroring the note icon) while a
+    // call is connected, refreshed live on state/details changes (e.g. a Wi-Fi<->cellular hand-over).
+    private fun updateCallNetworkType(call: Call?, state: Int) {
+        val showNetwork = state == Call.STATE_ACTIVE || state == Call.STATE_DIALING ||
+            state == Call.STATE_CONNECTING || state == Call.STATE_HOLDING
+        binding.callNetworkType.beVisibleIf(showNetwork)
+        if (!showNetwork) return
+        val isWifi = call.isWifiCall()
+        binding.callNetworkType.apply {
+            setImageResource(if (isWifi) R.drawable.ic_wifi_calling_vector else R.drawable.ic_cellular_vector)
+            contentDescription = getString(if (isWifi) R.string.wifi_calling else R.string.mobile_network_call)
+            applyColorFilter(if (config.backgroundCallScreen == THEME_BACKGROUND) getProperTextColor() else Color.WHITE)
+        }
     }
 
     private fun updateState() {
