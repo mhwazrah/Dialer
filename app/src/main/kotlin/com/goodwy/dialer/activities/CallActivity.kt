@@ -89,6 +89,7 @@ class CallActivity : SimpleActivity() {
     private var stopAnimation = false
     private var dialpadHeight = 0f
     private var needSelectSIM = false //true - if the call is called from a third-party application not via ACTION_CALL, for example, this is how MIUI applications do it.
+    private var simSelectionRequested = false
     private var audioRoutePopupMenu: PopupMenu? = null
     private var needHapticFeedback = true
 
@@ -1585,6 +1586,13 @@ class CallActivity : SimpleActivity() {
             }
             callContact = contact
 
+            // The call may already have been waiting for SIM selection before the contact
+            // resolved (showPhoneAccountPicker falls back to callContact when the call has
+            // no handle URI) — retry now; the one-shot flag makes this a no-op otherwise.
+            if (call.getStateCompat() == Call.STATE_SELECT_PHONE_ACCOUNT) {
+                runOnUiThread { showPhoneAccountPicker() }
+            }
+
             val configBackgroundCallScreen = config.backgroundCallScreen
             val isConference = call.isConference()
 
@@ -1659,8 +1667,18 @@ class CallActivity : SimpleActivity() {
     }
 
     private fun showPhoneAccountPicker() {
-        if (callContact != null && !needSelectSIM) {
-            getHandleToUse(intent, callContact!!.number) { handle ->
+        // Use the call's own number instead of callContact, which resolves asynchronously — a
+        // call already waiting in SELECT_PHONE_ACCOUNT when this screen opens (e.g. from the
+        // quiet outgoing-call notification) would otherwise never get its SIM picker and stay
+        // stuck on "Dialing". needSelectSIM calls are handled by initOutgoingCall; the one-shot
+        // flag prevents a second dialog when the state is dispatched again.
+        if (needSelectSIM || simSelectionRequested) return
+        val number = CallManager.getPrimaryCall()?.details?.handle?.schemeSpecificPart
+            ?: callContact?.number
+            ?: return
+        simSelectionRequested = true
+        getHandleToUse(intent, number) { handle ->
+            if (handle != null) {
                 CallManager.getPrimaryCall()?.phoneAccountSelected(handle, false)
             }
         }

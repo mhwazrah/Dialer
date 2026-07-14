@@ -85,14 +85,23 @@ class MainActivity : SimpleActivity() {
     // Telecom stack, but Android writes the call-log entry asynchronously a
     // moment later. This observer fires when the call log actually changes, so
     // the recents tab shows the new entry without the user having to wait.
-    private val callLogObserver = object : android.database.ContentObserver(
-        android.os.Handler(android.os.Looper.getMainLooper())
-    ) {
+    // Writes arrive in bursts (the call-end entry, our own cached-name updates,
+    // mark-missed-as-read), so coalesce them into a single refresh instead of
+    // launching one full reload pipeline per notification.
+    private val callLogRefreshHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val callLogRefreshRunnable = Runnable {
+        if (!isDestroyed && !isFinishing) {
+            config.needUpdateRecents = true
+            getRecentsFragment()?.refreshItems(needUpdate = true)
+        }
+    }
+
+    private val callLogObserver = object : android.database.ContentObserver(callLogRefreshHandler) {
         override fun onChange(selfChange: Boolean) {
             super.onChange(selfChange)
             if (isDestroyed || isFinishing) return
-            config.needUpdateRecents = true
-            getRecentsFragment()?.refreshItems(needUpdate = true)
+            callLogRefreshHandler.removeCallbacks(callLogRefreshRunnable)
+            callLogRefreshHandler.postDelayed(callLogRefreshRunnable, 400)
         }
     }
 
@@ -305,6 +314,7 @@ class MainActivity : SimpleActivity() {
             contentResolver.unregisterContentObserver(callLogObserver)
         } catch (_: Exception) {
         }
+        callLogRefreshHandler.removeCallbacks(callLogRefreshRunnable)
         storeStateVariables()
         config.lastUsedViewPagerPage = binding.viewPager.currentItem
     }

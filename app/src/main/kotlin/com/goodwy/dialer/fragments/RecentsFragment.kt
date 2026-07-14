@@ -302,9 +302,16 @@ class RecentsFragment(
             }
 
             if (recents.isNotEmpty()) {
+                // Render the cache instantly, then replace it with fresh data via the quick
+                // (limited) query before the slow full pass — otherwise new calls made while
+                // the app was closed stay invisible until the full query finishes.
                 refreshCallLogFromCache(recents) {
                     binding.recentsList.runAfterAnimations {
-                        refreshCallLog(loadAll = true)
+                        refreshCallLog(loadAll = false) {
+                            binding.recentsList.runAfterAnimations {
+                                refreshCallLog(loadAll = true)
+                            }
+                        }
                     }
                 }
             } else {
@@ -513,20 +520,18 @@ class RecentsFragment(
                 it.map { recentCall -> recentCall.phoneNumber.numberForNotes()}
             )
         }
+    }
 
-        if (loadAll) {
-            with(recentsHelper) {
-                val queryCount = context.config.queryLimitRecent
-                getRecentCalls(queryLimit = queryCount, updateCallsCache = false) { it ->
-                    ensureBackgroundThread {
-                        val recentOutgoingNumbers = it
-                            .filter { it.type == Calls.OUTGOING_TYPE }
-                            .map { recentCall -> recentCall.phoneNumber }
+    // Derives the outgoing-numbers whitelist (used by the call screener) from the calls that were
+    // just loaded, instead of re-querying the whole call log with a second full contacts load.
+    private fun updateRecentOutgoingNumbers(calls: List<RecentCall>) {
+        ensureBackgroundThread {
+            val outgoingNumbers = calls
+                .flatMap { listOf(it) + (it.groupedCalls ?: emptyList()) }
+                .filter { it.type == Calls.OUTGOING_TYPE }
+                .map { it.phoneNumber }
 
-                        context.config.recentOutgoingNumbers = recentOutgoingNumbers.toMutableSet()
-                    }
-                }
-            }
+            context.config.recentOutgoingNumbers = outgoingNumbers.toMutableSet()
         }
     }
 
@@ -542,10 +547,12 @@ class RecentsFragment(
         with(recentsHelper) {
             if (context.config.groupSubsequentCalls) {
                 getGroupedRecentCalls(existingRecentCalls, queryCount) {
+                    if (loadAll) updateRecentOutgoingNumbers(it)
                     prepareCallLog(it, callback)
                 }
             } else {
                 getRecentCalls(existingRecentCalls, queryCount, updateCallsCache = true) { it ->
+                    if (loadAll) updateRecentOutgoingNumbers(it)
                     val calls = if (context.config.groupAllCalls) it.distinctBy { it.phoneNumber } else it
                     prepareCallLog(calls, callback)
                 }
