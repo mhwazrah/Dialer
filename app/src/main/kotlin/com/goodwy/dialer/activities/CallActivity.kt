@@ -72,6 +72,12 @@ class CallActivity : SimpleActivity() {
             openAppIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             return openAppIntent
         }
+
+        // Whether the call screen is currently in the foreground. CallService uses this to
+        // detect that its direct activity start was silently blocked (OEM background-activity
+        // restrictions) so it can escalate the notification instead.
+        var isActivityVisible = false
+            private set
     }
 
     private val binding by viewBinding(ActivityCallBinding::inflate)
@@ -332,7 +338,13 @@ class CallActivity : SimpleActivity() {
 
     override fun onResume() {
         super.onResume()
+        isActivityVisible = true
         updateState()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isActivityVisible = false
     }
 
     @Suppress("DEPRECATION")

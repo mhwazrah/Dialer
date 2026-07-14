@@ -1,5 +1,7 @@
 package com.goodwy.dialer.services
 
+import android.os.Handler
+import android.os.Looper
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.InCallService
@@ -79,6 +81,19 @@ class CallService : InCallService() {
             }
         }
         callNotificationManager.setupNotification(lowPriority)
+
+        // A blocked background-activity launch does NOT throw — it silently no-ops. For an
+        // outgoing call started while the app is backgrounded (e.g. dialed by a car over
+        // Bluetooth), that would leave only the quiet notification above as the call's UI.
+        // If the call screen hasn't appeared shortly, escalate to a high-priority
+        // full-screen-intent notification so the system itself surfaces the call.
+        if (isOutgoing) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (!CallActivity.isActivityVisible && CallManager.getPhoneState() != NoCall) {
+                    callNotificationManager.setupNotification(lowPriority = false, forceFullScreen = true)
+                }
+            }, 2000)
+        }
     }
 
     override fun onCallRemoved(call: Call) {
