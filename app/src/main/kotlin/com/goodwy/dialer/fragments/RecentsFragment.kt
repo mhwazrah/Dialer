@@ -542,21 +542,40 @@ class RecentsFragment(
 
     private fun getRecentCalls(loadAll: Boolean, callback: (List<RecentCall>) -> Unit) {
         val queryCount = if (loadAll) context.config.queryLimitRecent else RecentsHelper.QUERY_LIMIT
-        val existingRecentCalls = allRecentCalls.filterIsInstance<RecentCall>()
+        // The quick pass paints instantly from the call log's cached names, so the full pass
+        // starts from scratch to re-resolve every row against the real contact book instead of
+        // keeping possibly cached-name rows verbatim through the previous-entries merge.
+        val existingRecentCalls = if (loadAll) emptyList() else allRecentCalls.filterIsInstance<RecentCall>()
 
         with(recentsHelper) {
             if (context.config.groupSubsequentCalls) {
-                getGroupedRecentCalls(existingRecentCalls, queryCount) {
+                // updateCallsCache on the full pass keeps CACHED_NAME/CACHED_PHOTO_URI correct,
+                // which the quick pass depends on for its instant first paint.
+                getGroupedRecentCalls(existingRecentCalls, queryCount, updateCallsCache = loadAll, useCachedNames = !loadAll) {
                     if (loadAll) updateRecentOutgoingNumbers(it)
-                    prepareCallLog(it, callback)
+                    finalizeCallLog(it, callback)
                 }
             } else {
-                getRecentCalls(existingRecentCalls, queryCount, updateCallsCache = true) { it ->
+                getRecentCalls(existingRecentCalls, queryCount, updateCallsCache = loadAll, useCachedNames = !loadAll) { it ->
                     if (loadAll) updateRecentOutgoingNumbers(it)
                     val calls = if (context.config.groupAllCalls) it.distinctBy { it.phoneNumber } else it
-                    prepareCallLog(calls, callback)
+                    finalizeCallLog(calls, callback)
                 }
             }
+        }
+    }
+
+    // The helper already resolves rows against the contact book (full pass) or paints from the
+    // call log's cached names (quick pass), so all that remains before display is the optional
+    // private-calls filter — not another full contact-book load like prepareCallLog does.
+    private fun finalizeCallLog(calls: List<RecentCall>, callback: (List<RecentCall>) -> Unit) {
+        if (SMT_PRIVATE !in context.baseConfig.ignoredContactSources) {
+            callback(calls)
+            return
+        }
+
+        ensureBackgroundThread {
+            callback(maybeFilterPrivateCalls(calls, getPrivateContacts()))
         }
     }
 
