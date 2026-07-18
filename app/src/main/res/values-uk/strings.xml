@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Стан дзвінка</string>
     <string name="call_notification_channel_high_priority">Стан виклику (високий пріоритет)</string>
     <string name="calling_accounts">Облікові записи для дзвінків</string>
+    <string name="send_whatsapp">Надіслати WhatsApp</string>
 </resources>

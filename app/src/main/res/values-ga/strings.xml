@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Stádas glaonna</string>
     <string name="call_notification_channel_high_priority">Stádas glao (tosaíocht ard)</string>
     <string name="calling_accounts">Cuntais ghlaonna</string>
+    <string name="send_whatsapp">Seol WhatsApp</string>
 </resources>

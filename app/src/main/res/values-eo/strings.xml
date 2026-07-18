@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Vokostato</string>
     <string name="call_notification_channel_high_priority">Vokostato (prioritata)</string>
     <string name="calling_accounts">Vokaj kontoj</string>
+    <string name="send_whatsapp">Sendi WhatsApp</string>
 </resources>

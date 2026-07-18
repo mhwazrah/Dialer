@@ -15,4 +15,5 @@
     <string name="clear_call_history">Notīrīt zvanu vēsturi</string>
     <string name="show_call_details">Rādīt informāciju par zvanu</string>
     <string name="dialpad">Ciparnīca</string>
+    <string name="send_whatsapp">Sūtīt WhatsApp</string>
 </resources>

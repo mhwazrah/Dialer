@@ -67,6 +67,8 @@
         <package android:name="com.goodwy.audiobooklite" />
         <package android:name="com.goodwy.keyboard" />
         <package android:name="com.goodwy.calendar" />
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
 
         <!-- Required for loading contact accounts -->
         <intent>

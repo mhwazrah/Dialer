@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Status poziva</string>
     <string name="call_notification_channel_high_priority">Status poziva (visoki prioritet)</string>
     <string name="calling_accounts">Računi pozivanja</string>
+    <string name="send_whatsapp">Pošalji WhatsApp</string>
 </resources>
