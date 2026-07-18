@@ -78,6 +78,10 @@ class CallService : InCallService() {
         callNotificationManager.cancelNotification()
         val wasPrimaryCall = call == CallManager.getPrimaryCall()
         CallManager.onCallRemoved(call)
+        // Persist the dirty flag too: the EventBus post only reaches subscribers while the app is
+        // open, so without this a call that ends with the app closed leaves the recents cache
+        // stale and the next launch renders old entries first.
+        config.needUpdateRecents = true
         EventBus.getDefault().post(Events.RefreshCallLog)
         if (CallManager.getPhoneState() == NoCall) {
             CallManager.inCallService = null
