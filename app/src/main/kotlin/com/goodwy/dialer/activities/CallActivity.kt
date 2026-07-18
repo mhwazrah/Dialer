@@ -63,6 +63,12 @@ class CallActivity : SimpleActivity() {
             openAppIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             return openAppIntent
         }
+
+        // Whether the call screen is currently in the foreground. CallService uses this to
+        // detect that its direct activity start was silently blocked (OEM background-activity
+        // restrictions) so it can escalate the notification instead.
+        var isActivityVisible = false
+            private set
     }
 
     private val binding by viewBinding(ActivityCallBinding::inflate)
@@ -80,6 +86,7 @@ class CallActivity : SimpleActivity() {
     private var stopAnimation = false
     private var dialpadHeight = 0f
     private var needSelectSIM = false //true - if the call is called from a third-party application not via ACTION_CALL, for example, this is how MIUI applications do it.
+    private var simSelectionRequested = false
     private var audioRoutePopupMenu: PopupMenu? = null
     private var needHapticFeedback = true
 
@@ -322,7 +329,13 @@ class CallActivity : SimpleActivity() {
 
     override fun onResume() {
         super.onResume()
+        isActivityVisible = true
         updateState()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isActivityVisible = false
     }
 
     @Suppress("DEPRECATION")
@@ -1399,6 +1412,8 @@ class CallActivity : SimpleActivity() {
         } else if (phoneState is TwoCalls) {
             updateCallState(phoneState.active)
             updateCallOnHoldState(phoneState.onHold, phoneState.active)
+            // Keep the screen on while a 2nd call is ringing (call waiting).
+            if (phoneState.active.getStateCompat() == Call.STATE_RINGING) changeProximitySensor = false
         }
 
         runOnUiThread {
@@ -1409,54 +1424,46 @@ class CallActivity : SimpleActivity() {
 
     private fun updateCallOnHoldState(call: Call?, callActive: Call? = null) {
         val hasCallOnHold = call != null
+        // Call waiting: the primary/active call is actually a 2nd call that is still ringing.
+        // The standard incoming UI (shown via callRinging) presents the NEW caller. We force plain
+        // Accept/Decline buttons here instead of the answer-style slider: the slider's drag bounds
+        // and arrow base positions are captured once by a one-shot layout listener when the call
+        // screen is first created (with the incoming UI hidden), so they are invalid on this
+        // re-shown call-waiting screen — the arrows would otherwise fly across the display.
+        val isCallWaiting = hasCallOnHold && callActive?.getStateCompat() == Call.STATE_RINGING
+
         if (hasCallOnHold) {
             getCallContact(applicationContext, call) { contact ->
                 runOnUiThread {
                     binding.onHoldCallerName.text = getContactNameOrNumber(contact)
                 }
             }
+        }
 
-            // A second call has been received but not yet accepted
-            if (call.getStateCompat() == Call.REJECT_REASON_UNWANTED) {
-                binding.apply {
-                    ongoingCallHolder.beGone()
-                    incomingCallHolder.beVisible()
-                    callStatusLabel.text = getString(R.string.is_calling)
-                    RxAnimation.from(binding.callStatusLabel)
-                        .shake()
-                        .subscribe()
+        if (isCallWaiting) {
+            binding.apply {
+                arrayOf(
+                    callDraggable, callDraggableBackground, callDraggableVertical,
+                    callLeftArrow, callRightArrow, callUpArrow, callDownArrow
+                ).forEach { it.beGone() }
 
-                    arrayOf(
-                        callDraggable, callDraggableBackground, callDraggableVertical,
-                        callLeftArrow, callRightArrow,
-                        callUpArrow, callDownArrow
-                    ).forEach {
-                        it.beGone()
-                    }
+                callDecline.beVisible()
+                callDecline.setOnClickListener { endCall() }
 
+                callAccept.beVisible()
+                callAccept.setOnClickListener { acceptCall() }
 
-                    callDecline.beVisible()
-                    callDecline.setOnClickListener {
-                        endCall()
-                    }
-
-                    callAccept.beVisible()
-                    callAccept.setOnClickListener {
+                callAcceptAndDecline.apply {
+                    beVisible()
+                    setText(R.string.answer_end_other_call)
+                    setOnClickListener {
                         acceptCall()
-                    }
-
-                    callAcceptAndDecline.apply {
-                        beVisible()
-                        setText(R.string.answer_end_other_call)
-                        setOnClickListener {
-                            acceptCall()
-                            callActive?.disconnect()
-                        }
+                        call?.disconnect()
                     }
                 }
             }
-        } else {
-            if (config.callBlockButton) binding.callAcceptAndDecline.apply {
+        } else if (!hasCallOnHold && config.callBlockButton) {
+            binding.callAcceptAndDecline.apply {
                 beVisible()
                 setText(R.string.block_number)
                 setOnClickListener {
@@ -1478,7 +1485,9 @@ class CallActivity : SimpleActivity() {
         binding.apply {
             onHoldStatusHolder.beVisibleIf(hasCallOnHold)
             controlsSingleCall.beVisibleIf(!hasCallOnHold && dialpadWrapper.isGone())
-            controlsTwoCalls.beVisibleIf(hasCallOnHold && dialpadWrapper.isGone())
+            // While a 2nd call is ringing the incoming UI is shown, so keep the two-call
+            // controls hidden until that waiting call is actually answered.
+            controlsTwoCalls.beVisibleIf(hasCallOnHold && !isCallWaiting && dialpadWrapper.isGone())
         }
     }
 
@@ -1496,6 +1505,13 @@ class CallActivity : SimpleActivity() {
                 return@getCallContact
             }
             callContact = contact
+
+            // The call may already have been waiting for SIM selection before the contact
+            // resolved (showPhoneAccountPicker falls back to callContact when the call has
+            // no handle URI) — retry now; the one-shot flag makes this a no-op otherwise.
+            if (call.getStateCompat() == Call.STATE_SELECT_PHONE_ACCOUNT) {
+                runOnUiThread { showPhoneAccountPicker() }
+            }
 
             val configBackgroundCallScreen = config.backgroundCallScreen
             val isConference = call.isConference()
@@ -1554,6 +1570,9 @@ class CallActivity : SimpleActivity() {
 
     private fun callRinging() {
         binding.incomingCallHolder.beVisible()
+        // Hide the in-call controls so a 2nd (waiting) call fully takes over with the
+        // incoming UI; for a first incoming call the ongoing holder is already hidden.
+        binding.ongoingCallHolder.beGone()
     }
 
     private fun callStarted() {
@@ -1568,10 +1587,18 @@ class CallActivity : SimpleActivity() {
     }
 
     private fun showPhoneAccountPicker() {
-        if (callContact != null && !needSelectSIM) {
-            getHandleToUse(intent, callContact!!.number) { handle ->
-                CallManager.getPrimaryCall()?.phoneAccountSelected(handle, false)
-            }
+        // Use the call's own number instead of callContact, which resolves asynchronously — a
+        // call already waiting in SELECT_PHONE_ACCOUNT when this screen opens (e.g. from the
+        // quiet outgoing-call notification) would otherwise never get its SIM picker and stay
+        // stuck on "Dialing". needSelectSIM calls are handled by initOutgoingCall; the one-shot
+        // flag prevents a second dialog when the state is dispatched again.
+        if (needSelectSIM || simSelectionRequested) return
+        val number = CallManager.getPrimaryCall()?.details?.handle?.schemeSpecificPart
+            ?: callContact?.number
+            ?: return
+        simSelectionRequested = true
+        getHandleToUse(intent, number) { handle ->
+            if (handle != null) CallManager.getPrimaryCall()?.phoneAccountSelected(handle, false)
         }
     }
 
