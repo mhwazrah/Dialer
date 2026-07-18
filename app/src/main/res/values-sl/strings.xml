@@ -69,4 +69,5 @@
     <string name="hide_dialpad_numbers">Skrij števila na številčnici</string>
     <string name="export_call_history">Izvozi zgodovino klicev</string>
     <string name="import_call_history">Uvozi zgodovino klicev</string>
+    <string name="hang_up">Odloži</string>
 </resources>

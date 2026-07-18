@@ -74,4 +74,5 @@
     <string name="call_is_being_connected">Híváskapcsolás folyamatban…</string>
     <string name="faq_3_title">Miért hiányzik néhány névjegyem az alkalmazásból?</string>
     <string name="faq_3_text">A Fossify Telefon csak azokat a névjegyeket jeleníti meg, amelyekhez telefonszám is tartozik. A telefonszám nélküli névjegyek nem jelennek meg az alkalmazásban.</string>
+    <string name="hang_up">Hívás bontása</string>
 </resources>

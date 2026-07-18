@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Status połączenia</string>
     <string name="call_notification_channel_high_priority">Status połączenia (wysoki priorytet)</string>
     <string name="calling_accounts">Konta telefoniczne</string>
+    <string name="hang_up">Rozłącz</string>
 </resources>

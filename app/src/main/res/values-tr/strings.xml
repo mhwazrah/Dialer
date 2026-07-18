@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Arama durumu</string>
     <string name="call_notification_channel_high_priority">Arama durumu (yüksek öncelik)</string>
     <string name="calling_accounts">Arama hesapları</string>
+    <string name="hang_up">Kapat</string>
 </resources>

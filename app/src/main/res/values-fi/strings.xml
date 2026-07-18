@@ -77,4 +77,5 @@
     <string name="call_notification_channel">Puhelun tila</string>
     <string name="call_notification_channel_high_priority">Puhelun tila (korkea prioriteetti)</string>
     <string name="calling_accounts">Puhelintilit</string>
+    <string name="hang_up">Lopeta puhelu</string>
 </resources>
