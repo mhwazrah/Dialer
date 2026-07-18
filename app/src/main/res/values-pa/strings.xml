@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="dialpad_number_font_size">ਨੰਬਰ ਫੌਂਟ ਆਕਾਰ</string>
+</resources>

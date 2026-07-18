@@ -77,4 +77,5 @@
     <string name="call_notification_channel_high_priority">Statut d\'appel (haute priorité)</string>
     <string name="call_notification_channel">Statut d\'appel</string>
     <string name="calling_accounts">Comptes d\'appel</string>
+    <string name="dialpad_number_font_size">Taille de police des chiffres</string>
 </resources>

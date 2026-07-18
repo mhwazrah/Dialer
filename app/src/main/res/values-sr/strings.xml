@@ -77,4 +77,5 @@
     <string name="app_launcher_name">Телефон</string>
     <string name="hide_dialpad_numbers">Сакриј бројеве тастатуре</string>
     <string name="calling_accounts">Позивни налози</string>
+    <string name="dialpad_number_font_size">Величина фонта бројева</string>
 </resources>

@@ -84,4 +84,5 @@
     <string name="call_notification_channel">Opkaldsstatus</string>
     <string name="call_notification_channel_high_priority">Opkaldsstatus (høj prioritet)</string>
     <string name="calling_accounts">Opkaldskonti</string>
+    <string name="dialpad_number_font_size">Skriftstørrelse for tal</string>
 </resources>

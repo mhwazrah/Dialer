@@ -77,4 +77,5 @@
     <string name="call_notification_channel_high_priority">Oproepstatus (hoge prioriteit)</string>
     <string name="call_notification_channel">Oproepstatus</string>
     <string name="calling_accounts">Oproepaccounts</string>
+    <string name="dialpad_number_font_size">Lettergrootte van cijfers</string>
 </resources>

@@ -69,4 +69,5 @@
     <string name="audio_route_speaker">ஒலிப்பெருக்கி</string>
     <string name="audio_route_earpiece">செவிப்பொறி</string>
     <string name="call_split">அழைப்புகளை பிரித்தெடுக்கவும்</string>
+    <string name="dialpad_number_font_size">எண் எழுத்துரு அளவு</string>
 </resources>
