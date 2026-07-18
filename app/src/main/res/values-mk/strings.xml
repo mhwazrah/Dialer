@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_launcher_name">Телефон</string>
+    <string name="create_new_contact">Создади нов контакт</string>
+    <string name="add_to_existing_contact">Додади во постоечки контакт</string>
 </resources>

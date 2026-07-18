@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="create_new_contact">Creu cyswllt newydd</string>
+    <string name="add_to_existing_contact">Ychwanegu at gyswllt presennol</string>
+</resources>

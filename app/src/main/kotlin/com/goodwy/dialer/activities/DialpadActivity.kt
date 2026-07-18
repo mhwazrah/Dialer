@@ -1031,7 +1031,7 @@ class DialpadActivity : SimpleActivity() {
     }
 
     private fun addNumberToContact() {
-        startAddContactIntent(binding.dialpadInput.value)
+        startAddNumberToContact(binding.dialpadInput.value)
     }
 
     private fun dialpadPressed(char: Char, view: View?) {
@@ -1600,7 +1600,7 @@ class DialpadActivity : SimpleActivity() {
                     if (contact != null) {
                         startContactDetailsIntent(contact)
                     } else {
-                        startAddContactIntent(recentCall.phoneNumber)
+                        startAddNumberToContact(recentCall.phoneNumber)
                     }
                 }
             )
