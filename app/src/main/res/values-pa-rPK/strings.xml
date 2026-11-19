@@ -9,4 +9,6 @@
     <string name="hashtag">ہیش‌ٹیگ</string>
     <string name="call_number">کال دا نمبر</string>
     <string name="dialer">فون دائک</string>
+    <string name="create_new_contact">نواں رابطہ بناؤ</string>
+    <string name="add_to_existing_contact">موجودہ رابطے وچ شامل کرو</string>
 </resources>

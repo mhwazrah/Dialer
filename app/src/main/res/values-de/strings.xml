@@ -77,4 +77,6 @@
     <string name="call_notification_channel">Anrufstatus</string>
     <string name="call_notification_channel_high_priority">Anrufstatus (hohe Priorität)</string>
     <string name="calling_accounts">Anrufkonten</string>
+    <string name="create_new_contact">Neuen Kontakt erstellen</string>
+    <string name="add_to_existing_contact">Zu bestehendem Kontakt hinzufügen</string>
 </resources>

@@ -1064,12 +1064,7 @@ class CallActivity : SimpleActivity() {
     private fun addContact() {
         val number = callContact?.number?.ifEmpty { "" } ?: ""
         val formatNumber = if (config.formatPhoneNumbers) number.formatPhoneNumber() else number
-        Intent().apply {
-            action = Intent.ACTION_INSERT_OR_EDIT
-            type = "vnd.android.cursor.item/contact"
-            putExtra(KEY_PHONE, formatNumber)
-            launchActivityIntent(this)
-        }
+        startAddNumberToContact(formatNumber)
     }
 
     @Suppress("DEPRECATION")
