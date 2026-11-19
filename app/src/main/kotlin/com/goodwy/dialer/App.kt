@@ -38,6 +38,7 @@ class App : RightApp(), LifecycleObserver {
         baseConfig.isPro = true
         baseConfig.isProNoGP = true
         baseConfig.hadThankYouInstalled = true
+        baseConfig.wasAppRated = true // no "Rate" prompt (commons shows it every 40th launch)
     }
 
     override fun onTerminate() {
