@@ -22,6 +22,7 @@ import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.NotificationActivity
 import com.goodwy.dialer.activities.SplashActivity
 import com.goodwy.dialer.extensions.clearMissedCalls
+import com.goodwy.dialer.extensions.contactLetterBitmap
 import com.goodwy.dialer.extensions.getContactFromAddress
 import com.goodwy.dialer.extensions.getNotificationBitmap
 import com.goodwy.dialer.extensions.updateUnreadCountBadge
@@ -79,7 +80,7 @@ class MissedCallReceiver : BroadcastReceiver() {
                                 if (simpleContact.isABusinessContact()) {
                                     SimpleContactsHelper(context).getColoredCompanyIcon(name).convertToBitmap()
                                 } else {
-                                    SimpleContactsHelper(context).getContactLetterIcon(name)
+                                    context.contactLetterBitmap(name)
                                 }
                             } else  {
                                 SimpleContactsHelper(context).getColoredContactIcon(name).convertToBitmap()

@@ -58,6 +58,11 @@ fun ImageView.loadBrandedContactImage(photoUri: String, name: String) {
     setImageBitmap(context.brandedLetterAvatar(name))
 }
 
+/** Letter-avatar bitmap (e.g. for notifications), same rules as [loadBrandedContactImage]. */
+fun Context.contactLetterBitmap(name: String): Bitmap =
+    if (baseConfig.useColoredContacts) SimpleContactsHelper(this).getContactLetterIcon(name)
+    else brandedLetterAvatar(name)
+
 private fun Context.brandedLetterAvatar(name: String): Bitmap {
     val size = resources.getDimension(com.goodwy.commons.R.dimen.contact_photo_big_size).toInt()
     val primary = getProperPrimaryColor()

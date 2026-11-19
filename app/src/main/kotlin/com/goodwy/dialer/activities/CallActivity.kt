@@ -826,6 +826,7 @@ class CallActivity : SimpleActivity() {
     private fun dialpadPressed(char: Char) {
         CallManager.keypad(char)
         binding.dialpadInput.addCharacter(char)
+        binding.dialpadInputGlass.beVisible() // glass card appears with the first digit, not as an empty bar
         maybePerformDialpadHapticFeedback(binding.dialpadInput)
     }
 
