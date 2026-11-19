@@ -92,6 +92,23 @@
         app:layout_goneMarginTop="56dp"
         tools:visibility="visible"/>
 
+    <!-- Network-type indicator (Wi-Fi calling vs mobile), mirrors the note icon on the left -->
+    <ImageView
+        android:id="@+id/callNetworkType"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="@dimen/big_margin"
+        android:alpha="0.8"
+        android:contentDescription="@string/wifi_calling"
+        android:elevation="@dimen/medium_margin"
+        android:padding="@dimen/small_margin"
+        android:src="@drawable/ic_cellular_vector"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/onHoldStatusHolder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_goneMarginTop="56dp"
+        tools:visibility="visible"/>
+
     <ImageView
         android:id="@+id/callerAvatar"
         android:layout_width="@dimen/caller_avatar_max_size"
