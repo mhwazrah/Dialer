@@ -197,14 +197,16 @@ class DialpadActivity : SimpleActivity() {
         setupTopAppBar(
             topAppBar = binding.dialpadAppbar,
             navigationIcon = NavigationIcon.Arrow,
-            topBarColor = Color.TRANSPARENT,
             navigationClick = false
         )
+        // Clear the bar after setup: passing a transparent topBarColor makes commons pick light
+        // status-bar icons, which vanish on the light backdrop.
+        binding.dialpadAppbar.setBackgroundColor(Color.TRANSPARENT)
         binding.dialpadRecentsList.setBackgroundColor(Color.TRANSPARENT)
         binding.dialpadList.setBackgroundColor(Color.TRANSPARENT)
         binding.dialpadToolbar.setBackgroundColor(Color.TRANSPARENT)
 
-        binding.dialpadRectWrapper.root.setBackgroundColor(Color.TRANSPARENT)
+        binding.dialpadRectWrapper.root.applyGlassSurface()
         binding.dialpadAddNumber.setTextColor(properPrimaryColor)
         binding.dialpadList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -282,6 +284,7 @@ class DialpadActivity : SimpleActivity() {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadIosHolder.beVisible()
                     dialpadIosHolder.setBackgroundColor(Color.TRANSPARENT)
+                    root.applyGlassSurface()
 
                     arrayOf(
                         dialpad0IosHolder, dialpad1IosHolder, dialpad2IosHolder, dialpad3IosHolder, dialpad4IosHolder,
@@ -342,6 +345,7 @@ class DialpadActivity : SimpleActivity() {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadGridHolder.beVisible()
                     dialpadGridHolder.setBackgroundColor(Color.TRANSPARENT)
+                    root.applyGlassSurface()
 
                     if (isPiePlus()) {
                         val textColor = getProperTextColor()
@@ -379,7 +383,7 @@ class DialpadActivity : SimpleActivity() {
                 binding.dialpadClearWrapper.apply {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadGridHolder.beVisible()
-                    root.setBackgroundColor(Color.TRANSPARENT)
+                    root.applyGlassSurface()
 
                     if (isPiePlus()) {
                         val textColor = getProperTextColor()

@@ -8,9 +8,9 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.goodwy.commons.RightApp
+import com.goodwy.commons.extensions.baseConfig
 import com.goodwy.commons.extensions.notificationManager
 import com.goodwy.commons.extensions.showErrorToast
-import com.goodwy.commons.helpers.PurchaseHelper
 import com.goodwy.dialer.extensions.*
 import com.goodwy.dialer.models.TimerEvent
 import com.goodwy.dialer.models.TimerState
@@ -29,7 +29,15 @@ class App : RightApp(), LifecycleObserver {
         super.onCreate()
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         EventBus.getDefault().register(this)
-        PurchaseHelper().initPurchaseIfNeed(this, "309929407")
+        unlockAllFeatures()
+    }
+
+    // MHWDialer ships every feature unlocked: no purchase flow, no "Project support" prompts.
+    // The commons library gates features on these flags (isPro / isOrWasThankYouInstalled).
+    private fun unlockAllFeatures() {
+        baseConfig.isPro = true
+        baseConfig.isProNoGP = true
+        baseConfig.hadThankYouInstalled = true
     }
 
     override fun onTerminate() {

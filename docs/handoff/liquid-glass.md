@@ -1,5 +1,31 @@
 # Handoff: Liquid Glass redesign (MHWDialer)
 
+## STATUS (latest — read first)
+Branch `feature/liquid-glass`: commits 57b5ce5 (redesign) + caf7e80 (test fixes) + **uncommitted review-fix work** (version 1.0.8 / 10008). User rule: commit only when asked — ask before committing.
+
+### Done & verified on emulator (Pixel_8_Pro_API_35, x86_64, ps16k image; app installed via `:app:installFossRelease`)
+- Glass rule (user): glass look, never see-through. `GlassPanel` = static opaque frosted panel (opaque base + sheen + rim) unless `app:backdropSourceId` is set (call screen → live glass over call bg) or API<31 (also static). `View.applyGlassSurface()` (opaque sheet) on the 3 dialpad keypad containers in DialpadActivity. Verified no rows show through top bar / keypad.
+- All features unlocked: `App.unlockAllFeatures()` sets commons `isPro`, `isProNoGP`, `hadThankYouInstalled`; PurchaseHelper init removed → Project support banners hidden, appearance/answer styles unlocked. (Verify Customize appearance now unlocked.)
+- Search field restyled (subagent): `MainActivity.styleGlassSearchField()` + `bg_glass_search_light/dark.xml` + `glass_search_*` colours (light fill/rim changed to faint navy #0F/#1A001E3C).
+- Swipe rows: `showSwipeActionsOnlyWhileSwiping` (INVISIBLE, listener removed on detach). Right swipe = SMS (works), left = delete w/ confirm (works; note adb swipes must start >~150px from the right edge or the system back gesture eats them).
+- Status-bar icons dark on Dialpad/Conference/SpeedDial (no `topBarColor = TRANSPARENT`; clear appbar after setupTopAppBar).
+- Placeholders offset under floating bars (MainActivity.updateListInsets).
+- API<33 x86 native-blur guard in `applyLiquidGlass` (lib ships ARM-only libnativegauss; app installs as x86_64 because androidx.graphics.path ships x86_64) — verified no crash at debugApiLevelCap 30/32 (cap removed again).
+- Calls: incoming, accept (buttons + Slider style drag), mute, hold/unhold, call waiting, hang up, outgoing — all OK. Swap unclear (emulator listing showed one call).
+- Search "Ahm", contacts tab, names in recents (earlier bare numbers were a seeding bug), top-tabs mode — OK.
+- Earlier SIGSEGVs: accessibility (uiautomator dump) + HeapTaskDaemon + IME JIT → emulator ART instability (ps16k image); not reproduced in 5 swipe+dump rounds.
+
+### PENDING (user asks, newest first)
+1. **Top bar title = current page name** ("Favorites"/"Recents"/"Contacts") instead of "MHWDialer" (MySearchMenu title; update on tab change).
+2. **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).
+3. Dark theme now testable (features unlocked): set App theme Dark in Customize appearance; check primary #001E3C contrast on navy backdrop (selected tab, FAB, switches, "All" chip) — likely needs a lighter primary in dark.
+4. Vertical slider answer style now selectable — test ring + drag on it.
+5. Deferred visuals: square patch behind dialpad FAB, status pill clips "Is Calling…"/timer, on-hold banner overruns edges, empty input bar on in-call dialpad, confirm resized icon in all-apps.
+6. detekt can't run: `detekt.yml` missing at repo root (pre-existing).
+7. Commit (ask user), then push only if asked.
+
+Test helpers (scratchpad, may be cleared): shot.ps1 (screenshot+crash check, `-Dump` for UI tree), tap.ps1 (tap by text). Device coords 1344x2992: tabs y=2812 (Fav 255, Rec 673, Con 1089), dialpad FAB (1202,2578), overflow (1220,248).
+
 ## Request
 Redesign all screens in the Liquid Glass style (https://liquidglassdesign.com). User decisions:
 - Library: **QWEA0/Liquid-Glass-Android** `com.github.QWEA0:liquidglass:v2.0.11` (XML Views; AGSL lens on API 33+, CPU blur fallback 24-32). Kyant0/AndroidLiquidGlass rejected (Compose-only; app has zero Compose).
@@ -17,8 +43,10 @@ Redesign all screens in the Liquid Glass style (https://liquidglassdesign.com). 
   - Library property names verified against source: cornerRadius, material, glassTint, dispersionStrength, enableAdaptiveTint, enableSensorHighlight, enablePressEffect, collectFrameStats, enableDynamicBackground, backdropSource (all `var`).
 
 ## Design rules (from advisor review — follow these)
+0. **User rule — glass look, never see-through.** Any surface floating over other content (bars, tab bar, dialpad keypad, sheets) has an opaque frosted base: live glass tint is 92% (`applyLiquidGlass`), floating panels use `View.applyGlassSurface()` (95%). Content behind (rows, text) must never be legible through it; only the plain colour-field backdrop may show through.
 1. **Glass needs content behind it.** Refraction is invisible over flat colour / smooth gradients. On list screens make the list fill the screen and scroll *under* the top bar, tab bar and FABs (list padding + `clipToPadding="false"`; bars overlay the list in the same parent). MainActivity: `mainHolder` currently sits below `mainMenu` (appbar_scrolling_view_behavior) — must change so content passes under both bars.
-2. **Real glass (`GlassPanel`, dynamic) only on the controls layer:** top/search bar, bottom tab bar, FABs, dialpad keys + call button, in-call buttons, accept/decline, dialogs/menus.
+2. **Real glass (`GlassPanel`, dynamic) only on the controls layer:** top/search bar, bottom tab bar, FABs, recents filter bar, in-call buttons, accept/decline, status/on-hold panels. **Dialpad keys use static `bg_glass_key(_round)`** — 14 live key panels measured ~3.6 s/frame on the emulator.
+   - `GlassPanel` without `backdropSourceId` refracts `android.R.id.content` (which carries the backdrop); the library default (direct parent) rendered dark.
 3. **Rows and settings cards = static glass drawable**, NOT a LiquidGlassView per row (they scroll with content → fixed backdrop anyway; per-row dynamic capture is a CPU-blur perf trap on API <31). Create e.g. `bg_glass_card.xml`: translucent tint (white ~22% light / navy ~30% dark), 1dp hairline stroke (white ~35%), top highlight, rounded corners. Apply to recents/contacts/favorites/history/conference/speed-dial rows and settings CardViews (make CardView backgrounds transparent).
 4. **Opaque runtime paints override the backdrop** — neutralise them or apply backdrop after them, in one shared place where possible:
    - MainActivity.kt:299-302 (mainHolder + fragments getSurfaceColor), 654 (mainTabsHolder), 661, 792-798 (mainMenu.updateColors / setupSearchMenuScrollListener)

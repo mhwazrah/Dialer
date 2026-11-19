@@ -9,4 +9,17 @@
     <color name="notification_icon">@color/dark_grey</color>
     <!-- Brand primary; overrides the commons default used when the user hasn't picked a colour. -->
     <color name="default_primary_color">#FF001E3C</color>
+    <!-- Liquid Glass search field (inset pill inside the glass top bar) -->
+    <color name="glass_search_fill_light">#0F001E3C</color>
+    <color name="glass_search_rim_light">#1A001E3C</color>
+    <color name="glass_search_fill_dark">#1FFFFFFF</color>
+    <color name="glass_search_rim_dark">#2EFFFFFF</color>
+    <color name="glass_search_text_light">#FF0B1B2B</color>
+    <color name="glass_search_hint_light">#FF5A6B7D</color>
+    <color name="glass_search_icon_light">#B3001E3C</color>
+    <color name="glass_search_cursor_light">#FF001E3C</color>
+    <color name="glass_search_text_dark">#FFF2F6FA</color>
+    <color name="glass_search_hint_dark">#FF9FB0C2</color>
+    <color name="glass_search_icon_dark">#BFFFFFFF</color>
+    <color name="glass_search_cursor_dark">#FF8CC4FF</color>
 </resources>

@@ -247,6 +247,7 @@ class MainActivity : SimpleActivity() {
             scrollOffset = scrollingView?.computeVerticalScrollOffset() ?: 0
         )
         clearMainMenuPaint()
+        styleGlassSearchField()
 
         val configStartNameWithSurname = config.startNameWithSurname
         if (storedStartNameWithSurname != configStartNameWithSurname) {
@@ -809,6 +810,7 @@ class MainActivity : SimpleActivity() {
             surfaceColor = useSurfaceColor
         )
         clearMainMenuPaint()
+        styleGlassSearchField()
     }
 
     // Commons repaints the search menu with opaque colours (also while scrolling); strip them so the glass
@@ -816,9 +818,35 @@ class MainActivity : SimpleActivity() {
     private fun setupLiquidGlassLayout() {
         binding.mainMenu.viewTreeObserver.addOnPreDrawListener {
             clearMainMenuPaint()
+            styleGlassSearchField()
             true
         }
         binding.mainHolder.viewTreeObserver.addOnGlobalLayoutListener { updateListInsets() }
+    }
+
+    // Commons' updateColors resets the holder to a tinted search_bg, so a foreign background means it just ran
+    // and the glass styling must be re-applied. The gate also keeps this safe to call from the pre-draw listener.
+    private fun styleGlassSearchField() {
+        val light = isLiquidLightTheme()
+        val holder = binding.mainMenu.binding.topToolbarSearchHolder
+        val glassBackground = getDrawable(if (light) R.drawable.bg_glass_search_light else R.drawable.bg_glass_search_dark)
+        if (holder.tag == light && holder.background?.constantState == glassBackground?.constantState) return
+        holder.tag = light
+
+        fun color(light_: Int, dark: Int) = getColor(if (light) light_ else dark)
+        val iconColor = color(R.color.glass_search_icon_light, R.color.glass_search_icon_dark)
+        val cursorColor = color(R.color.glass_search_cursor_light, R.color.glass_search_cursor_dark)
+
+        holder.backgroundTintList = null
+        holder.background = glassBackground
+        binding.mainMenu.binding.apply {
+            topToolbarSearch.setColors(color(R.color.glass_search_text_light, R.color.glass_search_text_dark), cursorColor, cursorColor)
+            topToolbarSearch.setHintTextColor(color(R.color.glass_search_hint_light, R.color.glass_search_hint_dark))
+            listOf(topToolbarSearchIcon, topToolbarSearchClear, topToolbarSearchSpeechToText).forEach {
+                it.alpha = 1f
+                it.applyColorFilter(iconColor)
+            }
+        }
     }
 
     private fun clearMainMenuPaint() {
@@ -854,6 +882,10 @@ class MainActivity : SimpleActivity() {
         getAllFragments().forEach { fragment ->
             val extraTop = if (fragment is RecentsFragment) filtersHeight else 0
             fragment?.myRecyclerView()?.updatePadding(top = top + extraTop, bottom = bottom)
+            // Empty-state text (and the action below it) must clear the floating bars too.
+            fragment?.findViewById<View>(
+                if (fragment is RecentsFragment) R.id.recents_placeholder else R.id.fragment_placeholder
+            )?.let { setTopMargin(it, top + extraTop) }
         }
     }
 

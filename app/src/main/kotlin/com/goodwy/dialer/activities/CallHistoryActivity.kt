@@ -56,8 +56,6 @@ class CallHistoryActivity : SimpleActivity() {
     private var initShowAll = false
     private var showAll = false
 
-    private var buttonBg = Color.WHITE
-
     @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +82,6 @@ class CallHistoryActivity : SimpleActivity() {
         super.onResume()
         binding.callHistoryPlaceholderContainer.beGone()
         updateTextColors(binding.callHistoryHolder)
-        buttonBg = if ((isLightTheme() || isGrayTheme()) && !isDynamicTheme()) Color.WHITE else getSurfaceColor()
         ensureBackgroundThread {
             initContact()
         }
@@ -353,9 +350,6 @@ class CallHistoryActivity : SimpleActivity() {
 
     private fun getStarDrawable(on: Boolean) = AppCompatResources.getDrawable(this, if (on) R.drawable.ic_star_vector else R.drawable.ic_star_outline_vector)
 
-    private fun updateBackgroundHistory() {
-    }
-
     private fun refreshCallLog(load: Boolean, loadAll: Boolean = false, callback: (() -> Unit)? = null) {
         getRecentCalls { recents ->
             allRecentCall = recents
@@ -376,7 +370,6 @@ class CallHistoryActivity : SimpleActivity() {
                             callHistoryToolbar.menu.findItem(R.id.delete).isVisible = true
                         }
                         gotRecents(currentRecentCalls)
-                        updateBackgroundHistory()
                     }
                 }
             } else {

@@ -25,7 +25,8 @@ class ConferenceActivity : SimpleActivity() {
 
     override fun onResume() {
         super.onResume()
-        setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow, topBarColor = Color.TRANSPARENT)
+        setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow)
+        binding.conferenceAppbar.setBackgroundColor(Color.TRANSPARENT)
     }
 
     override fun onBackPressedCompat(): Boolean {

@@ -65,7 +65,9 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
 
     override fun onResume() {
         super.onResume()
-        setupTopAppBar(binding.manageSpeedDialAppbar, NavigationIcon.Arrow, topBarColor = Color.TRANSPARENT, navigationClick = false)
+        setupTopAppBar(binding.manageSpeedDialAppbar, NavigationIcon.Arrow, navigationClick = false)
+        binding.manageSpeedDialAppbar.setBackgroundColor(Color.TRANSPARENT)
+        binding.manageSpeedDialToolbar.setBackgroundColor(Color.TRANSPARENT)
         binding.manageSpeedDialToolbar.setNavigationOnClickListener {
             hideKeyboard()
             onBackPressed()
