@@ -38,7 +38,7 @@ class CallNotificationManager(private val context: Context) {
         setupNotification(false)
     }
 
-    fun setupNotification(lowPriority: Boolean = false) {
+    fun setupNotification(lowPriority: Boolean = false, forceFullScreen: Boolean = false) {
         isServiceActive = true
         try {
             // Ringing: CallStyle (Android 12+) renders the avatar + badge and the BUILT-IN
@@ -51,7 +51,7 @@ class CallNotificationManager(private val context: Context) {
             if (isSPlus() && isRinging) {
                 setupNotificationNew(lowPriority)
             } else {
-                setupNotificationOld(lowPriority)
+                setupNotificationOld(lowPriority, forceFullScreen)
             }
         } catch (e: Exception) {
             cancelNotification()
@@ -61,11 +61,14 @@ class CallNotificationManager(private val context: Context) {
     }
 
     @SuppressLint("NewApi")
-    fun setupNotificationOld(lowPriority: Boolean) {
+    fun setupNotificationOld(lowPriority: Boolean, forceFullScreen: Boolean = false) {
         getCallContact(context.applicationContext, CallManager.getPrimaryCall()) { callContact ->
             val callContactAvatar = callContactAvatarHelper.getCallContactAvatar(callContact.photoUri)
             val callState = CallManager.getState()
-            val isHighPriority = callState == Call.STATE_RINGING && !lowPriority
+            // forceFullScreen escalates a non-ringing call (e.g. an outgoing call whose direct
+            // screen launch was blocked by the OEM) to the high-priority channel + full-screen
+            // intent so the system itself surfaces the call UI.
+            val isHighPriority = !lowPriority && (callState == Call.STATE_RINGING || forceFullScreen)
             val channelId =
                 if (isHighPriority) "right_dialer_call_high_priority" else "right_dialer_call"
             createNotificationChannel(isHighPriority, channelId)
