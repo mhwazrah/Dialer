@@ -1222,15 +1222,16 @@ class CallActivity : SimpleActivity() {
                             setImageDrawable(drawable)
                         } else {
                             if (!isFinishing && !isDestroyed) {
-                                val placeholder = if (isConference) {
-                                    SimpleContactsHelper(this@CallActivity).getColoredGroupIcon(name)
-                                } else null
-                                SimpleContactsHelper(this@CallActivity.applicationContext).loadContactImage(
-                                    avatarUri,
-                                    this,
-                                    name,
-                                    placeholder
-                                )
+                                if (isConference) {
+                                    SimpleContactsHelper(this@CallActivity.applicationContext).loadContactImage(
+                                        avatarUri,
+                                        this,
+                                        name,
+                                        SimpleContactsHelper(this@CallActivity).getColoredGroupIcon(name)
+                                    )
+                                } else {
+                                    loadBrandedContactImage(avatarUri, name)
+                                }
                             }
                         }
                     } catch (_: Exception) {

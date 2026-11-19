@@ -237,8 +237,9 @@ class MainActivity : SimpleActivity() {
         binding.mainDialpadButton.setImageDrawable(dialpadIcon)
 
         updateTextColors(binding.mainHolder)
-        // translucent accent so the glass behind the FABs stays visible
-        val fabTint = ColorStateList.valueOf(ColorUtils.setAlphaComponent(properPrimaryColor, 0xB3))
+        // Solid fill (glass rule: never see-through) — a translucent tint let the FAB's own
+        // shadow show through as an octagon/square patch.
+        val fabTint = ColorStateList.valueOf(properPrimaryColor)
         binding.mainDialpadButton.backgroundTintList = fabTint
         binding.mainCallButton.backgroundTintList = fabTint
         setupTabColors()

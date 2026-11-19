@@ -17,6 +17,7 @@ import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.databinding.ItemConferenceCallBinding
 import com.goodwy.dialer.extensions.hasCapability
+import com.goodwy.dialer.extensions.loadBrandedContactImage
 import com.goodwy.dialer.helpers.getCallContact
 import kotlin.math.abs
 
@@ -72,11 +73,7 @@ class ConferenceCallsAdapter(
                             }
                             itemConferenceCallImage.setImageDrawable(drawable)
                         } else {
-                            SimpleContactsHelper(activity).loadContactImage(
-                                callContact.photoUri,
-                                itemConferenceCallImage,
-                                callContact.name
-                            )
+                            itemConferenceCallImage.loadBrandedContactImage(callContact.photoUri, callContact.name)
                         }
                     }
                 }

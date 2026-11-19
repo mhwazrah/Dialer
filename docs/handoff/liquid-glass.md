@@ -23,6 +23,13 @@ Branch `feature/liquid-glass`: commits 57b5ce5 (redesign) + caf7e80 (test fixes)
 - Light theme after these changes: not re-checked yet (emulator left on Dark theme).
 - Still pending: vertical slider test, deferred visuals (FAB square patch, call-status pill clipping, on-hold banner edges, in-call dialpad empty input bar), swap-calls check on device, a "Rate" prompt (commons) appears on launch.
 
+### Round after 0c7b240 (UNCOMMITTED, 1.0.12 — commit was blocked; ask user to confirm)
+- Call status pill padded (call_status_holder padding, 3 layouts) and on-hold glass inset 12dp — verified.
+- Main dialpad FAB solid primary fill (translucent tint showed its shadow as an octagon/square patch) — verified.
+- Primary letter avatars also in ConferenceCallsAdapter and CallActivity (non-conference).
+- Vertical slider (now unlocked): ring renders cleanly, drag-up answers — verified. Slider decline (drag left) verified.
+- Known/minor: FAB icon stays white on the dark-theme light-blue primary (commons re-tints it); MissedCallReceiver notification avatar still grey; in-call dialpad empty input bar; light theme not re-checked after dark-theme work; emulator ART/system_server crashes (ps16k image) — not app code.
+
 ### PENDING (user asks, newest first)
 1. (done) page title
 2. (done) **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).
