@@ -16,6 +16,7 @@ import android.telephony.TelephonyManager
 import android.util.TypedValue
 import android.view.*
 import android.view.View.OnFocusChangeListener
+import android.widget.FrameLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -79,6 +80,9 @@ class DialpadActivity : SimpleActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        val numberInRow = config.dialpadStyle != DIALPAD_IOS && config.dialpadStyle != DIALPAD_CONCEPT
+        if (numberInRow) moveNumberInputIntoKeypadRow()
+
         binding.apply {
             setupEdgeToEdge(
                 padBottomSystem = listOf(
@@ -86,7 +90,7 @@ class DialpadActivity : SimpleActivity() {
                     dialpadRoundWrapper.dialpadIosWrapper,
                     dialpadRectWrapper.dialpadGridWrapper
                 ),
-                moveTopSystem = listOf(dialpadInput),
+                moveTopSystem = if (numberInRow) emptyList() else listOf(dialpadInput),
                 moveBottomSystem = listOf(dialpadRoundWrapperUp),
 //                padBottomImeAndSystem = listOf(dialpadList, dialpadHolder)
             )
@@ -384,6 +388,7 @@ class DialpadActivity : SimpleActivity() {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadGridHolder.beVisible()
                     root.applyGlassSurface()
+                    dialpadNumberUnderline.setBackgroundColor(getProperPrimaryColor())
 
                     if (isPiePlus()) {
                         val textColor = getProperTextColor()
@@ -926,7 +931,11 @@ class DialpadActivity : SimpleActivity() {
             DIALPAD_CONCEPT -> binding.dialpadRectWrapper.dialpadGridWrapper
             else -> binding.dialpadClearWrapper.dialpadGridWrapper
         }
-        val dimens = if (config.dialpadStyle == DIALPAD_IOS) pixels(R.dimen.dialpad_ios_height) else pixels(R.dimen.dialpad_grid_height)
+        val dimens = when (config.dialpadStyle) {
+            DIALPAD_IOS -> pixels(R.dimen.dialpad_ios_height)
+            DIALPAD_CONCEPT -> pixels(R.dimen.dialpad_grid_height)
+            else -> pixels(R.dimen.dialpad_pill_grid_height)
+        }
         view.setHeight((dimens * (size / 100f)).toInt())
 
         val margin = config.dialpadBottomMargin
@@ -939,6 +948,19 @@ class DialpadActivity : SimpleActivity() {
             if (config.dialpadStyle == DIALPAD_IOS) pixels(R.dimen.dialpad_margin_bottom_ios)
             else pixels(R.dimen.zero)
         marginView.setHeight((start + margin).toInt())
+    }
+
+    // The original-style keypad shows the typed number in a row above the keys instead of under the toolbar.
+    private fun moveNumberInputIntoKeypadRow() {
+        val input = binding.dialpadInput
+        (input.parent as ViewGroup).removeView(input)
+        // Keep the field clear of the backspace at the row's end (it would otherwise take its
+        // touches); mirror the inset on the start side so the number stays centred.
+        val sideMargin = pixels(R.dimen.dialpad_number_side_margin).toInt() +
+            binding.dialpadClearWrapper.dialpadClearCharHolder.layoutParams.width.coerceAtLeast(0)
+        val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        params.setMargins(sideMargin, 0, sideMargin, 0)
+        binding.dialpadClearWrapper.dialpadNumberRow.addView(input, 0, params)
     }
 
     private fun updateCallButtonSize() {

@@ -973,7 +973,11 @@ class SettingsDialpadActivity : SimpleActivity() {
             DIALPAD_CONCEPT -> binding.dialpadRectWrapper.dialpadGridWrapper
             else -> binding.dialpadClearWrapper.dialpadGridWrapper
         }
-        val dimens = if (config.dialpadStyle == DIALPAD_IOS) pixels(R.dimen.dialpad_ios_height) else pixels(R.dimen.dialpad_grid_height)
+        val dimens = when (config.dialpadStyle) {
+            DIALPAD_IOS -> pixels(R.dimen.dialpad_ios_height)
+            DIALPAD_CONCEPT -> pixels(R.dimen.dialpad_grid_height)
+            else -> pixels(R.dimen.dialpad_pill_grid_height)
+        }
         view.setHeight((dimens * (percent / 100f)).toInt())
 
         val textPercent = "$percent %"

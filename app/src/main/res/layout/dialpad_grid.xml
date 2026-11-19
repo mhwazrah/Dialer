@@ -21,10 +21,58 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
+        <FrameLayout
+            android:id="@+id/dialpadNumberRow"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <View
+                android:id="@+id/dialpadNumberUnderline"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_gravity="bottom"
+                android:importantForAccessibility="no"/>
+
+            <RelativeLayout
+                android:id="@+id/dialpadClearCharHolder"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|center_vertical"
+                android:contentDescription="@string/delete">
+
+                <ImageView
+                    android:id="@+id/dialpadClearChar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_centerInParent="true"
+                    android:layoutDirection="ltr"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:paddingEnd="4dp"
+                    android:contentDescription="null"
+                    android:src="@drawable/ic_backspace"/>
+
+                <ImageView
+                    android:id="@+id/dialpadClearCharX"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_centerInParent="true"
+                    android:layoutDirection="ltr"
+                    android:paddingEnd="4dp"
+                    android:contentDescription="null"
+                    app:srcCompat="@drawable/ic_backspace_x"
+                    tools:tint="@color/hint_black" />
+            </RelativeLayout>
+        </FrameLayout>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/dialpadGridWrapper"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dialpad_grid_height"
+            android:layout_height="@dimen/dialpad_pill_grid_height"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:layout_gravity="center_horizontal"
             android:maxWidth="500dp">
 
@@ -50,7 +98,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.19"/>
+                app:layout_constraintVertical_bias="0.1905"/>
 
             <View
                 android:id="@+id/divider_horizontal_two"
@@ -62,7 +110,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.38"/>
+                app:layout_constraintVertical_bias="0.381"/>
 
             <View
                 android:id="@+id/divider_horizontal_three"
@@ -74,7 +122,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.57"/>
+                app:layout_constraintVertical_bias="0.5714"/>
 
             <View
                 android:id="@+id/divider_horizontal_four"
@@ -86,7 +134,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.76"/>
+                app:layout_constraintVertical_bias="0.7619"/>
 
             <View
                 android:id="@+id/divider_horizontal_five"
@@ -97,7 +145,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.95"/>
+                app:layout_constraintVertical_bias="0.9762"/>
 
             <View
                 android:id="@+id/divider_vertical_start"
@@ -159,9 +207,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -215,9 +263,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -260,9 +308,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -305,9 +353,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -351,9 +399,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -396,9 +444,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -441,9 +489,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -487,9 +535,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -532,9 +580,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -577,9 +625,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <ImageView
@@ -604,9 +652,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <RelativeLayout
@@ -649,9 +697,9 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="3dp"
+                    android:layout_margin="4dp"
                     android:importantForAccessibility="no"
-                android:background="@drawable/bg_glass_key"/>
+                android:background="@drawable/bg_glass_key_pill"/>
 
 
                 <ImageView
@@ -682,7 +730,7 @@
                 android:layout_height="@dimen/dialpad_phone_button_size"
                 android:background="@drawable/circle_background_accent"
                 android:contentDescription="@string/call_from_sim_1"
-                android:foreground="@drawable/button_round_pressed"
+                android:foreground="@drawable/fg_glass_call_button"
                 android:elevation="@dimen/one_dp"
                 android:padding="@dimen/normal_margin"
                 android:src="@drawable/ic_phone_vector"
@@ -691,38 +739,6 @@
                 app:layout_constraintStart_toEndOf="@+id/divider_vertical_one"
                 app:layout_constraintTop_toBottomOf="@+id/divider_horizontal_four"/>
 
-            <RelativeLayout
-                android:id="@+id/dialpadClearCharHolder"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:contentDescription="@string/delete"
-                app:layout_constraintBottom_toBottomOf="@+id/divider_horizontal_five"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/divider_vertical_two"
-                app:layout_constraintTop_toBottomOf="@+id/divider_horizontal_four">
-
-                <ImageView
-                    android:id="@+id/dialpadClearChar"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_centerInParent="true"
-                    android:layoutDirection="ltr"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:paddingEnd="4dp"
-                    android:contentDescription="null"
-                    android:src="@drawable/ic_backspace"/>
-
-                <ImageView
-                    android:id="@+id/dialpadClearCharX"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_centerInParent="true"
-                    android:layoutDirection="ltr"
-                    android:paddingEnd="4dp"
-                    android:contentDescription="null"
-                    app:srcCompat="@drawable/ic_backspace_x"
-                    tools:tint="@color/hint_black" />
-            </RelativeLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <FrameLayout

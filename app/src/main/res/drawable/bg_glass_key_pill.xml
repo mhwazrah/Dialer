@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static glass for wide pill dialpad keys (see bg_glass_key_round for why keys are not live glass). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <corners android:radius="100dp" />
+            <!-- Blue-grey tint reads on both the light (#F7FAFD) and dark (#001123) keypad sheets -->
+            <solid android:color="#1A5A7896" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="100dp" />
+            <gradient
+                android:angle="270"
+                android:centerY="0.4"
+                android:startColor="#33FFFFFF"
+                android:centerColor="#00FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="100dp" />
+            <stroke
+                android:width="1dp"
+                android:color="#33607D9B" />
+        </shape>
+    </item>
+</layer-list>

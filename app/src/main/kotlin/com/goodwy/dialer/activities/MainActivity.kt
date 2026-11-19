@@ -242,6 +242,7 @@ class MainActivity : SimpleActivity() {
         binding.mainDialpadButton.backgroundTintList = fabTint
         binding.mainCallButton.backgroundTintList = fabTint
         setupTabColors()
+        updatePageTitle()
         binding.mainMenu.updateColors(
             background = getStartRequiredStatusBarColor(),
             scrollOffset = scrollingView?.computeVerticalScrollOffset() ?: 0
@@ -741,6 +742,7 @@ class MainActivity : SimpleActivity() {
                     it?.finishActMode()
                 }
                 refreshMenuItems()
+                updatePageTitle()
                 if (getCurrentFragment() == getRecentsFragment()) {
                     clearMissedCalls()
                 }
@@ -1013,6 +1015,17 @@ class MainActivity : SimpleActivity() {
         storedShowPhoneNumbers = config.showPhoneNumbers
     }
 
+    // The top bar shows the current page's name rather than the app name. Resolved from the
+    // fragment type, so it stays right when some tabs are hidden.
+    private fun updatePageTitle() {
+        val titleId = when (getCurrentFragment() ?: return) {
+            is FavoritesFragment -> R.string.favorites_tab
+            is RecentsFragment -> R.string.recents
+            else -> R.string.contacts_tab
+        }
+        binding.mainMenu.updateTitle(getString(titleId))
+    }
+
     private fun getTabLabel(position: Int): String {
         val stringId = when (position) {
             0 -> R.string.favorites_tab
@@ -1053,6 +1066,7 @@ class MainActivity : SimpleActivity() {
                 viewPager.currentItem = if (openLastTab) config.lastUsedViewPagerPage else getDefaultTab()
                 viewPager.onGlobalLayout {
                     refreshFragments()
+                    updatePageTitle() // fragments exist only after the first layout
                 }
             } else {
                 refreshFragments()

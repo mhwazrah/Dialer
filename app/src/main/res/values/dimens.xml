@@ -56,6 +56,8 @@
     <dimen name="dialpad_button_height">100dp</dimen>
     <dimen name="dialpad_margin_bottom_ios">28dp</dimen>
     <dimen name="dialpad_grid_height">420dp</dimen>
+    <dimen name="dialpad_pill_grid_height">376dp</dimen>
+    <dimen name="dialpad_number_side_margin">8dp</dimen>
     <dimen name="dialpad_ios_height">520dp</dimen>
 
     <!--dialpad style-->

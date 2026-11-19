@@ -15,9 +15,11 @@ Branch `feature/liquid-glass`: commits 57b5ce5 (redesign) + caf7e80 (test fixes)
 - Search "Ahm", contacts tab, names in recents (earlier bare numbers were a seeding bug), top-tabs mode — OK.
 - Earlier SIGSEGVs: accessibility (uiautomator dump) + HeapTaskDaemon + IME JIT → emulator ART instability (ps16k image); not reproduced in 5 swipe+dump rounds.
 
+### DONE since: page title in top bar (MainActivity.updatePageTitle, cold start + tab change) and pill dialpad redesign (dialpad_grid.xml number row + pill keys + glass call button; input reparented into the row with backspace inset; sheet consumes touches) — verified typing, one-tap backspace, sheet touch blocking. Commit after 67638bf.
+
 ### PENDING (user asks, newest first)
-1. **Top bar title = current page name** ("Favorites"/"Recents"/"Contacts") instead of "MHWDialer" (MySearchMenu title; update on tab change).
-2. **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).
+1. (done) page title
+2. (done) **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).
 3. Dark theme now testable (features unlocked): set App theme Dark in Customize appearance; check primary #001E3C contrast on navy backdrop (selected tab, FAB, switches, "All" chip) — likely needs a lighter primary in dark.
 4. Vertical slider answer style now selectable — test ring + drag on it.
 5. Deferred visuals: square patch behind dialpad FAB, status pill clips "Is Calling…"/timer, on-hold banner overruns edges, empty input bar on in-call dialpad, confirm resized icon in all-apps.

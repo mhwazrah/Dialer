@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Glass sheen + rim drawn over the green call fill (kept as foreground so the fill's colour filter stays untouched). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:angle="270"
+                android:centerY="0.45"
+                android:startColor="#4DFFFFFF"
+                android:centerColor="#00FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <stroke
+                android:width="1.5dp"
+                android:color="#8CFFFFFF" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/button_round_pressed" />
+</layer-list>

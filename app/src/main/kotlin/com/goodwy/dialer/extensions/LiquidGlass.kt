@@ -30,6 +30,9 @@ fun View.applyGlassSurface(topCornerRadiusDp: Float = 28f) {
         setColor(if (context.isLiquidLightTheme()) 0xFFF7FAFD.toInt() else 0xFF001123.toInt())
         setStroke(resources.displayMetrics.density.toInt().coerceAtLeast(1), 0x40FFFFFF)
     }
+    // Opaque to touch as well as to sight: taps on the sheet's empty areas must not reach the
+    // list rows underneath.
+    isClickable = true
 }
 
 /** Paints the colour-field backdrop the glass panels refract, matching the theme brightness. */
