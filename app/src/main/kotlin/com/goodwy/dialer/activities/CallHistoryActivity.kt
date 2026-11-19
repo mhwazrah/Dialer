@@ -1103,8 +1103,7 @@ class CallHistoryActivity : SimpleActivity() {
                 }
                 binding.topDetails.callHistoryImage.setImageDrawable(drawable)
             } else {
-                if (!isFinishing && !isDestroyed) SimpleContactsHelper(this.applicationContext)
-                    .loadContactImage(call.photoUri, binding.topDetails.callHistoryImage, call.name)
+                if (!isFinishing && !isDestroyed) binding.topDetails.callHistoryImage.loadBrandedContactImage(call.photoUri, call.name)
             }
 
             if (contact != null) {

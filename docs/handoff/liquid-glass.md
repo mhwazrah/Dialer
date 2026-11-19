@@ -17,6 +17,12 @@ Branch `feature/liquid-glass`: commits 57b5ce5 (redesign) + caf7e80 (test fixes)
 
 ### DONE since: page title in top bar (MainActivity.updatePageTitle, cold start + tab change) and pill dialpad redesign (dialpad_grid.xml number row + pill keys + glass call button; input reparented into the row with backspace inset; sheet consumes touches) — verified typing, one-tap backspace, sheet touch blocking. Commit after 67638bf.
 
+### Round after bd5e6cb (UNCOMMITTED, version 1.0.11 — user has not asked to commit yet)
+- Dialpad pill keys: letters overflowed with a secondary language → pill digit base 28sp (dimen dialpad_pill_text_size, still scaled by the font-size setting; applyDialpadNumberFontSize now takes the percent), "+" at 60%, digits includeFontPadding=false, letters marginTop -6dp. Verified with Arabic secondary language.
+- Dark theme (verified on emulator, theme set to Dark in Customize appearance): brand primary pair — SimpleActivity.syncBrandPrimaryWithTheme swaps default navy #001E3C ↔ #7FB2E5 (color brand_primary_dark_theme) by theme brightness, only when primary is a brand default. Per-activity localNightMode follows the app theme → drawable-night/bg_glass_card.xml (dark navy rows). Letter avatars use the primary (extensions/LiquidGlass.kt loadBrandedContactImage; navy letter on light primaries), unknown-number placeholders tinted primary (RecentCallsAdapter). Applied in Contacts, Recents (both row types), CallHistory header — NOT yet in ConferenceCallsAdapter, CallActivity, MissedCallReceiver notification.
+- Light theme after these changes: not re-checked yet (emulator left on Dark theme).
+- Still pending: vertical slider test, deferred visuals (FAB square patch, call-status pill clipping, on-hold banner edges, in-call dialpad empty input bar), swap-calls check on device, a "Rate" prompt (commons) appears on launch.
+
 ### PENDING (user asks, newest first)
 1. (done) page title
 2. (done) **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).

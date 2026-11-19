@@ -919,9 +919,7 @@ class DialpadActivity : SimpleActivity() {
     }
 
     private fun updateDialpadNumberFontSize() {
-        val basePx = resources.getDimension(R.dimen.dialpad_text_size)
-        val scaled = basePx * (config.dialpadNumberFontSize / 100f)
-        applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, scaled)
+        applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, config.dialpadNumberFontSize)
     }
 
     private fun updateDialpadSize() {

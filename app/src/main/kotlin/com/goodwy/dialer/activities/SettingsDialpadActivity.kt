@@ -800,9 +800,7 @@ class SettingsDialpadActivity : SimpleActivity() {
 
     private fun updateDialpadNumberFontSize(percent: Int = config.dialpadNumberFontSize) {
         binding.dialpadNumberFontSizeValue.text = "$percent %"
-        val basePx = resources.getDimension(R.dimen.dialpad_text_size)
-        val scaled = basePx * (percent / 100f)
-        applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, scaled)
+        applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, percent)
     }
 
     private fun setupDialpadBottomMargin() {

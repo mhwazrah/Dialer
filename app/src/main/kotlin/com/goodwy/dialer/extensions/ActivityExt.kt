@@ -251,13 +251,20 @@ fun applyDialpadNumberFontSize(
     clearWrapper: DialpadGridBinding,
     rectWrapper: DialpadRectangleBinding,
     roundWrapper: DialpadRoundBinding,
-    scaledPx: Float,
+    percent: Int,
 ) {
+    val res = clearWrapper.root.resources
+    val scale = percent / 100f
+    val scaledPx = res.getDimension(R.dimen.dialpad_text_size) * scale
+    // Pill keys are short: a smaller digit leaves room for the letters, including a second
+    // language row, inside the pill. The "+" under 0 is secondary, so it is smaller still.
+    val pillPx = res.getDimension(R.dimen.dialpad_pill_text_size) * scale
     clearWrapper.apply {
         listOf(dialpad1, dialpad2, dialpad3, dialpad4, dialpad5,
-            dialpad6, dialpad7, dialpad8, dialpad9, dialpad0, dialpadPlus).forEach {
-            it.setTextSize(TypedValue.COMPLEX_UNIT_PX, scaledPx)
+            dialpad6, dialpad7, dialpad8, dialpad9, dialpad0).forEach {
+            it.setTextSize(TypedValue.COMPLEX_UNIT_PX, pillPx)
         }
+        dialpadPlus.setTextSize(TypedValue.COMPLEX_UNIT_PX, pillPx * 0.6f)
     }
     rectWrapper.apply {
         listOf(dialpad1, dialpad2, dialpad3, dialpad4, dialpad5,

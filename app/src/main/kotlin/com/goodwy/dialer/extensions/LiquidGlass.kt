@@ -1,7 +1,16 @@
 package com.goodwy.dialer.extensions
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.view.View
+import android.widget.ImageView
+import androidx.core.graphics.createBitmap
+import com.goodwy.commons.extensions.baseConfig
+import com.goodwy.commons.extensions.getNameLetter
+import com.goodwy.commons.extensions.getProperPrimaryColor
+import com.goodwy.commons.helpers.SimpleContactsHelper
 import androidx.core.graphics.ColorUtils
 import android.view.ViewTreeObserver
 import androidx.core.view.isInvisible
@@ -33,6 +42,38 @@ fun View.applyGlassSurface(topCornerRadiusDp: Float = 28f) {
     // Opaque to touch as well as to sight: taps on the sheet's empty areas must not reach the
     // list rows underneath.
     isClickable = true
+}
+
+/**
+ * Contact avatar in the brand look: a photo when there is one, otherwise the name's letter on a
+ * circle in the theme's primary colour (commons draws a fixed grey when coloured contacts are off,
+ * and its palettes are hardcoded). With coloured contacts on, the commons palette is kept.
+ */
+fun ImageView.loadBrandedContactImage(photoUri: String, name: String) {
+    val helper = SimpleContactsHelper(context)
+    if (photoUri.isNotEmpty() || context.baseConfig.useColoredContacts || name.isEmpty()) {
+        helper.loadContactImage(photoUri, this, name)
+        return
+    }
+    setImageBitmap(context.brandedLetterAvatar(name))
+}
+
+private fun Context.brandedLetterAvatar(name: String): Bitmap {
+    val size = resources.getDimension(com.goodwy.commons.R.dimen.contact_photo_big_size).toInt()
+    val primary = getProperPrimaryColor()
+    val bitmap = createBitmap(size, size)
+    val canvas = Canvas(bitmap)
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary }
+    canvas.drawCircle(size / 2f, size / 2f, size / 2f, fill)
+    val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        // Navy letter on light primaries (e.g. the dark-theme light blue), white on dark ones.
+        color = if (ColorUtils.calculateLuminance(primary) > 0.3) 0xFF001123.toInt() else android.graphics.Color.WHITE
+        textAlign = Paint.Align.CENTER
+        textSize = size / 2f
+    }
+    val letter = name.getNameLetter()
+    canvas.drawText(letter, size / 2f, size / 2f - (text.descent() + text.ascent()) / 2, text)
+    return bitmap
 }
 
 /** Paints the colour-field backdrop the glass panels refract, matching the theme brightness. */

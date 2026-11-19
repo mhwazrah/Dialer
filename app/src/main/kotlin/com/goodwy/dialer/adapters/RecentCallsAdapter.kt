@@ -1,6 +1,7 @@
 package com.goodwy.dialer.adapters
 
 import com.goodwy.dialer.extensions.showSwipeActionsOnlyWhileSwiping
+import com.goodwy.dialer.extensions.loadBrandedContactImage
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -796,10 +797,15 @@ class RecentCallsAdapter(
                             // Use mutate() to create a separate copy, otherwise the colors might get mixed up
                             val backgroundDrawable = drawable.findDrawableByLayerId(backgroundId)?.mutate()
                             backgroundDrawable?.applyColorFilter(color)
+                        } else if (drawable is LayerDrawable) {
+                            // Brand look: placeholder circle in the theme's primary instead of grey.
+                            drawable.findDrawableByLayerId(
+                                if (call.isABusinessCall()) R.id.placeholder_company_background else R.id.placeholder_contact_background
+                            )?.mutate()?.applyColorFilter(properPrimaryColor)
                         }
                         itemRecentsImage.setImageDrawable(drawable)
                     } else {
-                        SimpleContactsHelper(root.context.applicationContext).loadContactImage(call.photoUri, itemRecentsImage, call.name)
+                        itemRecentsImage.loadBrandedContactImage(call.photoUri, call.name)
                     }
 
                     itemRecentsImage.apply {
@@ -1019,10 +1025,15 @@ class RecentCallsAdapter(
                             // Use mutate() to create a separate copy, otherwise the colors might get mixed up
                             val backgroundDrawable = drawable.findDrawableByLayerId(backgroundId)?.mutate()
                             backgroundDrawable?.applyColorFilter(color)
+                        } else if (drawable is LayerDrawable) {
+                            // Brand look: placeholder circle in the theme's primary instead of grey.
+                            drawable.findDrawableByLayerId(
+                                if (call.isABusinessCall()) R.id.placeholder_company_background else R.id.placeholder_contact_background
+                            )?.mutate()?.applyColorFilter(properPrimaryColor)
                         }
                         itemRecentsImage.setImageDrawable(drawable)
                     } else {
-                        SimpleContactsHelper(root.context.applicationContext).loadContactImage(call.photoUri, itemRecentsImage, call.name)
+                        itemRecentsImage.loadBrandedContactImage(call.photoUri, call.name)
                     }
 
                     itemRecentsImage.apply {

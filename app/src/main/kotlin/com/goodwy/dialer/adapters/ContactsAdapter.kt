@@ -533,7 +533,7 @@ class ContactsAdapter(
                         }
                         itemContactImage.setImageDrawable(drawable)
                     } else {
-                        SimpleContactsHelper(root.context).loadContactImage(contact.photoUri, itemContactImage, contact.getNameToDisplay())
+                        itemContactImage.loadBrandedContactImage(contact.photoUri, contact.getNameToDisplay())
                     }
                 }
             }

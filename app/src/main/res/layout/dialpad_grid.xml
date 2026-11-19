@@ -221,6 +221,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_1"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -233,7 +234,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_1"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="ABC"
                         android:visibility="invisible"/>
@@ -277,6 +278,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_2"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -289,7 +291,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_2"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="ABC"
                         android:alpha="0.5"/>
@@ -322,6 +324,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_3"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -334,7 +337,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_3"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="DEF"
                         android:alpha="0.5"/>
@@ -367,6 +370,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_4"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -379,7 +383,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_4"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="GHI"
                         android:alpha="0.5"/>
@@ -413,6 +417,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_5"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -425,7 +430,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_5"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="JKL"
                         android:alpha="0.5"/>
@@ -458,6 +463,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_6"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -470,7 +476,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_6"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="MNO"
                         android:alpha="0.5"/>
@@ -503,6 +509,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_7"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -515,7 +522,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_7"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="PQRS"
                         android:alpha="0.5"/>
@@ -549,6 +556,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_8"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -561,7 +569,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_8"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="TUV"
                         android:alpha="0.5"/>
@@ -594,6 +602,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_9"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
@@ -606,7 +615,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/dialpad_9"
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop="-3dp"
+                        android:layout_marginTop="-6dp"
                         android:gravity="center_horizontal"
                         android:text="WXYZ"
                         android:alpha="0.5"/>
@@ -666,6 +675,7 @@
                     <com.goodwy.commons.views.MyTextView
                         android:id="@+id/dialpad_0"
                         style="@style/DialpadNumberStyle"
+                        android:includeFontPadding="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
