@@ -5,6 +5,8 @@
     android:id="@+id/itemRecentsHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/activity_margin"
+    android:layout_marginVertical="@dimen/tiny_margin"
     android:clickable="true"
     android:focusable="true">
 
@@ -50,7 +52,7 @@
         android:id="@+id/itemRecentsFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/theme_black_background_color">
+        android:background="@drawable/bg_glass_card">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/itemRecentsFrameSelect"
@@ -58,7 +60,7 @@
             android:layout_height="wrap_content"
             android:minHeight="64dp"
             android:paddingStart="@dimen/activity_margin"
-            android:background="@color/theme_black_background_color">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/item_recents_image"

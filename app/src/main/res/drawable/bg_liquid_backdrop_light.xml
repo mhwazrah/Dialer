@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen backdrop the glass panels refract (light theme): pale blue base with pastel colour fields. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#FFDCE6F2"
+                android:startColor="#FFF2F7FD"
+                android:centerColor="#FFE8F0FA" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.15"
+                android:centerY="0.12"
+                android:endColor="#000A84FF"
+                android:gradientRadius="70%p"
+                android:startColor="#400A84FF"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.9"
+                android:centerY="0.45"
+                android:endColor="#0030D5C8"
+                android:gradientRadius="60%p"
+                android:startColor="#3330D5C8"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.25"
+                android:centerY="0.9"
+                android:endColor="#00BF5AF2"
+                android:gradientRadius="65%p"
+                android:startColor="#33BF5AF2"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>

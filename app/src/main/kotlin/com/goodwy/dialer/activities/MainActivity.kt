@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.pm.ShortcutInfo
 import android.content.res.Configuration
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -21,12 +23,18 @@ import android.telecom.Call
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.MenuItemCompat
+import androidx.core.view.children
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.viewpager.widget.ViewPager
 import com.behaviorule.arturdumchev.library.pixels
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
@@ -114,10 +122,11 @@ class MainActivity : SimpleActivity() {
         val useBottomNavigationBar = config.bottomNavigationBar
         val oneTabs: Boolean = getAllFragments().size == 1 || !useBottomNavigationBar
         setupEdgeToEdge(
-            padBottomImeAndSystem = listOf(binding.mainTabsHolder),
-            moveBottomSystem = if (oneTabs) listOf(binding.mainDialpadButton) else emptyList()
+            padBottomImeAndSystem = listOf(binding.mainTabsContainer),
+            moveBottomSystem = if (oneTabs) listOf(binding.mainDialpadGlass) else emptyList()
         )
 
+        setupLiquidGlassLayout()
         setupOptionsMenu()
         refreshMenuItems()
         storeStateVariables()
@@ -228,11 +237,16 @@ class MainActivity : SimpleActivity() {
         binding.mainDialpadButton.setImageDrawable(dialpadIcon)
 
         updateTextColors(binding.mainHolder)
+        // translucent accent so the glass behind the FABs stays visible
+        val fabTint = ColorStateList.valueOf(ColorUtils.setAlphaComponent(properPrimaryColor, 0xB3))
+        binding.mainDialpadButton.backgroundTintList = fabTint
+        binding.mainCallButton.backgroundTintList = fabTint
         setupTabColors()
         binding.mainMenu.updateColors(
             background = getStartRequiredStatusBarColor(),
             scrollOffset = scrollingView?.computeVerticalScrollOffset() ?: 0
         )
+        clearMainMenuPaint()
 
         val configStartNameWithSurname = config.startNameWithSurname
         if (storedStartNameWithSurname != configStartNameWithSurname) {
@@ -295,11 +309,9 @@ class MainActivity : SimpleActivity() {
         binding.viewPager.setPageTransformer(true, animation)
         binding.viewPager.setPagingEnabled(!config.useSwipeToAction)
 
-        val useSurfaceColor = isDynamicTheme() && !isSystemInDarkMode()
-        val backgroundColor = if (useSurfaceColor) getSurfaceColor() else getProperBackgroundColor()
-        if (useSurfaceColor) binding.mainHolder.setBackgroundColor(getSurfaceColor())
+        // transparent so the liquid backdrop shows through
         getAllFragments().forEach {
-            it?.setBackgroundColor(backgroundColor)
+            it?.setBackgroundColor(Color.TRANSPARENT)
         }
         if (getCurrentFragment() is RecentsFragment) clearMissedCalls()
 
@@ -522,7 +534,7 @@ class MainActivity : SimpleActivity() {
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, object : MenuItemCompat.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 isSearchOpen = true
-                binding.mainDialpadButton.beGone()
+                binding.mainDialpadGlass.beGone()
                 return true
             }
 
@@ -532,7 +544,7 @@ class MainActivity : SimpleActivity() {
                 }
 
                 isSearchOpen = false
-                binding.mainDialpadButton.beVisible()
+                binding.mainDialpadGlass.beVisible()
                 return true
             }
         })
@@ -648,10 +660,8 @@ class MainActivity : SimpleActivity() {
                 updateBottomTabItemColors(inactiveView, false, getDeselectedTabDrawableIds()[index])
             }
 
-            val bottomBarColor =
-                if (isDynamicTheme() && !isSystemInDarkMode()) getColoredMaterialStatusBarColor()
-                else getSurfaceColor()
-            binding.mainTabsHolder.setBackgroundColor(bottomBarColor)
+            // the glass pill behind the tabs is the bar background
+            binding.mainTabsHolder.setBackgroundColor(Color.TRANSPARENT)
         } else {
             // top tab bar
             val lastUsedPage = getDefaultTab()
@@ -798,11 +808,56 @@ class MainActivity : SimpleActivity() {
             searchMenu = binding.mainMenu,
             surfaceColor = useSurfaceColor
         )
+        clearMainMenuPaint()
+    }
+
+    // Commons repaints the search menu with opaque colours (also while scrolling); strip them so the glass
+    // pill behind shows, and keep list padding in step with the floating bars.
+    private fun setupLiquidGlassLayout() {
+        binding.mainMenu.viewTreeObserver.addOnPreDrawListener {
+            clearMainMenuPaint()
+            true
+        }
+        binding.mainHolder.viewTreeObserver.addOnGlobalLayoutListener { updateListInsets() }
+    }
+
+    private fun clearMainMenuPaint() {
+        fun clear(view: View) {
+            if (view.background is ColorDrawable) view.background = null
+            if (view is ViewGroup) view.children.forEach(::clear)
+        }
+        clear(binding.mainMenu)
+    }
+
+    // Skips no-op writes: setting layout params always requests a layout, which would loop the layout listener.
+    private fun setTopMargin(view: View, margin: Int) {
+        if ((view.layoutParams as ViewGroup.MarginLayoutParams).topMargin != margin) {
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = margin }
+        }
+    }
+
+    // Lists fill the screen and scroll under the floating bars: pad them by the bar sizes.
+    private fun updateListInsets() {
+        val glassTop = binding.mainMenuGlass.bottom
+        val tabsVisible = binding.mainTabsContainer.isVisible
+        val topTabsVisible = binding.mainTopTabsContainer.isVisible
+        val bottom = (if (tabsVisible) binding.mainHolder.height - binding.mainTabsContainer.top else 0) +
+            (72 * resources.displayMetrics.density).toInt() // room for the FAB
+        val top = if (topTabsVisible) 0 else glassTop
+        if (topTabsVisible) setTopMargin(binding.mainTopTabsContainer, glassTop)
+        val filtersHeight = getRecentsFragment()?.findViewById<View>(R.id.recents_filters_appbar)?.let { filters ->
+            setTopMargin(filters, top)
+            filters.height
+        } ?: 0
+        getAllFragments().forEach { fragment ->
+            val extraTop = if (fragment is RecentsFragment) filtersHeight else 0
+            fragment?.myRecyclerView()?.updatePadding(top = top + extraTop, bottom = bottom)
+        }
     }
 
     private fun setupTopTabs() {
         // top tab bar
-        binding.mainTabsHolder.beGone()
+        binding.mainTabsContainer.beGone()
         val selectedTabIndex = binding.mainTopTabsHolder.selectedTabPosition
         binding.viewPager.adapter = null
         binding.mainTopTabsHolder.removeAllTabs()
@@ -918,7 +973,7 @@ class MainActivity : SimpleActivity() {
             }
         )
 
-        binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
+        binding.mainTabsContainer.beGoneIf(binding.mainTabsHolder.tabCount == 1)
         storedShowTabs = config.showTabs
         storedStartNameWithSurname = config.startNameWithSurname
         storedShowPhoneNumbers = config.showPhoneNumbers
@@ -1178,10 +1233,10 @@ class MainActivity : SimpleActivity() {
         when (phoneState) {
             is SingleCall -> {
                 RxAnimation.together(
-                    binding.mainCallButton.scale(1.1f),
-                    binding.mainCallButton.fadeIn(duration = 260),
+                    binding.mainCallGlass.scale(1.1f),
+                    binding.mainCallGlass.fadeIn(duration = 260),
                 ).andThen(
-                    binding.mainCallButton.scale(1f)
+                    binding.mainCallGlass.scale(1f)
                 ).subscribe()
 //                val state = phoneState.call.getStateCompat()
 //                if (state == Call.STATE_RINGING) {
@@ -1192,8 +1247,8 @@ class MainActivity : SimpleActivity() {
 
             else -> {
                 RxAnimation.together(
-                    binding.mainCallButton.scale(0.6f),
-                    binding.mainCallButton.fadeOut(duration = 360),
+                    binding.mainCallGlass.scale(0.6f),
+                    binding.mainCallGlass.fadeOut(duration = 360),
                 ).subscribe()
             }
         }

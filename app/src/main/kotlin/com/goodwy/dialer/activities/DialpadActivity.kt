@@ -90,7 +90,6 @@ class DialpadActivity : SimpleActivity() {
                 moveBottomSystem = listOf(dialpadRoundWrapperUp),
 //                padBottomImeAndSystem = listOf(dialpadList, dialpadHolder)
             )
-            setupMaterialScrollListener(binding.dialpadList, binding.dialpadAppbar)
         }
 
         EventBus.getDefault().register(this)
@@ -181,7 +180,7 @@ class DialpadActivity : SimpleActivity() {
         isTalkBackOn = isTalkBackOn()
 
 
-        if (isDynamicTheme() && !isSystemInDarkMode()) binding.dialpadHolder.setBackgroundColor(getSurfaceColor())
+        binding.dialpadCoordinator.applyLiquidBackdrop()
         speedDialValues = config.getSpeedDialValues()
         initStyle()
         updateDialpadSize()
@@ -198,14 +197,14 @@ class DialpadActivity : SimpleActivity() {
         setupTopAppBar(
             topAppBar = binding.dialpadAppbar,
             navigationIcon = NavigationIcon.Arrow,
-            topBarColor = properBackgroundColor,
+            topBarColor = Color.TRANSPARENT,
             navigationClick = false
         )
-        binding.dialpadRecentsList.setBackgroundColor(properBackgroundColor)
-        binding.dialpadList.setBackgroundColor(properBackgroundColor)
-        binding.dialpadToolbar.setBackgroundColor(properBackgroundColor)
+        binding.dialpadRecentsList.setBackgroundColor(Color.TRANSPARENT)
+        binding.dialpadList.setBackgroundColor(Color.TRANSPARENT)
+        binding.dialpadToolbar.setBackgroundColor(Color.TRANSPARENT)
 
-        binding.dialpadRectWrapper.root.setBackgroundColor(properBackgroundColor)
+        binding.dialpadRectWrapper.root.setBackgroundColor(Color.TRANSPARENT)
         binding.dialpadAddNumber.setTextColor(properPrimaryColor)
         binding.dialpadList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -282,7 +281,7 @@ class DialpadActivity : SimpleActivity() {
                 binding.dialpadRoundWrapper.apply {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadIosHolder.beVisible()
-                    dialpadIosHolder.setBackgroundColor(properBackgroundColor)
+                    dialpadIosHolder.setBackgroundColor(Color.TRANSPARENT)
 
                     arrayOf(
                         dialpad0IosHolder, dialpad1IosHolder, dialpad2IosHolder, dialpad3IosHolder, dialpad4IosHolder,
@@ -300,7 +299,7 @@ class DialpadActivity : SimpleActivity() {
                     }
 
                     dialpadBottomMargin.apply {
-                        setBackgroundColor(properBackgroundColor)
+                        setBackgroundColor(Color.TRANSPARENT)
                         setHeight(100)
                     }
                 }
@@ -314,7 +313,7 @@ class DialpadActivity : SimpleActivity() {
 
                 binding.dialpadRectWrapper.apply {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                    dialpadGridWrapper.setBackgroundColor(properBackgroundColor)
+                    dialpadGridWrapper.setBackgroundColor(Color.TRANSPARENT)
 
                     arrayOf(
                         dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
@@ -324,7 +323,7 @@ class DialpadActivity : SimpleActivity() {
                     }
 
                     dialpadBottomMargin.apply {
-                        setBackgroundColor(properBackgroundColor)
+                        setBackgroundColor(Color.TRANSPARENT)
                         setHeight(100)
                     }
                 }
@@ -342,45 +341,7 @@ class DialpadActivity : SimpleActivity() {
                 binding.dialpadClearWrapper.apply {
                     dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
                     dialpadGridHolder.beVisible()
-                    dialpadGridHolder.setBackgroundColor(surfaceColor)
-
-                    if (isPiePlus()) {
-                        val textColor = getProperTextColor()
-                        dialpadGridHolder.outlineAmbientShadowColor = textColor
-                        dialpadGridHolder.outlineSpotShadowColor = textColor
-                    }
-
-                    arrayOf(
-                        dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
-                        dividerHorizontalFour, dividerVerticalOne, dividerVerticalTwo, dividerVerticalStart, dividerVerticalEnd
-                    ).forEach {
-                        it.beVisible()
-                    }
-
-                    val properTextColor = getProperTextColor()
-                    arrayOf(dialpadAsterisk, dialpadHashtag, dialpadVoicemail
-                    ).forEach {
-                        it.applyColorFilter(properTextColor)
-                    }
-
-                    dialpadBottomMargin.apply {
-                        setBackgroundColor(surfaceColor)
-                        setHeight(100)
-                    }
-                }
-                initLetters()
-            }
-
-            else -> {
-                val surfaceColor =
-                    if (isDynamicTheme() && !isSystemInDarkMode()) getProperBackgroundColor() else getSurfaceColor()
-
-                binding.dialpadRoundWrapper.root.beGone()
-                binding.dialpadRectWrapper.root.beGone()
-                binding.dialpadClearWrapper.apply {
-                    dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                    dialpadGridHolder.beVisible()
-                    root.setBackgroundColor(surfaceColor)
+                    dialpadGridHolder.setBackgroundColor(Color.TRANSPARENT)
 
                     if (isPiePlus()) {
                         val textColor = getProperTextColor()
@@ -402,7 +363,45 @@ class DialpadActivity : SimpleActivity() {
                     }
 
                     dialpadBottomMargin.apply {
-                        setBackgroundColor(surfaceColor)
+                        setBackgroundColor(Color.TRANSPARENT)
+                        setHeight(100)
+                    }
+                }
+                initLetters()
+            }
+
+            else -> {
+                val surfaceColor =
+                    if (isDynamicTheme() && !isSystemInDarkMode()) getProperBackgroundColor() else getSurfaceColor()
+
+                binding.dialpadRoundWrapper.root.beGone()
+                binding.dialpadRectWrapper.root.beGone()
+                binding.dialpadClearWrapper.apply {
+                    dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
+                    dialpadGridHolder.beVisible()
+                    root.setBackgroundColor(Color.TRANSPARENT)
+
+                    if (isPiePlus()) {
+                        val textColor = getProperTextColor()
+                        dialpadGridHolder.outlineAmbientShadowColor = textColor
+                        dialpadGridHolder.outlineSpotShadowColor = textColor
+                    }
+
+                    arrayOf(
+                        dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
+                        dividerHorizontalFour, dividerVerticalOne, dividerVerticalTwo, dividerVerticalStart, dividerVerticalEnd
+                    ).forEach {
+                        it.beInvisible()
+                    }
+
+                    val properTextColor = getProperTextColor()
+                    arrayOf(dialpadAsterisk, dialpadHashtag, dialpadVoicemail
+                    ).forEach {
+                        it.applyColorFilter(properTextColor)
+                    }
+
+                    dialpadBottomMargin.apply {
+                        setBackgroundColor(Color.TRANSPARENT)
                         setHeight(100)
                     }
                 }

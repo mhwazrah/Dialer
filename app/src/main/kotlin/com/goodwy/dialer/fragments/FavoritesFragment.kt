@@ -1,5 +1,6 @@
 package com.goodwy.dialer.fragments
 
+import android.graphics.Color
 import android.content.Context
 import android.util.AttributeSet
 import com.google.gson.Gson
@@ -43,9 +44,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     }
 
     override fun setupFragment() {
-        val useSurfaceColor = context.isDynamicTheme() && !context.isSystemInDarkMode()
-        val backgroundColor = if (useSurfaceColor) context.getSurfaceColor() else context.getProperBackgroundColor()
-        binding.root.setBackgroundColor(backgroundColor)
+        binding.root.setBackgroundColor(Color.TRANSPARENT) // let the liquid backdrop show through
 
         val placeholderResId = if (context.hasPermission(PERMISSION_READ_CONTACTS)) {
             R.string.no_contacts_found

@@ -31,6 +31,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_1_ios_wrapper"
@@ -86,6 +92,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_2_ios_wrapper"
@@ -128,6 +140,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_3_ios_wrapper"
@@ -170,6 +188,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_4_ios_wrapper"
@@ -212,6 +236,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_5_ios_wrapper"
@@ -254,6 +284,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_6_ios_wrapper"
@@ -296,6 +332,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_7_ios_wrapper"
@@ -338,6 +380,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_8_ios_wrapper"
@@ -380,6 +428,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_9_ios_wrapper"
@@ -422,6 +476,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <ImageView
                 android:id="@+id/dialpad_asterisk_ios"
@@ -445,6 +505,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <RelativeLayout
                 android:id="@+id/dialpad_0_ios_wrapper"
@@ -486,6 +552,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <ImageView
                 android:id="@+id/dialpad_hashtag_ios"
@@ -507,6 +579,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <ImageView
                 android:id="@+id/dialpadSimIos"
@@ -532,6 +610,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:backgroundTint="@color/ic_dialer">
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                app:backdropSourceId="@id/dialpadCoordinator"/>
+
 
             <ImageView
                 android:id="@+id/dialpadCallButtonIosIcon"
@@ -578,5 +662,5 @@
         android:id="@+id/dialpadBottomMargin"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dialpad_margin_bottom_ios"
-        android:background="@color/theme_black_background_color"/>
+        android:background="@android:color/transparent"/>
 </LinearLayout>

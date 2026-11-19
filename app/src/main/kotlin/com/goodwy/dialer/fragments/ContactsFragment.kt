@@ -1,5 +1,6 @@
 package com.goodwy.dialer.fragments
 
+import android.graphics.Color
 import android.content.Context
 import android.content.res.Configuration
 import android.util.AttributeSet
@@ -40,9 +41,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     }
 
     override fun setupFragment() {
-        val useSurfaceColor = context.isDynamicTheme() && !context.isSystemInDarkMode()
-        val backgroundColor = if (useSurfaceColor) context.getSurfaceColor() else context.getProperBackgroundColor()
-        binding.root.setBackgroundColor(backgroundColor)
+        binding.root.setBackgroundColor(Color.TRANSPARENT) // let the liquid backdrop show through
         //binding.contactsFragment.setBackgroundColor(context.getProperBackgroundColor())
 
         val placeholderResId = if (context.hasPermission(PERMISSION_READ_CONTACTS)) {

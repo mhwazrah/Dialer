@@ -2,8 +2,19 @@ package com.goodwy.dialer.activities
 
 import com.goodwy.commons.activities.BaseSimpleActivity
 import com.goodwy.dialer.R
+import com.goodwy.dialer.extensions.applyLiquidBackdrop
 
 open class SimpleActivity : BaseSimpleActivity() {
+    // The call screen keeps the user's call-background setting (photo / blurred avatar) as its
+    // glass backdrop, so it opts out of the shared colour-field backdrop.
+    protected open val usesLiquidBackdrop = true
+
+    override fun onResume() {
+        super.onResume()
+        // Runs after commons paints the theme background colour, so the backdrop wins.
+        if (usesLiquidBackdrop) window.decorView.applyLiquidBackdrop()
+    }
+
     override fun getAppIconIDs() = arrayListOf(
         R.mipmap.ic_launcher,
         R.mipmap.ic_launcher_one,

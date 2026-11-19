@@ -24,6 +24,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_1_wrapper"
@@ -68,6 +73,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_2_wrapper"
@@ -110,6 +120,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_3_wrapper"
@@ -152,6 +167,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_4_wrapper"
@@ -194,6 +214,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_5_wrapper"
@@ -236,6 +261,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_6_wrapper"
@@ -278,6 +308,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_7_wrapper"
@@ -320,6 +355,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_8_wrapper"
@@ -362,6 +402,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <RelativeLayout
             android:id="@+id/dialpad_9_wrapper"
@@ -404,6 +449,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <ImageView
             android:id="@+id/dialpad_asterisk"
@@ -426,6 +476,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <com.goodwy.commons.views.MyTextView
             android:id="@+id/dialpad_0"
@@ -461,6 +516,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <com.goodwy.dialer.views.GlassPanel
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+
 
         <ImageView
             android:id="@+id/dialpad_hashtag"

@@ -1,6 +1,7 @@
 package com.goodwy.dialer.activities
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import com.google.gson.Gson
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
@@ -45,7 +46,6 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
 
         binding.apply {
             setupEdgeToEdge(padBottomSystem = listOf(manageSpeedDialScrollview))
-            setupMaterialScrollListener(binding.manageSpeedDialScrollview, binding.manageSpeedDialAppbar)
         }
 
         speedDialValues = config.getSpeedDialValues()
@@ -65,7 +65,7 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
 
     override fun onResume() {
         super.onResume()
-        setupTopAppBar(binding.manageSpeedDialAppbar, NavigationIcon.Arrow, navigationClick = false)
+        setupTopAppBar(binding.manageSpeedDialAppbar, NavigationIcon.Arrow, topBarColor = Color.TRANSPARENT, navigationClick = false)
         binding.manageSpeedDialToolbar.setNavigationOnClickListener {
             hideKeyboard()
             onBackPressed()

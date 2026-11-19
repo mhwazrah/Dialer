@@ -72,7 +72,6 @@ class SettingsDialpadActivity : SimpleActivity() {
                     dialpadRectWrapper.dialpadGridWrapper
                 ),
             )
-            setupMaterialScrollListener(binding.dialpadNestedScrollview, binding.dialpadAppbar)
         }
 
         updateDialpadSize()
@@ -142,13 +141,16 @@ class SettingsDialpadActivity : SimpleActivity() {
 
         binding.apply {
             setupTopAppBar(dialpadAppbar, NavigationIcon.Arrow)
+            dialpadAppbar.setBackgroundColor(Color.TRANSPARENT)
+            dialpadToolbar.setBackgroundColor(Color.TRANSPARENT)
 
             arrayOf(
                 styleHolder,
                 dialpadSettingsCardHolder,
                 dialpadSizeCardHolder
             ).forEach {
-                it.setCardBackgroundColor(surfaceColor)
+                it.setCardBackgroundColor(Color.TRANSPARENT)
+                it.setBackgroundResource(R.drawable.bg_glass_card)
             }
 
             speedDialValues = config.getSpeedDialValues()
@@ -244,9 +246,8 @@ class SettingsDialpadActivity : SimpleActivity() {
 
                     dialpadRoundWrapper.apply {
                         dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                        dialpadIosHolder.setBackgroundColor(properBackgroundColor)
+                        dialpadIosHolder.setBackgroundColor(Color.TRANSPARENT)
 
-                        dialpadIosHolder.alpha = 0.5f
                         dialpadCallButtonIosHolder.background.applyColorFilter(config.simIconsColors[1])
                         arrayOf(
                             dialpad0IosHolder, dialpad1IosHolder, dialpad2IosHolder, dialpad3IosHolder, dialpad4IosHolder,
@@ -258,7 +259,7 @@ class SettingsDialpadActivity : SimpleActivity() {
                         }
 
                         dialpadBottomMargin.apply {
-                            setBackgroundColor(properBackgroundColor)
+                            setBackgroundColor(Color.TRANSPARENT)
                             setHeight(100)
                         }
                     }
@@ -271,9 +272,8 @@ class SettingsDialpadActivity : SimpleActivity() {
 
                     dialpadRectWrapper.apply {
                         dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                        dialpadGridHolder.setBackgroundColor(properBackgroundColor)
+                        dialpadGridHolder.setBackgroundColor(Color.TRANSPARENT)
 
-                        dialpadGridHolder.alpha = 0.5f
                         arrayOf(
                             dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
                             dividerHorizontalFour, dividerVerticalOne, dividerVerticalTwo, dividerVerticalStart, dividerVerticalEnd
@@ -282,7 +282,7 @@ class SettingsDialpadActivity : SimpleActivity() {
                         }
 
                         dialpadBottomMargin.apply {
-                            setBackgroundColor(properBackgroundColor)
+                            setBackgroundColor(Color.TRANSPARENT)
                             setHeight(100)
                         }
                     }
@@ -295,18 +295,17 @@ class SettingsDialpadActivity : SimpleActivity() {
 
                     dialpadClearWrapper.apply {
                         dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                        dialpadGridHolder.setBackgroundColor(surfaceColor)
+                        dialpadGridHolder.setBackgroundColor(Color.TRANSPARENT)
 
-                        dialpadGridHolder.alpha = 0.5f
                         arrayOf(
                             dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
                             dividerHorizontalFour, dividerVerticalOne, dividerVerticalTwo, dividerVerticalStart, dividerVerticalEnd
                         ).forEach {
-                            it.beVisible()
+                            it.beInvisible()
                         }
 
                         dialpadBottomMargin.apply {
-                            setBackgroundColor(surfaceColor)
+                            setBackgroundColor(Color.TRANSPARENT)
                             setHeight(100)
                         }
                     }
@@ -320,9 +319,8 @@ class SettingsDialpadActivity : SimpleActivity() {
 
                     dialpadClearWrapper.apply {
                         dialpadVoicemail.beVisibleIf(config.showVoicemailIcon && !config.hideDialpadLetters)
-                        dialpadGridHolder.setBackgroundColor(surfaceColor)
+                        dialpadGridHolder.setBackgroundColor(Color.TRANSPARENT)
 
-                        dialpadGridHolder.alpha = 0.5f
                         arrayOf(
                             dividerHorizontalZero, dividerHorizontalOne, dividerHorizontalTwo, dividerHorizontalThree,
                             dividerHorizontalFour, dividerVerticalOne, dividerVerticalTwo, dividerVerticalStart, dividerVerticalEnd
@@ -331,7 +329,7 @@ class SettingsDialpadActivity : SimpleActivity() {
                         }
 
                         dialpadBottomMargin.apply {
-                            setBackgroundColor(surfaceColor)
+                            setBackgroundColor(Color.TRANSPARENT)
                             setHeight(100)
                         }
                     }

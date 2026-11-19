@@ -5,7 +5,9 @@
     android:id="@+id/itemRecentsHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
+    android:layout_marginHorizontal="@dimen/activity_margin"
+    android:layout_marginVertical="@dimen/tiny_margin"
+    android:background="@drawable/bg_glass_card"
     android:clickable="true"
     android:focusable="true"
     android:foreground="@drawable/selector">

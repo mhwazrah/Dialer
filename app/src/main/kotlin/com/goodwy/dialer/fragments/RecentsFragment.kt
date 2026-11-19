@@ -91,10 +91,9 @@ class RecentsFragment(
     }
 
     override fun setupFragment() {
-        val useSurfaceColor = context.isDynamicTheme() && !context.isSystemInDarkMode()
-        val backgroundColor = if (useSurfaceColor) context.getSurfaceColor() else context.getProperBackgroundColor()
-        binding.recentsFragment.setBackgroundColor(backgroundColor)
-        binding.recentsFiltersHolder.setBackgroundColor(backgroundColor)
+        // transparent so the liquid backdrop shows through
+        binding.recentsFragment.setBackgroundColor(Color.TRANSPARENT)
+        binding.recentsFiltersHolder.setBackgroundColor(Color.TRANSPARENT)
 
         val placeholderResId = if (context.hasPermission(PERMISSION_READ_CALL_LOG)) {
             R.string.no_previous_calls

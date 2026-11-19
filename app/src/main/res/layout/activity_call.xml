@@ -9,11 +9,21 @@
     android:background="@color/default_call_background">
 
     <!-- default = normal, small - for small screens -->
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:cornerRadius="@dimen/glass_card_radius"
+        app:layout_constraintBottom_toBottomOf="@id/onHoldStatusHolder"
+        app:layout_constraintEnd_toEndOf="@id/onHoldStatusHolder"
+        app:layout_constraintStart_toStartOf="@id/onHoldStatusHolder"
+        app:layout_constraintTop_toTopOf="@id/onHoldStatusHolder"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/onHoldStatusHolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/hint_black"
+        android:background="@android:color/transparent"
         android:paddingStart="@dimen/normal_margin"
         android:paddingEnd="@dimen/normal_margin"
         android:visibility="gone"
@@ -183,6 +193,16 @@
         tools:text="Caller notes"
         tools:visibility="visible"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:cornerRadius="@dimen/glass_card_radius"
+        app:layout_constraintBottom_toBottomOf="@id/call_status_holder"
+        app:layout_constraintEnd_toEndOf="@id/call_status_holder"
+        app:layout_constraintStart_toStartOf="@id/call_status_holder"
+        app:layout_constraintTop_toTopOf="@id/call_status_holder"/>
+
     <RelativeLayout
         android:id="@+id/call_status_holder"
         android:layout_width="wrap_content"
@@ -285,6 +305,15 @@
             android:visibility="gone"
             app:constraint_referenced_ids="callSwapHolder,callMergeHolder"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callToggleMicrophone"
+        app:layout_constraintEnd_toEndOf="@id/callToggleMicrophone"
+        app:layout_constraintStart_toStartOf="@id/callToggleMicrophone"
+        app:layout_constraintTop_toTopOf="@id/callToggleMicrophone"/>
+
         <ImageView
             android:id="@+id/callToggleMicrophone"
             android:layout_width="@dimen/call_button_size"
@@ -313,6 +342,15 @@
             app:layout_constraintEnd_toEndOf="@+id/callToggleMicrophone"
             app:layout_constraintStart_toStartOf="@+id/callToggleMicrophone"
             app:layout_constraintTop_toBottomOf="@+id/callToggleMicrophone"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callDialpadHolder"
+        app:layout_constraintEnd_toEndOf="@id/callDialpadHolder"
+        app:layout_constraintStart_toStartOf="@id/callDialpadHolder"
+        app:layout_constraintTop_toTopOf="@id/callDialpadHolder"/>
 
         <LinearLayout
             android:id="@+id/callDialpadHolder"
@@ -352,6 +390,15 @@
             app:layout_constraintStart_toStartOf="@+id/callDialpadHolder"
             app:layout_constraintTop_toBottomOf="@+id/callDialpadHolder"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callToggleSpeaker"
+        app:layout_constraintEnd_toEndOf="@id/callToggleSpeaker"
+        app:layout_constraintStart_toStartOf="@id/callToggleSpeaker"
+        app:layout_constraintTop_toTopOf="@id/callToggleSpeaker"/>
+
         <ImageView
             android:id="@+id/callToggleSpeaker"
             android:layout_width="@dimen/call_button_size"
@@ -380,6 +427,15 @@
             app:layout_constraintEnd_toEndOf="@+id/callToggleSpeaker"
             app:layout_constraintStart_toStartOf="@+id/callToggleSpeaker"
             app:layout_constraintTop_toBottomOf="@+id/callToggleSpeaker"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callAddHolder"
+        app:layout_constraintEnd_toEndOf="@id/callAddHolder"
+        app:layout_constraintStart_toStartOf="@id/callAddHolder"
+        app:layout_constraintTop_toTopOf="@id/callAddHolder"/>
 
         <LinearLayout
             android:id="@+id/callAddHolder"
@@ -416,6 +472,15 @@
             app:layout_constraintStart_toStartOf="@+id/callAddHolder"
             app:layout_constraintTop_toBottomOf="@+id/callAddHolder"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callSwapHolder"
+        app:layout_constraintEnd_toEndOf="@id/callSwapHolder"
+        app:layout_constraintStart_toStartOf="@id/callSwapHolder"
+        app:layout_constraintTop_toTopOf="@id/callSwapHolder"/>
+
         <LinearLayout
             android:id="@+id/callSwapHolder"
             android:layout_width="wrap_content"
@@ -450,6 +515,15 @@
             app:layout_constraintEnd_toEndOf="@+id/callSwapHolder"
             app:layout_constraintStart_toStartOf="@+id/callSwapHolder"
             app:layout_constraintTop_toBottomOf="@+id/callSwapHolder"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callMergeHolder"
+        app:layout_constraintEnd_toEndOf="@id/callMergeHolder"
+        app:layout_constraintStart_toStartOf="@id/callMergeHolder"
+        app:layout_constraintTop_toTopOf="@id/callMergeHolder"/>
 
         <LinearLayout
             android:id="@+id/callMergeHolder"
@@ -486,6 +560,15 @@
             app:layout_constraintStart_toStartOf="@+id/callMergeHolder"
             app:layout_constraintTop_toBottomOf="@+id/callMergeHolder"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callToggleHold"
+        app:layout_constraintEnd_toEndOf="@id/callToggleHold"
+        app:layout_constraintStart_toStartOf="@id/callToggleHold"
+        app:layout_constraintTop_toTopOf="@id/callToggleHold"/>
+
         <ImageView
             android:id="@+id/callToggleHold"
             android:layout_width="@dimen/call_button_size"
@@ -513,6 +596,15 @@
             app:layout_constraintEnd_toEndOf="@+id/callToggleHold"
             app:layout_constraintStart_toStartOf="@+id/callToggleHold"
             app:layout_constraintTop_toBottomOf="@+id/callToggleHold"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callAddContactHolder"
+        app:layout_constraintEnd_toEndOf="@id/callAddContactHolder"
+        app:layout_constraintStart_toStartOf="@id/callAddContactHolder"
+        app:layout_constraintTop_toTopOf="@id/callAddContactHolder"/>
 
         <LinearLayout
             android:id="@+id/callAddContactHolder"
@@ -548,6 +640,15 @@
             app:layout_constraintEnd_toEndOf="@+id/callAddContactHolder"
             app:layout_constraintStart_toStartOf="@+id/callAddContactHolder"
             app:layout_constraintTop_toBottomOf="@+id/callAddContactHolder"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callEnd"
+        app:layout_constraintEnd_toEndOf="@id/callEnd"
+        app:layout_constraintStart_toStartOf="@id/callEnd"
+        app:layout_constraintTop_toTopOf="@id/callEnd"/>
 
         <ImageView
             android:id="@+id/callEnd"
@@ -610,6 +711,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <com.goodwy.dialer.views.GlassPanel
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@id/dialpad_input_holder"
+                android:layout_alignTop="@id/dialpad_input_holder"
+                android:layout_alignEnd="@id/dialpad_input_holder"
+                android:layout_alignBottom="@id/dialpad_input_holder"
+                android:layout_marginHorizontal="@dimen/big_margin"
+                app:backdropSourceId="@id/call_holder"
+                app:cornerRadius="@dimen/glass_card_radius"/>
+
             <RelativeLayout
                 android:id="@+id/dialpad_input_holder"
                 android:layout_width="match_parent"
@@ -646,6 +758,15 @@
         tools:layout_editor_absoluteY="0dp"
         tools:visibility="visible">
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/call_remind"
+        app:layout_constraintEnd_toEndOf="@id/call_remind"
+        app:layout_constraintStart_toStartOf="@id/call_remind"
+        app:layout_constraintTop_toTopOf="@id/call_remind"/>
+
         <ImageView
             android:id="@+id/call_remind"
             android:layout_width="48dp"
@@ -674,6 +795,15 @@
             app:layout_constraintEnd_toEndOf="@+id/call_remind"
             app:layout_constraintStart_toStartOf="@+id/call_remind"
             app:layout_constraintTop_toBottomOf="@+id/call_remind"/>
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callMessage"
+        app:layout_constraintEnd_toEndOf="@id/callMessage"
+        app:layout_constraintStart_toStartOf="@id/callMessage"
+        app:layout_constraintTop_toTopOf="@id/callMessage"/>
 
         <ImageView
             android:id="@+id/callMessage"
@@ -704,6 +834,15 @@
             app:layout_constraintStart_toStartOf="@+id/callMessage"
             app:layout_constraintTop_toBottomOf="@+id/callMessage"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callDecline"
+        app:layout_constraintEnd_toEndOf="@id/callDecline"
+        app:layout_constraintStart_toStartOf="@id/callDecline"
+        app:layout_constraintTop_toTopOf="@id/callDecline"/>
+
         <ImageView
             android:id="@+id/callDecline"
             android:layout_width="@dimen/call_button_size"
@@ -728,6 +867,16 @@
             app:layout_constraintStart_toStartOf="@+id/callDecline"
             app:layout_constraintTop_toBottomOf="@+id/callDecline"/>
 
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:cornerRadius="@dimen/glass_card_radius"
+        app:layout_constraintBottom_toBottomOf="@id/callAcceptAndDecline"
+        app:layout_constraintEnd_toEndOf="@id/callAcceptAndDecline"
+        app:layout_constraintStart_toStartOf="@id/callAcceptAndDecline"
+        app:layout_constraintTop_toTopOf="@id/callAcceptAndDecline"/>
+
         <com.goodwy.commons.views.MyTextView
             android:id="@+id/callAcceptAndDecline"
             android:layout_width="wrap_content"
@@ -749,6 +898,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible" />
+
+    <com.goodwy.dialer.views.GlassPanel
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backdropSourceId="@id/call_holder"
+        app:layout_constraintBottom_toBottomOf="@id/callAccept"
+        app:layout_constraintEnd_toEndOf="@id/callAccept"
+        app:layout_constraintStart_toStartOf="@id/callAccept"
+        app:layout_constraintTop_toTopOf="@id/callAccept"/>
 
         <ImageView
             android:id="@+id/callAccept"

@@ -50,7 +50,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsColorCustomizationHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -239,7 +239,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsGeneralHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -438,7 +438,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsTabsHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -569,7 +569,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsSwipeGesturesHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -772,7 +772,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsDialpadHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -851,7 +851,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsNotificationsHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -881,7 +881,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsCallsHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -1268,7 +1268,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsSecurityHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -1322,7 +1322,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsTopAppBarHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -1363,7 +1363,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsListViewHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -1554,7 +1554,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/settingsBackupsHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -1612,7 +1612,7 @@
                 android:id="@+id/settingsOtherHolder"
                 style="@style/SettingsSectionHolder"
                 android:layout_marginBottom="@dimen/secondary_fab_bottom_margin"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout

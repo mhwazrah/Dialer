@@ -1,6 +1,7 @@
 package com.goodwy.dialer.activities
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import com.goodwy.commons.extensions.viewBinding
 import com.goodwy.commons.helpers.NavigationIcon
@@ -18,14 +19,13 @@ class ConferenceActivity : SimpleActivity() {
         setContentView(binding.root)
         binding.apply {
             setupEdgeToEdge(padBottomSystem = listOf(conferenceList))
-            setupMaterialScrollListener(conferenceList, conferenceAppbar)
             conferenceList.adapter = ConferenceCallsAdapter(this@ConferenceActivity, conferenceList, ArrayList(CallManager.getConferenceCalls())) {}
         }
     }
 
     override fun onResume() {
         super.onResume()
-        setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow)
+        setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow, topBarColor = Color.TRANSPARENT)
     }
 
     override fun onBackPressedCompat(): Boolean {

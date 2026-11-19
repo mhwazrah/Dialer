@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -81,7 +82,6 @@ class SettingsActivity : SimpleActivity() {
         setupOptionsMenu()
 
 //        setupEdgeToEdge(padBottomSystem = listOf(settingsNestedScrollview))
-        setupMaterialScrollListener(binding.settingsNestedScrollview, binding.settingsAppbar)
 
         val iapList: ArrayList<String> = arrayListOf(productIdX1, productIdX2, productIdX3)
         val subList: ArrayList<String> =
@@ -108,6 +108,8 @@ class SettingsActivity : SimpleActivity() {
     override fun onResume() {
         super.onResume()
         setupTopAppBar(binding.settingsAppbar, NavigationIcon.Arrow)
+        binding.settingsAppbar.setBackgroundColor(Color.TRANSPARENT)
+        binding.settingsToolbar.setBackgroundColor(Color.TRANSPARENT)
 
         setupPurchaseThankYou()
 
@@ -204,8 +206,6 @@ class SettingsActivity : SimpleActivity() {
         binding.apply {
             val properTextColor = getProperTextColor()
             val properPrimaryColor = getProperPrimaryColor()
-            val surfaceColor = getSurfaceColor()
-
             arrayOf(
                 settingsAppearanceLabel,
                 settingsGeneralLabel,
@@ -236,7 +236,8 @@ class SettingsActivity : SimpleActivity() {
                 settingsBackupsHolder,
                 settingsOtherHolder
             ).forEach {
-                it.setCardBackgroundColor(surfaceColor)
+                it.setCardBackgroundColor(Color.TRANSPARENT)
+                it.setBackgroundResource(R.drawable.bg_glass_card)
             }
 
             arrayOf(

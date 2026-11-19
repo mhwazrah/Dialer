@@ -5,7 +5,9 @@
     android:id="@+id/itemContactSwipe"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_clickable"
+    android:layout_marginHorizontal="@dimen/activity_margin"
+    android:layout_marginVertical="@dimen/tiny_margin"
+    android:background="@android:color/transparent"
     android:clickable="true"
     android:focusable="true"
     android:foreground="@drawable/selector">
@@ -52,7 +54,7 @@
         android:id="@+id/item_contact_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/theme_black_background_color">
+        android:background="@drawable/bg_glass_card">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/itemContactFrameSelect"
@@ -61,7 +63,7 @@
             android:minHeight="@dimen/min_row_height"
             android:paddingStart="@dimen/activity_margin"
             android:paddingTop="@dimen/medium_margin"
-            android:background="@color/theme_black_background_color">
+            android:background="@android:color/transparent">
 
             <ImageView
                 android:id="@+id/item_contact_image"

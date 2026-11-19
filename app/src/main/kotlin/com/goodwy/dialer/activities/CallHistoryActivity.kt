@@ -211,34 +211,9 @@ class CallHistoryActivity : SimpleActivity() {
             callHistoryNumber.text = formatterUnicodeWrap(phoneNumber)
             callHistoryNumber.setTextColor(properPrimaryColor)
 
-            if (isLightTheme() && !isDynamicTheme()) {
-                val colorToWhite = getSurfaceColor()
-                supportActionBar?.setBackgroundDrawable(colorToWhite.toDrawable())
-                window.decorView.setBackgroundColor(colorToWhite)
-                window.statusBarColor = colorToWhite
-                //window.navigationBarColor = colorToWhite
-                contactActionsHolder.setBackgroundColor(colorToWhite)
-                collapsingToolbar.setBackgroundColor(colorToWhite)
-            } else {
-                val properBackgroundColor = getProperBackgroundColor()
-                window.decorView.setBackgroundColor(properBackgroundColor)
-                contactActionsHolder.setBackgroundColor(properBackgroundColor)
-                collapsingToolbar.setBackgroundColor(properBackgroundColor)
-            }
-
-            arrayOf(
-                oneButton, twoButton, threeButton, fourButton,
-                callHistoryPlaceholderContainer, callHistoryList,
-                callHistoryNumberContainer,
-                contactMessengersActionsHolder,
-                contactEmailsHolder,
-                contactEventsHolder,
-                callerNotesHolder,
-                defaultSimButtonContainer,
-                blockButton
-            ).forEach {
-                it.background.setTint(buttonBg)
-            }
+            supportActionBar?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+            contactActionsHolder.setBackgroundColor(Color.TRANSPARENT)
+            collapsingToolbar.setBackgroundColor(Color.TRANSPARENT)
 
             if (isNumberBlocked(currentRecentCall!!.phoneNumber, getBlockedNumbers())) {
                 blockButton.text = getString(R.string.unblock_number)
@@ -379,7 +354,6 @@ class CallHistoryActivity : SimpleActivity() {
     private fun getStarDrawable(on: Boolean) = AppCompatResources.getDrawable(this, if (on) R.drawable.ic_star_vector else R.drawable.ic_star_outline_vector)
 
     private fun updateBackgroundHistory() {
-        binding.callHistoryList.background.setTint(buttonBg)
     }
 
     private fun refreshCallLog(load: Boolean, loadAll: Boolean = false, callback: (() -> Unit)? = null) {

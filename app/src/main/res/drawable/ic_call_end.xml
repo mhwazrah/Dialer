@@ -2,7 +2,7 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/ripple_foreground">
     <item android:id="@+id/shortcut_dialpad_background">
         <shape android:shape="oval">
-            <solid android:color="@color/red_call"/>
+            <solid android:color="#B3EB5545"/>
         </shape>
     </item>
     <item

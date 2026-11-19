@@ -80,6 +80,8 @@ class CallActivity : SimpleActivity() {
             private set
     }
 
+    override val usesLiquidBackdrop = false
+
     private val binding by viewBinding(ActivityCallBinding::inflate)
 
     private var isMicrophoneOff = false

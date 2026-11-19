@@ -45,7 +45,7 @@
                 android:id="@+id/styleHolder"
                 style="@style/SettingsSectionHolder"
                 android:layout_marginTop="@dimen/activity_margin"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <RelativeLayout
@@ -78,7 +78,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/dialpadSettingsCardHolder"
                 style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -416,7 +416,7 @@
                 android:id="@+id/dialpadSizeCardHolder"
                 style="@style/SettingsSectionHolder"
                 android:layout_marginBottom="@dimen/secondary_fab_bottom_margin"
-                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
 
                 <LinearLayout

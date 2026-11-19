@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen backdrop the glass panels refract (dark theme): #001E3C base with soft colour fields. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#FF00122A"
+                android:startColor="#FF0A3560"
+                android:centerColor="#FF001E3C" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.15"
+                android:centerY="0.12"
+                android:endColor="#000A84FF"
+                android:gradientRadius="70%p"
+                android:startColor="#660A84FF"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.9"
+                android:centerY="0.45"
+                android:endColor="#0030D5C8"
+                android:gradientRadius="60%p"
+                android:startColor="#4D30D5C8"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.25"
+                android:centerY="0.9"
+                android:endColor="#005E5CE6"
+                android:gradientRadius="65%p"
+                android:startColor="#665E5CE6"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>

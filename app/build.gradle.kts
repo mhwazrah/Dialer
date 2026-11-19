@@ -176,6 +176,7 @@ dependencies {
     implementation(libs.rx.animation)
     implementation(libs.rx.java)
     implementation(libs.swipe.action)
+    implementation(libs.liquid.glass)
     //timer
     implementation(libs.bundles.lifecycle)
     ksp(libs.androidx.room.compiler)

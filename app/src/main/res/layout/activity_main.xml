@@ -6,18 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.goodwy.commons.views.MySearchMenu
-        android:id="@+id/mainMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainHolder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:scrollbars="none"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:scrollbars="none">
 
         <RelativeLayout
             android:id="@+id/mainTopTabsContainer"
@@ -70,52 +64,94 @@
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/mainTabsHolder"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mainTopTabsContainer"/>
 
-        <com.goodwy.commons.views.MyFloatingActionButton
-            android:id="@+id/main_dialpad_button"
+        <com.goodwy.dialer.views.GlassPanel
+            android:id="@+id/mainDialpadGlass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/bigger_margin"
             android:layout_marginBottom="@dimen/activity_margin"
-            android:contentDescription="@string/dialpad"
-            android:elevation="@dimen/medium_margin"
-            android:padding="@dimen/activity_margin"
-            android:src="@drawable/ic_dialpad_vector"
-            app:backgroundTint="@color/color_primary"
-            app:layout_constraintBottom_toTopOf="@+id/mainTabsHolder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:rippleColor="@color/pressed_item_foreground"/>
+            app:layout_constraintBottom_toTopOf="@+id/mainTabsContainer"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <com.goodwy.commons.views.MyFloatingActionButton
-            android:id="@+id/mainCallButton"
+            <com.goodwy.commons.views.MyFloatingActionButton
+                android:id="@+id/main_dialpad_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/dialpad"
+                android:elevation="0dp"
+                android:padding="@dimen/activity_margin"
+                android:src="@drawable/ic_dialpad_vector"
+                app:backgroundTint="@color/color_primary"
+                app:elevation="0dp"
+                app:rippleColor="@color/pressed_item_foreground"/>
+        </com.goodwy.dialer.views.GlassPanel>
+
+        <com.goodwy.dialer.views.GlassPanel
+            android:id="@+id/mainCallGlass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/bigger_margin"
             android:layout_marginBottom="@dimen/activity_margin"
-            android:contentDescription="@string/dialpad"
-            android:elevation="@dimen/medium_margin"
-            android:padding="@dimen/activity_margin"
             android:scaleX="0.6"
             android:scaleY="0.6"
             android:alpha="0"
-            android:src="@drawable/ic_phone_vector"
-            app:backgroundTint="@color/color_primary"
-            app:layout_constraintBottom_toTopOf="@+id/main_dialpad_button"
+            app:layout_constraintBottom_toTopOf="@+id/mainDialpadGlass"
             app:layout_constraintEnd_toEndOf="parent"
-            app:rippleColor="@color/pressed_item_foreground"
-            tools:alpha="1"/>
+            tools:alpha="1">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/mainTabsHolder"
+            <com.goodwy.commons.views.MyFloatingActionButton
+                android:id="@+id/mainCallButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/dialpad"
+                android:elevation="0dp"
+                android:padding="@dimen/activity_margin"
+                android:src="@drawable/ic_phone_vector"
+                app:backgroundTint="@color/color_primary"
+                app:elevation="0dp"
+                app:rippleColor="@color/pressed_item_foreground"/>
+        </com.goodwy.dialer.views.GlassPanel>
+
+        <FrameLayout
+            android:id="@+id/mainTabsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:tabIndicator="@null"
-            app:tabMinWidth="150dp"
-            app:tabRippleColor="@null"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.goodwy.dialer.views.GlassPanel
+                android:id="@+id/mainTabsGlass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_margin"
+                android:layout_marginEnd="@dimen/activity_margin"
+                android:layout_marginBottom="@dimen/small_margin"
+                app:cornerRadius="@dimen/glass_bar_radius">
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/mainTabsHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:tabIndicator="@null"
+                    app:tabMinWidth="150dp"
+                    app:tabRippleColor="@null"/>
+            </com.goodwy.dialer.views.GlassPanel>
+        </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.goodwy.dialer.views.GlassPanel
+        android:id="@+id/mainMenuGlass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_margin"
+        android:layout_marginEnd="@dimen/activity_margin"
+        app:cornerRadius="@dimen/glass_bar_radius">
+
+        <com.goodwy.commons.views.MySearchMenu
+            android:id="@+id/mainMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </com.goodwy.dialer.views.GlassPanel>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
