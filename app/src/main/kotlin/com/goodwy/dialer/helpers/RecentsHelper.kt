@@ -37,6 +37,7 @@ class RecentsHelper(private val context: Context) {
         queryLimit: Int = QUERY_LIMIT,
         isDialpad: Boolean = false,
         updateCallsCache: Boolean = false,
+        useCachedNames: Boolean = false,
         callback: (List<RecentCall>) -> Unit,
     ) {
         if (!context.hasPermission(PERMISSION_READ_CALL_LOG)) {
@@ -44,62 +45,74 @@ class RecentsHelper(private val context: Context) {
             return
         }
 
-        val privateCursor = context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-        ContactsHelper(context).getContacts(getAll = true, showOnlyContactsWithNumbers = true) { contacts ->
-            ensureBackgroundThread {
-                val privateContacts = MyContactsContentProvider.getContacts(context, privateCursor)
-                if (privateContacts.isNotEmpty()) {
-                    contacts.addAll(privateContacts)
-                }
+        fun proceed(contacts: ArrayList<Contact>) {
+            this.queryLimit = queryLimit
+            //Do not use the current list if the recent ones have been changed in another activity.
+            //The cached-names pass deliberately does NOT consume the flag, so the follow-up full
+            //pass still starts from scratch and re-resolves every row against the contact book.
+            val needUpdateRecents = context.config.needUpdateRecents
+            val previousRecentsOrEmpty = if (needUpdateRecents) ArrayList() else previousRecents
+            if (needUpdateRecents && !isDialpad && !useCachedNames) context.config.needUpdateRecents = false
+            val recentCalls = if (previousRecentsOrEmpty.isNotEmpty()) {
+                val previousRecentCalls = previousRecentsOrEmpty
+                    .flatMap { it.groupedCalls ?: listOf(it) }
+                    .map { it.copy(groupedCalls = null) }
 
-                this.queryLimit = queryLimit
-                //Do not use the current list if the recent ones have been changed in another activity
-                val needUpdateRecents = context.config.needUpdateRecents
-                val previousRecentsOrEmpty = if (needUpdateRecents) ArrayList() else previousRecents
-                if (needUpdateRecents && !isDialpad) context.config.needUpdateRecents = false
-                val recentCalls = if (previousRecentsOrEmpty.isNotEmpty()) {
-                    val previousRecentCalls = previousRecentsOrEmpty
-                        .flatMap { it.groupedCalls ?: listOf(it) }
-                        .map { it.copy(groupedCalls = null) }
+                // We take into account the size of previous entries in the total limit
+                val remainingLimit = queryLimit - previousRecentCalls.size
 
-                    // We take into account the size of previous entries in the total limit
-                    val remainingLimit = queryLimit - previousRecentCalls.size
-
-                    if (remainingLimit <= 0) {
-                        // If there are already enough previous entries, we return them within the limit
-                        previousRecentCalls.take(queryLimit)
-                    } else {
-
-                        val newerLimit = (queryLimit * 0.3).toInt() // 30% limit on new entries
-                        val newerRecents = getRecents(
-                            contacts = contacts,
-                            selection = "${Calls.DATE} > ?",
-                            selectionParams = arrayOf("${previousRecentCalls.first().startTS}"),
-                            updateCallsCache = updateCallsCache,
-                            limit = newerLimit
-                        )
-
-                        val olderLimit = queryLimit - newerRecents.size // Remaining limit on old entries
-                        val olderRecents = getRecents(
-                            contacts = contacts,
-                            selection = "${Calls.DATE} < ?",
-                            selectionParams = arrayOf("${previousRecentCalls.last().startTS}"),
-                            updateCallsCache = updateCallsCache,
-                            limit = olderLimit
-                        )
-
-                        newerRecents + previousRecentCalls + olderRecents
-                    }
+                if (remainingLimit <= 0) {
+                    // If there are already enough previous entries, we return them within the limit
+                    previousRecentCalls.take(queryLimit)
                 } else {
-                    getRecents(contacts, updateCallsCache = updateCallsCache, limit = queryLimit)
-                }
 
-                callback(
-                    recentCalls
-                        .sortedByDescending { it.startTS }
-                        .distinctBy { it.id }
+                    val newerLimit = (queryLimit * 0.3).toInt() // 30% limit on new entries
+                    val newerRecents = getRecents(
+                        contacts = contacts,
+                        selection = "${Calls.DATE} > ?",
+                        selectionParams = arrayOf("${previousRecentCalls.first().startTS}"),
+                        updateCallsCache = updateCallsCache,
+                        limit = newerLimit
+                    )
+
+                    val olderLimit = queryLimit - newerRecents.size // Remaining limit on old entries
+                    val olderRecents = getRecents(
+                        contacts = contacts,
+                        selection = "${Calls.DATE} < ?",
+                        selectionParams = arrayOf("${previousRecentCalls.last().startTS}"),
+                        updateCallsCache = updateCallsCache,
+                        limit = olderLimit
+                    )
+
+                    newerRecents + previousRecentCalls + olderRecents
+                }
+            } else {
+                getRecents(contacts, updateCallsCache = updateCallsCache, limit = queryLimit)
+            }
+
+            callback(
+                recentCalls
+                    .sortedByDescending { it.startTS }
+                    .distinctBy { it.id }
 //                        .take(queryLimit)
-                )
+            )
+        }
+
+        if (useCachedNames) {
+            // Fast first paint: skip the full contact-book load and render from the call log's
+            // own cached names/photos, which the full pass keeps up to date. The follow-up full
+            // pass re-resolves everything against the real contact book.
+            ensureBackgroundThread { proceed(arrayListOf()) }
+        } else {
+            val privateCursor = context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
+            ContactsHelper(context).getContacts(getAll = true, showOnlyContactsWithNumbers = true) { contacts ->
+                ensureBackgroundThread {
+                    val privateContacts = MyContactsContentProvider.getContacts(context, privateCursor)
+                    if (privateContacts.isNotEmpty()) {
+                        contacts.addAll(privateContacts)
+                    }
+                    proceed(contacts)
+                }
             }
         }
     }
@@ -108,9 +121,11 @@ class RecentsHelper(private val context: Context) {
         previousRecents: List<RecentCall> = ArrayList(),
         queryLimit: Int = QUERY_LIMIT,
         isDialpad: Boolean = false,
+        updateCallsCache: Boolean = false,
+        useCachedNames: Boolean = false,
         callback: (List<RecentCall>) -> Unit,
     ) {
-        getRecentCalls(previousRecents, queryLimit, isDialpad) { recentCalls ->
+        getRecentCalls(previousRecents, queryLimit, isDialpad, updateCallsCache = updateCallsCache, useCachedNames = useCachedNames) { recentCalls ->
             callback(
                 groupSubsequentCalls(calls = recentCalls)
             )
@@ -166,7 +181,9 @@ class RecentsHelper(private val context: Context) {
         var previousStartTS = 0L
 //        val contactsNumbersMap = HashMap<String, String>()
         val contactPhotosMap = HashMap<String, String>()
-        val contactsMap = HashMap<String, Contact>()
+        // Caches misses (null) too, so a number with no matching contact — the common case for
+        // repeated unknown callers — doesn't rescan the whole contact list for every log row.
+        val contactsMap = HashMap<String, Contact?>()
 
         val accountIdToSimIDMap = HashMap<String, Int>()
         context.getAvailableSIMCardLabels().forEach {
@@ -242,11 +259,11 @@ class RecentsHelper(private val context: Context) {
 
                 var contact: Contact? = null
                 if (number != null) {
-                    if (contactsMap.containsKey(number)) {
-                        contact = contactsMap[number]!!
+                    contact = if (contactsMap.containsKey(number)) {
+                        contactsMap[number]
                     } else {
-                        contact = contacts.firstOrNull { it.doesContainPhoneNumber(number) } //contacts.firstOrNull { it.doesHavePhoneNumber(number) }
-                        if (contact != null) contactsMap[number] = contact
+                        contacts.firstOrNull { it.doesContainPhoneNumber(number) } //contacts.firstOrNull { it.doesHavePhoneNumber(number) }
+                            .also { contactsMap[number] = it }
                     }
                 }
 

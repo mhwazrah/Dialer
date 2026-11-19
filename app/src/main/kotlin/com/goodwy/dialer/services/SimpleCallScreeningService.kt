@@ -79,6 +79,9 @@ class SimpleCallScreeningService : CallScreeningService() {
 
         // setSkipCallLog() does not work on many versions of Android, so let's update the list after blocking the call
         // https://issuetracker.google.com/issues/130081372
-        if (isBlocked) EventBus.getDefault().post(Events.RefreshCallLog)
+        if (isBlocked) {
+            config.needUpdateRecents = true
+            EventBus.getDefault().post(Events.RefreshCallLog)
+        }
     }
 }
