@@ -30,6 +30,9 @@ Branch `feature/liquid-glass`: commits 57b5ce5 (redesign) + caf7e80 (test fixes)
 - Vertical slider (now unlocked): ring renders cleanly, drag-up answers — verified. Slider decline (drag left) verified.
 - Known/minor: FAB icon stays white on the dark-theme light-blue primary (commons re-tints it); MissedCallReceiver notification avatar still grey; in-call dialpad empty input bar; light theme not re-checked after dark-theme work; emulator ART/system_server crashes (ps16k image) — not app code.
 
+### Latest commits: 8757b2c (call screen/FAB polish), 7503d09 (missed-call avatar, in-call input card hidden until first digit) — version 1.0.13, working tree clean.
+Remaining: re-check LIGHT theme after the dark-theme work (emulator app theme is still Dark; switch via Settings > Customize appearance > App theme, then Save); FAB icon white on dark-theme light-blue primary (commons re-tints; minor); swap calls on a real device; optional: remove commons "Rate" prompt; push branch when user asks.
+
 ### PENDING (user asks, newest first)
 1. (done) page title
 2. (done) **Dialpad redesign like the user's reference** (dark screenshot): number display row with underline + backspace above the keypad, keys = wide pill buttons in 3 columns (≈ full-width pills, navy fill), round call button below — but with glass effect on each key and the call button, and the opaque keypad sheet rule. Applies to DialpadActivity default style (`else`/DIALPAD_ORIGINAL branch → dialpad_grid.xml via dialpadClearWrapper).
