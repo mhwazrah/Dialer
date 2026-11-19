@@ -79,4 +79,5 @@
     <string name="create_new_contact">Crea nuovo contatto</string>
     <string name="add_to_existing_contact">Aggiungi a contatto esistente</string>
     <string name="send_whatsapp">Invia WhatsApp</string>
+    <string name="dialpad_number_font_size">Dimensione carattere dei numeri</string>
 </resources>

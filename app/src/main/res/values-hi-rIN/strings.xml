@@ -85,4 +85,5 @@
     <string name="create_new_contact">नया संपर्क बनाएँ</string>
     <string name="add_to_existing_contact">मौजूदा संपर्क में जोड़ें</string>
     <string name="send_whatsapp">WhatsApp भेजें</string>
+    <string name="dialpad_number_font_size">संख्या फ़ॉन्ट आकार</string>
 </resources>

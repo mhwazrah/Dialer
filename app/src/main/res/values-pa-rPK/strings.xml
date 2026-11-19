@@ -12,4 +12,5 @@
     <string name="create_new_contact">نواں رابطہ بناؤ</string>
     <string name="add_to_existing_contact">موجودہ رابطے وچ شامل کرو</string>
     <string name="send_whatsapp">WhatsApp بھیجو</string>
+    <string name="dialpad_number_font_size">نمبر فونٹ سائز</string>
 </resources>

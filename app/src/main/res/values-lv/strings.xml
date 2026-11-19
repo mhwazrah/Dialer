@@ -18,4 +18,5 @@
     <string name="create_new_contact">Izveidot jaunu kontaktu</string>
     <string name="add_to_existing_contact">Pievienot esošam kontaktam</string>
     <string name="send_whatsapp">Sūtīt WhatsApp</string>
+    <string name="dialpad_number_font_size">Ciparu fonta lielums</string>
 </resources>

@@ -72,4 +72,5 @@
     <string name="create_new_contact">Ustvari nov stik</string>
     <string name="add_to_existing_contact">Dodaj k obstoječemu stiku</string>
     <string name="send_whatsapp">Pošlji WhatsApp</string>
+    <string name="dialpad_number_font_size">Velikost pisave številk</string>
 </resources>

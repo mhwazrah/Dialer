@@ -60,4 +60,5 @@
     <string name="create_new_contact">Стварыць новы кантакт</string>
     <string name="add_to_existing_contact">Дадаць у існуючы кантакт</string>
     <string name="send_whatsapp">Адправіць WhatsApp</string>
+    <string name="dialpad_number_font_size">Памер шрыфта лічбаў</string>
 </resources>

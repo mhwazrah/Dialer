@@ -80,4 +80,5 @@
     <string name="create_new_contact">Neuen Kontakt erstellen</string>
     <string name="add_to_existing_contact">Zu bestehendem Kontakt hinzufügen</string>
     <string name="send_whatsapp">WhatsApp senden</string>
+    <string name="dialpad_number_font_size">Schriftgröße der Ziffern</string>
 </resources>

@@ -80,4 +80,5 @@
     <string name="create_new_contact">建立新聯絡人</string>
     <string name="add_to_existing_contact">加入現有聯絡人</string>
     <string name="send_whatsapp">傳送 WhatsApp</string>
+    <string name="dialpad_number_font_size">數字字體大小</string>
 </resources>

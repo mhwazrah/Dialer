@@ -77,4 +77,5 @@
     <string name="create_new_contact">Új névjegy létrehozása</string>
     <string name="add_to_existing_contact">Hozzáadás meglévő névjegyhez</string>
     <string name="send_whatsapp">WhatsApp küldése</string>
+    <string name="dialpad_number_font_size">Számok betűmérete</string>
 </resources>

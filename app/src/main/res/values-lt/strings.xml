@@ -57,4 +57,5 @@
     <string name="create_new_contact">Kurti naują kontaktą</string>
     <string name="add_to_existing_contact">Pridėti prie esamo kontakto</string>
     <string name="send_whatsapp">Siųsti WhatsApp</string>
+    <string name="dialpad_number_font_size">Skaičių šrifto dydis</string>
 </resources>

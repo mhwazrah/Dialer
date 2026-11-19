@@ -80,4 +80,5 @@
     <string name="create_new_contact">Loo uus kontakt</string>
     <string name="add_to_existing_contact">Lisa olemasolevale kontaktile</string>
     <string name="send_whatsapp">Saada WhatsApp</string>
+    <string name="dialpad_number_font_size">Numbrite fondi suurus</string>
 </resources>

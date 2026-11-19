@@ -80,4 +80,5 @@
     <string name="create_new_contact">Yeni kişi oluştur</string>
     <string name="add_to_existing_contact">Mevcut kişiye ekle</string>
     <string name="send_whatsapp">WhatsApp gönder</string>
+    <string name="dialpad_number_font_size">Rakam yazı tipi boyutu</string>
 </resources>

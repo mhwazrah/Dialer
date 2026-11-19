@@ -8,4 +8,5 @@
     <string name="create_new_contact">Yeni kontakt yarat</string>
     <string name="add_to_existing_contact">Mövcud kontakta əlavə et</string>
     <string name="send_whatsapp">WhatsApp göndər</string>
+    <string name="dialpad_number_font_size">Rəqəm şrift ölçüsü</string>
 </resources>

@@ -98,4 +98,6 @@
     <!-- Add to contact -->
     <string name="create_new_contact">Create new contact</string>
     <string name="add_to_existing_contact">Add to existing contact</string>
+    <!-- Dialpad settings -->
+    <string name="dialpad_number_font_size">Number font size</string>
 </resources>

@@ -185,6 +185,7 @@ class DialpadActivity : SimpleActivity() {
         speedDialValues = config.getSpeedDialValues()
         initStyle()
         updateDialpadSize()
+        updateDialpadNumberFontSize()
         if (config.dialpadStyle == DIALPAD_GRID || config.dialpadStyle == DIALPAD_ORIGINAL) updateCallButtonSize()
         setupOptionsMenu()
         refreshMenuItems()
@@ -907,6 +908,12 @@ class DialpadActivity : SimpleActivity() {
         DIALPAD_IOS -> binding.dialpadRoundWrapper.root
         DIALPAD_CONCEPT -> binding.dialpadRectWrapper.root
         else -> binding.dialpadClearWrapper.root
+    }
+
+    private fun updateDialpadNumberFontSize() {
+        val basePx = resources.getDimension(R.dimen.dialpad_text_size)
+        val scaled = basePx * (config.dialpadNumberFontSize / 100f)
+        applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, scaled)
     }
 
     private fun updateDialpadSize() {
