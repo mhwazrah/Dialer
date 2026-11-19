@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Додај у постојећи контакт</string>
     <string name="send_whatsapp">Пошаљи WhatsApp</string>
     <string name="dialpad_number_font_size">Величина фонта бројева</string>
+    <string name="hang_up">Прекини позив</string>
 </resources>

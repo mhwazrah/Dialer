@@ -4,4 +4,5 @@
     <string name="add_to_existing_contact">ਮੌਜੂਦਾ ਸੰਪਰਕ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ</string>
     <string name="send_whatsapp">WhatsApp ਭੇਜੋ</string>
     <string name="dialpad_number_font_size">ਨੰਬਰ ਫੌਂਟ ਆਕਾਰ</string>
+    <string name="hang_up">ਕਾਲ ਖਤਮ ਕਰੋ</string>
 </resources>

@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Додати до наявного контакту</string>
     <string name="send_whatsapp">Надіслати WhatsApp</string>
     <string name="dialpad_number_font_size">Розмір шрифту цифр</string>
+    <string name="hang_up">Завершити виклик</string>
 </resources>

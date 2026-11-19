@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">הוספה לאיש קשר קיים</string>
     <string name="send_whatsapp">שליחת WhatsApp</string>
     <string name="dialpad_number_font_size">גודל גופן הספרות</string>
+    <string name="hang_up">ניתוק שיחה</string>
 </resources>

@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Afegeix a un contacte existent</string>
     <string name="send_whatsapp">Envia WhatsApp</string>
     <string name="dialpad_number_font_size">Mida de la lletra dels números</string>
+    <string name="hang_up">Penja</string>
 </resources>

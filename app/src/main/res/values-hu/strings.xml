@@ -78,4 +78,5 @@
     <string name="add_to_existing_contact">Hozzáadás meglévő névjegyhez</string>
     <string name="send_whatsapp">WhatsApp küldése</string>
     <string name="dialpad_number_font_size">Számok betűmérete</string>
+    <string name="hang_up">Hívás bontása</string>
 </resources>

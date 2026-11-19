@@ -88,4 +88,5 @@
     <string name="add_to_existing_contact">Føj til eksisterende kontakt</string>
     <string name="send_whatsapp">Send WhatsApp</string>
     <string name="dialpad_number_font_size">Skriftstørrelse for tal</string>
+    <string name="hang_up">Læg på</string>
 </resources>

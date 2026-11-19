@@ -59,4 +59,5 @@
     <string name="add_to_existing_contact">നിലവിലുള്ള കോൺടാക്റ്റിലേക്ക് ചേർക്കുക</string>
     <string name="send_whatsapp">WhatsApp അയയ്ക്കുക</string>
     <string name="dialpad_number_font_size">നമ്പർ ഫോണ്ട് വലുപ്പം</string>
+    <string name="hang_up">കോൾ അവസാനിപ്പിക്കുക</string>
 </resources>

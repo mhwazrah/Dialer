@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Aan bestaand contact toevoegen</string>
     <string name="send_whatsapp">WhatsApp versturen</string>
     <string name="dialpad_number_font_size">Lettergrootte van cijfers</string>
+    <string name="hang_up">Ophangen</string>
 </resources>

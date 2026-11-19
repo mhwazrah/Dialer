@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Aldoni al ekzistanta kontakto</string>
     <string name="send_whatsapp">Sendi WhatsApp</string>
     <string name="dialpad_number_font_size">Tipargrandeco de ciferoj</string>
+    <string name="hang_up">Fini vokon</string>
 </resources>

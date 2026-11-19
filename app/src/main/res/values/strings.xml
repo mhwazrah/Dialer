@@ -100,4 +100,6 @@
     <string name="add_to_existing_contact">Add to existing contact</string>
     <!-- Dialpad settings -->
     <string name="dialpad_number_font_size">Number font size</string>
+    <!-- Ongoing call notification -->
+    <string name="hang_up">Hang up</string>
 </resources>

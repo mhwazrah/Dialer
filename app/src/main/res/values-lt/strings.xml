@@ -58,4 +58,5 @@
     <string name="add_to_existing_contact">Pridėti prie esamo kontakto</string>
     <string name="send_whatsapp">Siųsti WhatsApp</string>
     <string name="dialpad_number_font_size">Skaičių šrifto dydis</string>
+    <string name="hang_up">Padėti ragelį</string>
 </resources>

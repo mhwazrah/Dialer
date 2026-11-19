@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">既存の連絡先に追加</string>
     <string name="send_whatsapp">WhatsApp を送信</string>
     <string name="dialpad_number_font_size">数字のフォントサイズ</string>
+    <string name="hang_up">通話を終了</string>
 </resources>

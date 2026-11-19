@@ -81,4 +81,5 @@
     <string name="add_to_existing_contact">Thêm vào liên hệ hiện có</string>
     <string name="send_whatsapp">Gửi WhatsApp</string>
     <string name="dialpad_number_font_size">Cỡ chữ của số</string>
+    <string name="hang_up">Gác máy</string>
 </resources>

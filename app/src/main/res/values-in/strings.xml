@@ -78,4 +78,5 @@
     <string name="add_to_existing_contact">Tambahkan ke kontak yang ada</string>
     <string name="send_whatsapp">Kirim WhatsApp</string>
     <string name="dialpad_number_font_size">Ukuran font angka</string>
+    <string name="hang_up">Akhiri panggilan</string>
 </resources>

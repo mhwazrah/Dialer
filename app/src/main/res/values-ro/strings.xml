@@ -73,4 +73,5 @@
     <string name="add_to_existing_contact">Adaugă la un contact existent</string>
     <string name="send_whatsapp">Trimite WhatsApp</string>
     <string name="dialpad_number_font_size">Dimensiunea fontului cifrelor</string>
+    <string name="hang_up">Închide</string>
 </resources>

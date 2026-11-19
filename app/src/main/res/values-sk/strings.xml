@@ -78,4 +78,5 @@
     <string name="add_to_existing_contact">Pridať k existujúcemu kontaktu</string>
     <string name="send_whatsapp">Odoslať WhatsApp</string>
     <string name="dialpad_number_font_size">Veľkosť písma číslic</string>
+    <string name="hang_up">Zložiť</string>
 </resources>
