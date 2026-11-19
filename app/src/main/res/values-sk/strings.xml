@@ -76,4 +76,5 @@
     <string name="faq_3_text">Fossify Phone zobrazuje iba tie kontakty, ktoré majú pridelené telefónne číslo. Kontakty bez telefónneho čísla sa nezobrazia.</string>
     <string name="create_new_contact">Vytvoriť nový kontakt</string>
     <string name="add_to_existing_contact">Pridať k existujúcemu kontaktu</string>
+    <string name="send_whatsapp">Odoslať WhatsApp</string>
 </resources>

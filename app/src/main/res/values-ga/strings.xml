@@ -79,4 +79,5 @@
     <string name="calling_accounts">Cuntais ghlaonna</string>
     <string name="create_new_contact">Cruthaigh teagmháil nua</string>
     <string name="add_to_existing_contact">Cuir le teagmháil atá ann</string>
+    <string name="send_whatsapp">Seol WhatsApp</string>
 </resources>

@@ -79,4 +79,5 @@
     <string name="faq_3_text">Fossify Phone 只會顯示有電話號碼的聯絡人。沒有電話號碼的聯絡人不會顯示在應用程式中。</string>
     <string name="create_new_contact">建立新聯絡人</string>
     <string name="add_to_existing_contact">加入現有聯絡人</string>
+    <string name="send_whatsapp">傳送 WhatsApp</string>
 </resources>

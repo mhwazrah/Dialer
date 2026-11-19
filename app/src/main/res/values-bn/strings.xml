@@ -2,4 +2,5 @@
 <resources>
     <string name="create_new_contact">নতুন পরিচিতি তৈরি করুন</string>
     <string name="add_to_existing_contact">বিদ্যমান পরিচিতিতে যোগ করুন</string>
+    <string name="send_whatsapp">WhatsApp পাঠান</string>
 </resources>

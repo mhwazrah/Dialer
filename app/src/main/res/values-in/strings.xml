@@ -76,4 +76,5 @@
     <string name="faq_3_title">Kenapa beberapa kontak saya hilang dari aplikasi?</string>
     <string name="create_new_contact">Buat kontak baru</string>
     <string name="add_to_existing_contact">Tambahkan ke kontak yang ada</string>
+    <string name="send_whatsapp">Kirim WhatsApp</string>
 </resources>

@@ -56,4 +56,5 @@
     <string name="show_incoming_calls_full_screen">Visada rodykite įeinančius skambučius per visą ekraną</string>
     <string name="create_new_contact">Kurti naują kontaktą</string>
     <string name="add_to_existing_contact">Pridėti prie esamo kontakto</string>
+    <string name="send_whatsapp">Siųsti WhatsApp</string>
 </resources>

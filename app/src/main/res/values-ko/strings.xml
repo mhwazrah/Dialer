@@ -71,4 +71,5 @@
     <string name="asterisk">별표</string>
     <string name="create_new_contact">새 연락처 만들기</string>
     <string name="add_to_existing_contact">기존 연락처에 추가</string>
+    <string name="send_whatsapp">WhatsApp 보내기</string>
 </resources>

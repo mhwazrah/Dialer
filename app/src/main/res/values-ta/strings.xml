@@ -71,4 +71,5 @@
     <string name="call_split">அழைப்புகளை பிரித்தெடுக்கவும்</string>
     <string name="create_new_contact">புதிய தொடர்பை உருவாக்கு</string>
     <string name="add_to_existing_contact">ஏற்கனவே உள்ள தொடர்பில் சேர்</string>
+    <string name="send_whatsapp">WhatsApp அனுப்பு</string>
 </resources>

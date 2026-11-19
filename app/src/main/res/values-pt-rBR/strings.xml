@@ -79,4 +79,5 @@
     <string name="calling_accounts">Contas de chamada</string>
     <string name="create_new_contact">Criar novo contato</string>
     <string name="add_to_existing_contact">Adicionar a contato existente</string>
+    <string name="send_whatsapp">Enviar WhatsApp</string>
 </resources>

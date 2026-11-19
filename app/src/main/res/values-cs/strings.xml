@@ -79,4 +79,5 @@
     <string name="calling_accounts">Účty volání</string>
     <string name="create_new_contact">Vytvořit nový kontakt</string>
     <string name="add_to_existing_contact">Přidat k existujícímu kontaktu</string>
+    <string name="send_whatsapp">Odeslat WhatsApp</string>
 </resources>

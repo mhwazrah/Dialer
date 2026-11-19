@@ -79,4 +79,5 @@
     <string name="calling_accounts">חשבונות שיחות</string>
     <string name="create_new_contact">יצירת איש קשר חדש</string>
     <string name="add_to_existing_contact">הוספה לאיש קשר קיים</string>
+    <string name="send_whatsapp">שליחת WhatsApp</string>
 </resources>

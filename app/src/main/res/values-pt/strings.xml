@@ -79,4 +79,5 @@
     <string name="faq_2_text">Devido a restrições do sistema, chamadas de emergência só podem ser feitas através marcador padrão do seu dispositivo ou da aplicação do telefone. Para garantir que as chamadas de emergência funcionam corretamente, necessita de manter a aplicação do dispositivo instalada e ativa.</string>
     <string name="create_new_contact">Criar novo contacto</string>
     <string name="add_to_existing_contact">Adicionar a contacto existente</string>
+    <string name="send_whatsapp">Enviar WhatsApp</string>
 </resources>

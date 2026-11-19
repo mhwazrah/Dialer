@@ -2,4 +2,5 @@
 <resources>
     <string name="create_new_contact">Creu cyswllt newydd</string>
     <string name="add_to_existing_contact">Ychwanegu at gyswllt presennol</string>
+    <string name="send_whatsapp">Anfon WhatsApp</string>
 </resources>

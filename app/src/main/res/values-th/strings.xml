@@ -79,4 +79,5 @@
     <string name="faq_3_text">Fossify Phone จะแสดงเฉพาะรายชื่อติดต่อที่มีหมายเลขโทรศัพท์ที่เชื่อมโยงอยู่เท่านั้น รายชื่อติดต่อที่ไม่มีหมายเลขโทรศัพท์จะไม่แสดงในแอป</string>
     <string name="create_new_contact">สร้างผู้ติดต่อใหม่</string>
     <string name="add_to_existing_contact">เพิ่มไปยังผู้ติดต่อที่มีอยู่</string>
+    <string name="send_whatsapp">ส่ง WhatsApp</string>
 </resources>

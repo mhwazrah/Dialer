@@ -79,4 +79,5 @@
     <string name="faq_3_text">Fossify Phone só mostra os contactos que teñen un número de teléfono asociado a eles. Os contactos sen número de teléfono non se mostran.</string>
     <string name="create_new_contact">Crear un contacto novo</string>
     <string name="add_to_existing_contact">Engadir a un contacto existente</string>
+    <string name="send_whatsapp">Enviar WhatsApp</string>
 </resources>

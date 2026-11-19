@@ -79,4 +79,5 @@
     <string name="calling_accounts">Deien kontuak</string>
     <string name="create_new_contact">Sortu kontaktu berria</string>
     <string name="add_to_existing_contact">Gehitu lehendik dagoen kontaktuari</string>
+    <string name="send_whatsapp">Bidali WhatsApp</string>
 </resources>

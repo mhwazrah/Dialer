@@ -78,4 +78,5 @@
     <string name="call_notification_channel_high_priority">Stato della chiamata (priorità elevata)</string>
     <string name="create_new_contact">Crea nuovo contatto</string>
     <string name="add_to_existing_contact">Aggiungi a contatto esistente</string>
+    <string name="send_whatsapp">Invia WhatsApp</string>
 </resources>
