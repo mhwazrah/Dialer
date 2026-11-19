@@ -1,5 +1,6 @@
 package com.goodwy.dialer.activities
 
+import android.view.View
 import com.goodwy.commons.activities.BaseSimpleActivity
 import com.goodwy.dialer.R
 import com.goodwy.dialer.extensions.applyLiquidBackdrop
@@ -11,8 +12,10 @@ open class SimpleActivity : BaseSimpleActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Runs after commons paints the theme background colour, so the backdrop wins.
-        if (usesLiquidBackdrop) window.decorView.applyLiquidBackdrop()
+        // Runs after commons paints the theme background colour, so the backdrop wins. It goes on
+        // the content view, not the window: glass panels capture views, and a window background
+        // is never part of that capture (the glass would render dark).
+        if (usesLiquidBackdrop) findViewById<View>(android.R.id.content).applyLiquidBackdrop()
     }
 
     override fun getAppIconIDs() = arrayListOf(

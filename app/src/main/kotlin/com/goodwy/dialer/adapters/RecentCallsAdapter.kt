@@ -1,5 +1,7 @@
 package com.goodwy.dialer.adapters
 
+import com.goodwy.dialer.extensions.showSwipeActionsOnlyWhileSwiping
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -1128,6 +1130,7 @@ class RecentCallsAdapter(
 
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Left, swipeLeftAction != SWIPE_ACTION_NONE)
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Right, swipeRightAction != SWIPE_ACTION_NONE)
+                itemRecentsHolder.showSwipeActionsOnlyWhileSwiping(itemRecentsFrame, swipeLeftIconHolder, swipeRightIconHolder)
 
                 val halfScreenWidth = activity.resources.displayMetrics.widthPixels / activity.config.swipeToActionWidth
                 val swipeWidth = activity.resources.getDimension(com.goodwy.commons.R.dimen.swipe_width)

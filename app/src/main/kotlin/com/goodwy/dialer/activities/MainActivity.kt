@@ -826,6 +826,8 @@ class MainActivity : SimpleActivity() {
             if (view.background is ColorDrawable) view.background = null
             if (view is ViewGroup) view.children.forEach(::clear)
         }
+        // The menu is an AppBarLayout: its own surface is a MaterialShapeDrawable, not a colour.
+        if (binding.mainMenu.background != null) binding.mainMenu.background = null
         clear(binding.mainMenu)
     }
 

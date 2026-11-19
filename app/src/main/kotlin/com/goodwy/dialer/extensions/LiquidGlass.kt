@@ -3,6 +3,7 @@ package com.goodwy.dialer.extensions
 import android.content.Context
 import android.view.View
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import com.example.liquidglass.GlassMaterial
 import com.example.liquidglass.LiquidGlassView
 import com.goodwy.commons.extensions.getProperBackgroundColor
@@ -21,6 +22,21 @@ fun View.applyLiquidBackdrop() {
         if (context.isLiquidLightTheme()) R.drawable.bg_liquid_backdrop_light
         else R.drawable.bg_liquid_backdrop_dark
     )
+}
+
+/**
+ * Swipe rows draw their action backgrounds (call / delete) behind the row content. With a
+ * translucent glass row those backgrounds would always show through, so only draw them while the
+ * row is actually swiped. Safe to call on every bind: the listener is installed once per view.
+ */
+fun View.showSwipeActionsOnlyWhileSwiping(content: View, vararg actions: View) {
+    if (getTag(R.id.glass_swipe_listener) != null) return
+    setTag(R.id.glass_swipe_listener, true)
+    viewTreeObserver.addOnPreDrawListener {
+        val swiping = content.translationX != 0f
+        actions.forEach { if (it.isVisible != swiping) it.isVisible = swiping }
+        true
+    }
 }
 
 /**

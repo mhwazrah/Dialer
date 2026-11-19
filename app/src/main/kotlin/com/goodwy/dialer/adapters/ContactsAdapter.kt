@@ -560,6 +560,7 @@ class ContactsAdapter(
 
                 itemContactSwipe!!.setDirectionEnabled(SwipeDirection.Left, swipeLeftAction != SWIPE_ACTION_NONE)
                 itemContactSwipe!!.setDirectionEnabled(SwipeDirection.Right, swipeRightAction != SWIPE_ACTION_NONE)
+                itemContactSwipe!!.showSwipeActionsOnlyWhileSwiping(itemContactFrame!!, swipeLeftIconHolder!!, swipeRightIconHolder!!)
 
                 if (activity.config.swipeRipple) {
                     itemContactSwipe!!.setRippleColor(SwipeDirection.Left, swipeActionColor(swipeLeftAction))

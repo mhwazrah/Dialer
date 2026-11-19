@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static glass for round dialpad keys. Keys are many and small: a live refracting panel per key
+     re-captured the whole screen for each key every frame (seconds per frame), for no visible gain. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#2EFFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:angle="270"
+                android:centerY="0.4"
+                android:startColor="#33FFFFFF"
+                android:centerColor="#00FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <stroke
+                android:width="1dp"
+                android:color="#59FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

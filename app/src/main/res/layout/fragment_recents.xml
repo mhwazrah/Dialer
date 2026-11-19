@@ -64,8 +64,7 @@
                 android:layout_marginStart="@dimen/activity_margin"
                 android:layout_marginEnd="@dimen/activity_margin"
                 android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/small_margin"
-                app:backdropSourceId="@id/recents_list">
+                android:layout_marginBottom="@dimen/small_margin">
 
                 <HorizontalScrollView
                     android:id="@+id/recents_filters_holder"

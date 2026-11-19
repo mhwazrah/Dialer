@@ -24,10 +24,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -73,10 +74,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -120,10 +122,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -167,10 +170,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -214,10 +218,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -261,10 +266,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -308,10 +314,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -355,10 +362,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -402,10 +410,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <RelativeLayout
@@ -449,10 +458,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <ImageView
@@ -476,10 +486,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <com.goodwy.commons.views.MyTextView
@@ -516,10 +527,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.goodwy.dialer.views.GlassPanel
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:importantForAccessibility="no"/>
+            android:importantForAccessibility="no"
+                android:background="@drawable/bg_glass_key_round"/>
 
 
         <ImageView
