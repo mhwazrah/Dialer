@@ -141,6 +141,7 @@ const val SWIPE_ACTION_WHATSAPP = 8
 const val SWIPE_ACTION_OPEN = 9
 const val SWIPE_VIBRATION = "swipe_vibration"
 const val SWIPE_RIPPLE = "swipe_ripple"
+const val CONTACTS_FAVORITES_EXPANDED = "contacts_favorites_expanded"
 
 // Query limit recent
 const val QUERY_LIMIT_TINY_VALUE = 200

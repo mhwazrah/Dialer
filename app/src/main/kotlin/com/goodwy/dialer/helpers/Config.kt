@@ -368,5 +368,9 @@ class Config(context: Context) : BaseConfig(context) {
     var swipeRipple: Boolean
         get() = prefs.getBoolean(SWIPE_RIPPLE, false)
         set(swipeRipple) = prefs.edit { putBoolean(SWIPE_RIPPLE, swipeRipple) }
+
+    var contactsFavoritesExpanded: Boolean
+        get() = prefs.getBoolean(CONTACTS_FAVORITES_EXPANDED, true)
+        set(expanded) = prefs.edit { putBoolean(CONTACTS_FAVORITES_EXPANDED, expanded) }
 }
 

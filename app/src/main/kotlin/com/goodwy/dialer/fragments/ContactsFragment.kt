@@ -4,6 +4,9 @@ import android.graphics.Color
 import android.content.Context
 import android.content.res.Configuration
 import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import com.goodwy.commons.adapters.MyRecyclerViewAdapter
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
@@ -14,10 +17,12 @@ import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.adapters.ContactsAdapter
 import com.goodwy.dialer.databinding.FragmentContactsBinding
 import com.goodwy.dialer.databinding.FragmentLettersLayoutBinding
+import com.goodwy.dialer.databinding.ItemFavoriteStripBinding
 import com.goodwy.dialer.extensions.config
 import com.goodwy.dialer.extensions.launchCreateNewContactIntent
 import com.goodwy.dialer.extensions.launchSendSMSIntentRecommendation
 import com.goodwy.dialer.extensions.launchSendWhatsAppIntent
+import com.goodwy.dialer.extensions.loadBrandedContactImage
 import com.goodwy.dialer.extensions.setupWithContacts
 import com.goodwy.dialer.extensions.startCallWithConfirmationCheck
 import com.goodwy.dialer.extensions.startContactDetailsIntentRecommendation
@@ -32,12 +37,25 @@ import com.goodwy.dialer.interfaces.RefreshItemsListener
 class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPagerFragment<MyViewPagerFragment.LettersInnerBinding>(context, attributeSet),
     RefreshItemsListener {
     private lateinit var binding: FragmentLettersLayoutBinding
+    private lateinit var contactsBinding: FragmentContactsBinding
     private var allContacts = ArrayList<Contact>()
+    private val favoritesAdapter = FavoritesStripAdapter()
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        binding = FragmentLettersLayoutBinding.bind(FragmentContactsBinding.bind(this).contactsFragment)
+        contactsBinding = FragmentContactsBinding.bind(this)
+        binding = FragmentLettersLayoutBinding.bind(contactsBinding.contactsFragment)
         innerBinding = LettersInnerBinding(binding)
+        contactsBinding.contactsFavoritesList.adapter = favoritesAdapter
+        contactsBinding.contactsFavoritesTitle.setOnClickListener {
+            context.config.contactsFavoritesExpanded = !context.config.contactsFavoritesExpanded
+            applyFavoritesExpanded()
+        }
+        applyFavoritesExpanded()
+        // MainActivity pads the list by the strip's height; keep the strip glued to the first row.
+        binding.fragmentList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = syncFavoritesStrip()
+        })
     }
 
     override fun setupFragment() {
@@ -80,6 +98,9 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
             }
             fragmentPlaceholder.setTextColor(textColor)
             fragmentPlaceholder2.setTextColor(accentColor)
+            contactsBinding.contactsFavoritesTitle.setTextColor(accentColor)
+            applyFavoritesExpanded() // re-tints the arrow to the new title colour
+            favoritesAdapter.notifyDataSetChanged()
 
             letterFastscroller.textColor = textColor.getColorStateList()
             letterFastscroller.pressedTextColor = accentColor
@@ -112,6 +133,9 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
     private fun gotContacts(contacts: ArrayList<Contact>) {
         setupLetterFastScroller(contacts)
+        favoritesAdapter.items = context.sortFavoritesByCustomOrder(allContacts.filter { it.starred == 1 })
+        favoritesAdapter.notifyDataSetChanged()
+        showFavoritesStrip(true)
         if (contacts.isEmpty()) {
             binding.apply {
                 fragmentPlaceholder.beVisible()
@@ -192,7 +216,33 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         binding.letterFastscroller.setupWithContacts(binding.fragmentList, contacts)
     }
 
+    private fun showFavoritesStrip(show: Boolean) {
+        contactsBinding.contactsFavoritesHeader.beVisibleIf(show && favoritesAdapter.itemCount > 0)
+    }
+
+    private fun applyFavoritesExpanded() {
+        val expanded = context.config.contactsFavoritesExpanded
+        contactsBinding.contactsFavoritesList.beVisibleIf(expanded)
+        contactsBinding.contactsFavoritesTitle.apply {
+            val arrow = context.getDrawable(if (expanded) R.drawable.ic_chevron_up_vector else R.drawable.ic_chevron_down_vector)
+            arrow?.setTint(currentTextColor)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, arrow, null)
+        }
+    }
+
+    private fun syncFavoritesStrip() {
+        val list = binding.fragmentList
+        val header = contactsBinding.contactsFavoritesHeader
+        val first = list.getChildAt(0)
+        header.translationY = when {
+            first == null -> 0f
+            list.getChildAdapterPosition(first) == 0 -> (first.top - list.paddingTop).toFloat()
+            else -> -header.bottom.toFloat() // first row scrolled away: strip is off-screen too
+        }
+    }
+
     override fun onSearchClosed() {
+        showFavoritesStrip(true)
         binding.fragmentPlaceholder.beVisibleIf(allContacts.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(allContacts)
         setupLetterFastScroller(allContacts)
@@ -200,6 +250,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
     override fun onSearchQueryChanged(text: String) {
         val fixedText = text.trim().replace("\\s+".toRegex(), " ")
+        showFavoritesStrip(fixedText.isEmpty())
         val shouldNormalize = fixedText.normalizeString() == fixedText
         val filtered = allContacts.filter { contact ->
             getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
@@ -266,5 +317,28 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
     private fun actionOpen(contact: Contact) {
         activity?.startContactDetailsIntentRecommendation(contact)
+    }
+
+    private inner class FavoritesStripAdapter : RecyclerView.Adapter<FavoritesStripAdapter.Holder>() {
+        var items: List<Contact> = emptyList()
+
+        inner class Holder(val binding: ItemFavoriteStripBinding) : RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            Holder(ItemFavoriteStripBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+
+        override fun getItemCount() = items.size
+
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            val contact = items[position]
+            val name = contact.getNameToDisplay()
+            holder.binding.apply {
+                favoriteStripImage.loadBrandedContactImage(contact.photoUri, name)
+                favoriteStripName.text = name
+                favoriteStripName.setTextColor(context.getProperTextColor())
+                root.setOnClickListener { itemClickAction(context.config.onFavoriteClick, contact) }
+                root.setOnLongClickListener { actionOpen(contact); true }
+            }
+        }
     }
 }

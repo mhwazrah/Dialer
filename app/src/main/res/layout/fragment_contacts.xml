@@ -6,4 +6,42 @@
 
     <include layout="@layout/fragment_letters_layout" />
 
+    <!-- Favourites strip: sits above the list's first row and scrolls away with it (see ContactsFragment). -->
+    <LinearLayout
+        android:id="@+id/contacts_favorites_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.goodwy.commons.views.MyTextView
+            android:id="@+id/contacts_favorites_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/activity_margin"
+            android:paddingTop="@dimen/medium_margin"
+            android:paddingEnd="@dimen/activity_margin"
+            android:paddingBottom="@dimen/small_margin"
+            android:background="?attr/selectableItemBackground"
+            android:drawablePadding="@dimen/small_margin"
+            android:gravity="center_vertical"
+            android:text="@string/favorites_tab"
+            android:textSize="@dimen/bigger_text_size" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/contacts_favorites_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:overScrollMode="never"
+            android:paddingStart="@dimen/small_margin"
+            android:paddingEnd="@dimen/small_margin"
+            android:paddingBottom="@dimen/medium_margin"
+            android:scrollbars="none"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    </LinearLayout>
+
 </com.goodwy.dialer.fragments.ContactsFragment>

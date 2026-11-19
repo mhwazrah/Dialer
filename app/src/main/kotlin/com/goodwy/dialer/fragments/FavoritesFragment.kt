@@ -91,11 +91,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
             }
             val favorites = contacts.filter { it.starred == 1 } as ArrayList<Contact>
 
-            allContacts = if (activity!!.config.isCustomOrderSelected) {
-                sortByCustomOrder(favorites)
-            } else {
-                favorites
-            }
+            allContacts = activity!!.sortFavoritesByCustomOrder(favorites)
 
             activity?.runOnUiThread {
                 gotContacts(allContacts)
@@ -187,20 +183,6 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
         }
     }
 
-    private fun sortByCustomOrder(favorites: List<Contact>): ArrayList<Contact> {
-        val favoritesOrder = activity!!.config.favoritesContactsOrder
-
-        if (favoritesOrder.isEmpty()) {
-            return ArrayList(favorites)
-        }
-
-        val orderList = Converters().jsonToStringList(favoritesOrder)
-        val map = orderList.withIndex().associate { it.value to it.index }
-        val sorted = favorites.sortedBy { map[it.contactId.toString()] }
-
-        return ArrayList(sorted)
-    }
-
     private fun saveCustomOrderToPrefs(items: List<Contact>) {
         activity?.apply {
             val orderIds = items.map { it.contactId }
@@ -289,4 +271,14 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     private fun actionOpen(contact: Contact) {
         activity?.startContactDetailsIntentRecommendation(contact)
     }
+}
+
+/** Favourites in the user's custom order when one is selected (shared by the Favourites tab and the Contacts strip). */
+fun Context.sortFavoritesByCustomOrder(favorites: List<Contact>): ArrayList<Contact> {
+    val favoritesOrder = config.favoritesContactsOrder
+    if (!config.isCustomOrderSelected || favoritesOrder.isEmpty()) return ArrayList(favorites)
+
+    val orderList = Converters().jsonToStringList(favoritesOrder)
+    val map = orderList.withIndex().associate { it.value to it.index }
+    return ArrayList(favorites.sortedBy { map[it.contactId.toString()] })
 }

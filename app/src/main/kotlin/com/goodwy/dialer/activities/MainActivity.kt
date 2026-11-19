@@ -882,8 +882,17 @@ class MainActivity : SimpleActivity() {
             setTopMargin(filters, top)
             filters.height
         } ?: 0
+        val favoritesHeight = getContactsFragment()?.findViewById<View>(R.id.contacts_favorites_header)
+            ?.takeIf { it.isVisible }?.let { strip ->
+                setTopMargin(strip, top)
+                strip.height
+            } ?: 0
         getAllFragments().forEach { fragment ->
-            val extraTop = if (fragment is RecentsFragment) filtersHeight else 0
+            val extraTop = when (fragment) {
+                is RecentsFragment -> filtersHeight
+                is ContactsFragment -> favoritesHeight
+                else -> 0
+            }
             fragment?.myRecyclerView()?.updatePadding(top = top + extraTop, bottom = bottom)
             // Empty-state text (and the action below it) must clear the floating bars too.
             fragment?.findViewById<View>(
