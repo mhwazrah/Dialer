@@ -27,6 +27,10 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
+    <!-- Needed to read paired Bluetooth device names (e.g. "Car Audio") for the in-call
+         audio-route picker on Android 12+. Default-dialer apps get this auto-granted. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
     <uses-permission
         android:name="android.permission.USE_FINGERPRINT"
         tools:node="remove" />
