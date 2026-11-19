@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.goodwy.commons.adapters.MyRecyclerViewAdapter
@@ -40,6 +43,11 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     private lateinit var contactsBinding: FragmentContactsBinding
     private var allContacts = ArrayList<Contact>()
     private val favoritesAdapter = FavoritesStripAdapter()
+    private var searchQuery = ""
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private var downX = 0f
+    private var downY = 0f
+    private var forwardingToList = false
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -133,9 +141,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
     private fun gotContacts(contacts: ArrayList<Contact>) {
         setupLetterFastScroller(contacts)
-        favoritesAdapter.items = context.sortFavoritesByCustomOrder(allContacts.filter { it.starred == 1 })
-        favoritesAdapter.notifyDataSetChanged()
-        showFavoritesStrip(true)
+        updateFavoritesStrip()
         if (contacts.isEmpty()) {
             binding.apply {
                 fragmentPlaceholder.beVisible()
@@ -216,6 +222,13 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         binding.letterFastscroller.setupWithContacts(binding.fragmentList, contacts)
     }
 
+    /** Re-reads favourites (and their custom order) from the loaded contacts. */
+    fun updateFavoritesStrip() {
+        favoritesAdapter.items = context.sortFavoritesByCustomOrder(allContacts.filter { it.starred == 1 })
+        favoritesAdapter.notifyDataSetChanged()
+        showFavoritesStrip(searchQuery.isEmpty())
+    }
+
     private fun showFavoritesStrip(show: Boolean) {
         contactsBinding.contactsFavoritesHeader.beVisibleIf(show && favoritesAdapter.itemCount > 0)
     }
@@ -224,7 +237,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         val expanded = context.config.contactsFavoritesExpanded
         contactsBinding.contactsFavoritesList.beVisibleIf(expanded)
         contactsBinding.contactsFavoritesTitle.apply {
-            val arrow = context.getDrawable(if (expanded) R.drawable.ic_chevron_up_vector else R.drawable.ic_chevron_down_vector)
+            val arrow = context.getDrawable(if (expanded) R.drawable.ic_chevron_up_vector else R.drawable.ic_chevron_down_vector)?.mutate()
             arrow?.setTint(currentTextColor)
             setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, arrow, null)
         }
@@ -241,7 +254,50 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         }
     }
 
+    // The strip floats over the list rather than being one of its rows, so a vertical drag that starts on
+    // an avatar would otherwise go nowhere. Take it from the strip and hand it to the list.
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                downX = ev.x
+                downY = ev.y
+                forwardingToList = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val header = contactsBinding.contactsFavoritesHeader
+                val startedOnStrip = header.visibility == View.VISIBLE && downY >= header.top + header.translationY &&
+                    downY <= header.bottom + header.translationY
+                val dy = Math.abs(ev.y - downY)
+                if (startedOnStrip && dy > touchSlop && dy > Math.abs(ev.x - downX)) {
+                    forwardingToList = true
+                    forwardToList(MotionEvent.obtain(ev.downTime, ev.eventTime, MotionEvent.ACTION_DOWN, downX, downY, 0))
+                    return true
+                }
+            }
+        }
+        return super.onInterceptTouchEvent(ev)
+    }
+
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (!forwardingToList) return super.onTouchEvent(ev)
+        forwardToList(MotionEvent.obtain(ev))
+        if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) forwardingToList = false
+        return true
+    }
+
+    private fun forwardToList(event: MotionEvent) {
+        val list = binding.fragmentList
+        var view: View = list
+        while (view !== this) {
+            event.offsetLocation(-view.left.toFloat(), -view.top.toFloat())
+            view = view.parent as View
+        }
+        list.dispatchTouchEvent(event)
+        event.recycle()
+    }
+
     override fun onSearchClosed() {
+        searchQuery = ""
         showFavoritesStrip(true)
         binding.fragmentPlaceholder.beVisibleIf(allContacts.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(allContacts)
@@ -250,6 +306,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
     override fun onSearchQueryChanged(text: String) {
         val fixedText = text.trim().replace("\\s+".toRegex(), " ")
+        searchQuery = fixedText
         showFavoritesStrip(fixedText.isEmpty())
         val shouldNormalize = fixedText.normalizeString() == fixedText
         val filtered = allContacts.filter { contact ->

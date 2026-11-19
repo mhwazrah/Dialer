@@ -893,7 +893,13 @@ class MainActivity : SimpleActivity() {
                 is ContactsFragment -> favoritesHeight
                 else -> 0
             }
-            fragment?.myRecyclerView()?.updatePadding(top = top + extraTop, bottom = bottom)
+            fragment?.myRecyclerView()?.let { list ->
+                // A list at the top keeps its first row's old offset when the top padding grows (e.g. the
+                // favourites strip expands), so the row would slide under the strip: re-pin it to the top.
+                val repin = list.paddingTop != top + extraTop && !list.canScrollVertically(-1)
+                list.updatePadding(top = top + extraTop, bottom = bottom)
+                if (repin) list.scrollToPosition(0)
+            }
             // Empty-state text (and the action below it) must clear the floating bars too.
             fragment?.findViewById<View>(
                 if (fragment is RecentsFragment) R.id.recents_placeholder else R.id.fragment_placeholder

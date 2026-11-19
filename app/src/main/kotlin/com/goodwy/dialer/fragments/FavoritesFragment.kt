@@ -157,6 +157,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
                         saveCustomOrderToPrefs(items)
                         setupLetterFastScroller(items)
                         (activity as MainActivity).cacheFavorites(items)
+                        activity?.findViewById<ContactsFragment>(R.id.contacts_fragment)?.updateFavoritesStrip()
                     }
                 }
 
