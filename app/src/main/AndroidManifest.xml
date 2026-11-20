@@ -56,8 +56,8 @@
         <package android:name="dev.goodwy.messages" />
         <package android:name="dev.goodwy.contacts.debug" />
         <package android:name="dev.goodwy.contacts" />
-        <package android:name="com.goodwy.dialer.debug" />
-        <package android:name="com.goodwy.dialer" />
+        <package android:name="com.mhw.phone.debug" />
+        <package android:name="com.mhw.phone" />
         <package android:name="com.goodwy.contacts.debug" />
         <package android:name="com.goodwy.contacts" />
         <package android:name="com.goodwy.smsmessenger.debug" />
@@ -108,7 +108,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <data android:mimeType="vnd.android.cursor.dir/calls" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="com.goodwy.dialer.scheme" />
+                <data android:scheme="com.mhw.phone.scheme" />
             </intent-filter>
         </activity>
 

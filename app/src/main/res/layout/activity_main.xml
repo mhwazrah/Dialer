@@ -67,7 +67,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mainTopTabsContainer"/>
 
-        <com.goodwy.dialer.views.GlassPanel
+        <com.mhw.phone.views.GlassPanel
             android:id="@+id/mainDialpadGlass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -87,9 +87,9 @@
                 app:backgroundTint="@color/color_primary"
                 app:elevation="0dp"
                 app:rippleColor="@color/pressed_item_foreground"/>
-        </com.goodwy.dialer.views.GlassPanel>
+        </com.mhw.phone.views.GlassPanel>
 
-        <com.goodwy.dialer.views.GlassPanel
+        <com.mhw.phone.views.GlassPanel
             android:id="@+id/mainCallGlass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -113,7 +113,7 @@
                 app:backgroundTint="@color/color_primary"
                 app:elevation="0dp"
                 app:rippleColor="@color/pressed_item_foreground"/>
-        </com.goodwy.dialer.views.GlassPanel>
+        </com.mhw.phone.views.GlassPanel>
 
         <FrameLayout
             android:id="@+id/mainTabsContainer"
@@ -121,7 +121,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.goodwy.dialer.views.GlassPanel
+            <com.mhw.phone.views.GlassPanel
                 android:id="@+id/mainTabsGlass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -138,10 +138,10 @@
                     app:tabIndicator="@null"
                     app:tabMinWidth="150dp"
                     app:tabRippleColor="@null"/>
-            </com.goodwy.dialer.views.GlassPanel>
+            </com.mhw.phone.views.GlassPanel>
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <com.goodwy.dialer.views.GlassPanel
+    <com.mhw.phone.views.GlassPanel
         android:id="@+id/mainMenuGlass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -153,5 +153,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/main_menu_bottom_padding"/>
-    </com.goodwy.dialer.views.GlassPanel>
+    </com.mhw.phone.views.GlassPanel>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

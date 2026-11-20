@@ -1,0 +1,85 @@
+package com.mhw.phone.views
+
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.util.AttributeSet
+import android.view.View
+import com.example.liquidglass.LiquidGlassView
+import com.mhw.phone.extensions.applyLiquidGlass
+import com.mhw.phone.extensions.isLiquidLightTheme
+
+/**
+ * The app's glass panel. Rule: glass look, never see-through (see extensions/LiquidGlass.kt).
+ *
+ * - With `app:backdropSourceId` (the call screen, pointing at the call background) it is live
+ *   refracting glass: the backdrop there is a plain colour/photo, never readable content.
+ * - Otherwise it floats over scrolling lists, where refraction would only make rows legible
+ *   through it — so it draws a static frosted panel: near-opaque frost, top sheen, hairline rim.
+ *   Also used below Android 12, where the library has no GPU pipeline (150-600 ms per frame).
+ */
+class GlassPanel @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : LiquidGlassView(context, attrs, defStyleAttr) {
+    private val useStaticGlass: Boolean
+    private val squareTopCorners = attrs?.getAttributeBooleanValue(RES_AUTO, "squareTopCorners", false) ?: false
+
+    init {
+        val hasExplicitBackdrop = (attrs?.getAttributeResourceValue(RES_AUTO, "backdropSourceId", 0) ?: 0) != 0
+        useStaticGlass = !hasExplicitBackdrop || effectiveApiLevel < 31
+        if (useStaticGlass) {
+            // Nothing of the library's pipeline is drawn: switch every effect off instead of configuring it
+            enableDynamicBackground = false
+            enableBackdropBlur = false
+            enableChromaticAberration = false
+            enableChromaticDispersion = false
+            enableSensorHighlight = false
+            enableAdaptiveTint = false
+            enablePressEffect = false
+            collectFrameStats = false
+            background = staticGlassDrawable()
+        } else {
+            applyLiquidGlass(pressable = isClickable)
+        }
+    }
+
+    private fun staticGlassDrawable(): LayerDrawable {
+        val isLight = context.isLiquidLightTheme()
+        val r = cornerRadius // clamped by GradientDrawable to half the short side
+        val top = if (squareTopCorners) 0f else r
+        val radii = floatArrayOf(top, top, top, top, r, r, r, r)
+        val frost = GradientDrawable().apply {
+            cornerRadii = radii
+            // Fully opaque base: even 5% transparency left rows ghosting through (user rule).
+            setColor(if (isLight) 0xFFF7FAFD.toInt() else 0xFF001123.toInt())
+        }
+        val sheen = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(if (isLight) 0x66FFFFFF else 0x1FFFFFFF, 0x00FFFFFF, 0x00FFFFFF),
+        ).apply { cornerRadii = radii }
+        val rim = GradientDrawable().apply {
+            cornerRadii = radii
+            setColor(0)
+            setStroke(resources.displayMetrics.density.toInt().coerceAtLeast(1), if (isLight) 0x8CFFFFFF.toInt() else 0x33FFFFFF)
+        }
+        return LayerDrawable(arrayOf(frost, sheen, rim))
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        if (!useStaticGlass) super.onDraw(canvas)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow() // resolves app:backdropSourceId
+        if (!useStaticGlass && backdropSource == null) {
+            backdropSource = rootView.findViewById<View>(android.R.id.content)
+        }
+    }
+
+    private companion object {
+        const val RES_AUTO = "http://schemas.android.com/apk/res-auto"
+    }
+}
