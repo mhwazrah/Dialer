@@ -132,8 +132,8 @@ object ContactsRepository {
                 return SearchKeys(keys.toList(), displayNameDigits)
             }
 
-            private fun t9(value: String, language: String): String =
-                DialpadT9.convertLettersToNumbers(value.normalizeString().uppercase(), language)
+            // Same conversion as the dialpad highlight, so a match is always highlighted where it was found
+            private fun t9(value: String, language: String): String = DialpadT9.convertLettersToNumbers(value, language)
         }
     }
 

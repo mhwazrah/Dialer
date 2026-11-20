@@ -26,6 +26,8 @@ rxJava3 = "3.1.12"
 room = "2.8.5"
 swipeToActionLayout = "94ab9268eb"
 liquidGlass = "v2.0.11"
+#Test
+junit = "4.13.2"
 #build
 app-build-compileSDKVersion = "37"
 app-build-targetSDK = "36"
@@ -59,6 +61,8 @@ rx-animation = { module = "com.mikhaellopez:rxanimation", version.ref = "rxAnima
 rx-java = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxJava3" }
 swipe-action = { module = "com.github.Goodwy:SwipeActionView", version.ref = "swipeToActionLayout" }
 liquid-glass = { module = "com.github.QWEA0:liquidglass", version.ref = "liquidGlass" }
+#Test
+junit = { module = "junit:junit", version.ref = "junit" }
 [bundles]
 lifecycle = [
     "androidx-lifecycle-runtime",

@@ -1257,7 +1257,7 @@ class DialpadActivity : SimpleActivity() {
             if (generation != searchGeneration) return@execute
             val result = SearchResult(
                 contacts = if (searchContacts) filterContacts(text, language, source, recents) else null,
-                recents = if (searchRecents) filterRecents(text, recents) else null
+                recents = if (searchRecents) filterRecents(text, language, recents) else null
             )
             runOnUiThread {
                 if (generation == searchGeneration && !isDestroyed && !isFinishing) applySearchResult(text, source, result)
@@ -1302,19 +1302,25 @@ class DialpadActivity : SimpleActivity() {
         return callCounts
     }
 
-    private fun filterRecents(text: String, recents: List<RecentCall>): List<RecentCall> = recents
-        .filter {
-            it.name.contains(text, true) ||
-                it.doesContainPhoneNumber(text) ||
-                it.nickname.contains(text, true) ||
-                it.company.contains(text, true) ||
-                it.jobPosition.contains(text, true)
-        }
-        .sortedWith(
-            compareByDescending<RecentCall> { it.dayCode }
-                .thenByDescending { it.name.startsWith(text, true) }
-                .thenByDescending { it.startTS }
-        )
+    // Search thread only. Name, nickname and company match by their T9 digits, like the contact search.
+    private fun filterRecents(text: String, language: String, recents: List<RecentCall>): List<RecentCall> {
+        fun t9(value: String) = DialpadT9.convertLettersToNumbers(value, language).filter { it.isDigit() }
+        return recents
+            .map { it to t9(it.name) }
+            .filter { (call, nameDigits) ->
+                nameDigits.contains(text) ||
+                    call.doesContainPhoneNumber(text) ||
+                    t9(call.nickname).contains(text) ||
+                    t9(call.company).contains(text) ||
+                    call.jobPosition.contains(text, true)
+            }
+            .sortedWith(
+                compareByDescending<Pair<RecentCall, String>> { it.first.dayCode }
+                    .thenByDescending { it.second.startsWith(text) }
+                    .thenByDescending { it.first.startTS }
+            )
+            .map { it.first }
+    }
 
     private fun applySearchResult(text: String, source: ContactSource, result: SearchResult) {
         val filtered = result.contacts

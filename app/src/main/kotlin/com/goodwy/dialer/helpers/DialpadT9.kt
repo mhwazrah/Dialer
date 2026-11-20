@@ -1,52 +1,45 @@
 package com.goodwy.dialer.helpers
 
 import android.content.Context
-import android.telephony.PhoneNumberUtils
 import com.goodwy.dialer.R
 import com.google.gson.JsonParser
-
-private typealias CharMap = HashMap<Char, Int>
+import java.text.Normalizer
 
 /**
  * A helper class to map chars of various alphabets to numbers
  */
 object DialpadT9 {
 
-    private class T9Language {
-        val letters = Array(8) {""}
-        val charMap = CharMap()
-    }
-
-    private val languages = HashMap<String, T9Language>()
-
-    @Volatile
-    private var supportedSecondaryLanguages: List<String>? = null
+    private class T9Language(val letters: Array<String>, val charMap: Map<Char, Int>)
 
     /**
-     * Create a map for Latin (English) characters according to ITU E.161 and ISO/IEC 9995-8
+     * Immutable, published in one write. [fallback]: every char of every loaded language that sits on the same key
+     * in all of them, so names in another script still match whatever secondary language is chosen.
      */
-    private fun initLatinChars() {
-        val lang = T9Language()
-        val abc = 'A'..'Z'
-        val num = '0'..'9'
-        val abcNum = abc + num
-        for (c in abcNum) {
-            val number = PhoneNumberUtils.convertKeypadLettersToDigits(c.toString()).toInt()
-            if(number in 2..9) {
-                lang.letters[number - 2] += c.toString()
-                lang.charMap[c] = number
-            }
-        }
-
-        languages[LOCALE_EN] = lang
+    private class State(val languages: Map<String, T9Language>, val fallback: Map<Char, Int>, val initialized: Boolean) {
+        val latin = languages.getValue(LOCALE_EN).charMap
+        val secondaryLanguages = languages.keys.filter { it != LOCALE_EN }.sorted()
     }
 
-    @Volatile
-    var Initialized = false
-        private set
+    // ITU E.161 / ISO/IEC 9995-8
+    private val LATIN_LETTERS = arrayOf("ABC", "DEF", "GHI", "JKL", "MNO", "PQRS", "TUV", "WXYZ")
 
-    init {
-        initLatinChars()
+    // Letters keyed like the letter they stand in for: ß as S, and Persian/Urdu letters common in Arabic-script names
+    private val LETTER_ALIASES = mapOf(
+        'ß' to 'S',
+        'ک' to 'ك', 'گ' to 'ك', 'ی' to 'ي', 'ے' to 'ي', 'پ' to 'ب', 'چ' to 'ج',
+        'ژ' to 'ز', 'ڤ' to 'ف', 'ڨ' to 'ق', 'ٱ' to 'ا', 'ھ' to 'ه', 'ہ' to 'ه', 'ە' to 'ه'
+    )
+
+    @Volatile
+    private var state = State(mapOf(LOCALE_EN to language(LATIN_LETTERS)), emptyMap(), initialized = false)
+
+    private fun language(letters: Array<String>): T9Language {
+        val charMap = HashMap<Char, Int>()
+        letters.forEachIndexed { i, group ->
+            group.forEach { c -> if (!c.isWhitespace()) charMap[c] = i + 2 } // the labels separate letters with U+200A
+        }
+        return T9Language(letters, charMap)
     }
 
     /**
@@ -55,59 +48,67 @@ object DialpadT9 {
      */
     @Synchronized
     fun ensureInitialized(context: Context) {
-        if (Initialized) return
+        if (state.initialized) return
         context.resources.openRawResource(R.raw.t9languages).bufferedReader().use { readFromJson(it.readText()) }
     }
 
     /**
      * Read extra languages data from JSON
      */
+    @Synchronized
     fun readFromJson(jsonText: String) {
+        val languages = HashMap(state.languages)
         for (arrayElement in JsonParser.parseString(jsonText).asJsonArray) {
             val objectElement = arrayElement.asJsonObject
             val lang = objectElement["lang"].asString
-            if (languages[lang] != null) {
-                continue
-            }
-            val language = T9Language()
-            for ((i, lettersElement) in objectElement["letters"].asJsonArray.withIndex()) {
-                val letters = lettersElement.asString
-                language.letters[i] = letters
-                for (c in letters) {
-                    language.charMap[c] = i + 2
-                }
-            }
-            languages[lang] = language
+            if (lang in languages) continue
+            languages[lang] = language(objectElement["letters"].asJsonArray.map { it.asString }.toTypedArray())
         }
+        state = State(languages, unambiguousChars(languages.values), initialized = true)
+    }
 
-        supportedSecondaryLanguages = null
-        Initialized = true
+    private fun unambiguousChars(languages: Collection<T9Language>): Map<Char, Int> {
+        val keys = HashMap<Char, Int>()
+        val ambiguous = HashSet<Char>()
+        for (language in languages) {
+            for ((c, key) in language.charMap) {
+                val previous = keys.put(c, key)
+                if (previous != null && previous != key) ambiguous.add(c)
+            }
+        }
+        return keys - ambiguous
     }
 
     fun getLettersForNumber(number: Int, language: String): String {
-        val lang = languages[language]
-        return if (lang == null || number < 2 || number > 9) {
-            ""
-        } else {
-            lang.letters[number - 2]
-        }
+        val lang = state.languages[language]
+        return if (lang == null || number < 2 || number > 9) "" else lang.letters[number - 2]
     }
 
+    /**
+     * The dialpad key of [c] ('2'..'9', or the digit itself), or null when it has none. Looked up as typed first, so a
+     * letter keeps the key its label shows (ؤ on 3, not on و's 7), then by its base letter (é → E, presentation forms).
+     */
+    fun digitFor(c: Char, language: String): Char? {
+        if (c.isDigit()) return '0' + c.digitToInt()
+        if (c.isWhitespace()) return null
+        val s = state
+        val selected = s.languages[language]?.charMap
+        fun lookup(ch: Char): Int? = (selected?.get(ch) ?: s.latin[ch] ?: s.fallback[ch])
+            ?: LETTER_ALIASES[ch]?.let { selected?.get(it) ?: s.fallback[it] }
+        val upper = c.uppercaseChar()
+        val key = lookup(upper) ?: baseChar(upper)?.let(::lookup) ?: return null
+        return '0' + key
+    }
+
+    private fun baseChar(c: Char): Char? =
+        Normalizer.normalize(c.toString(), Normalizer.Form.NFKD).firstOrNull()?.uppercaseChar()?.takeIf { it != c }
+
+    /** [letters] with every char that has a key replaced by it; same length, so indexes line up with [letters]. */
     fun convertLettersToNumbers(letters: String, language: String): String {
-        val charMap = languages[language]?.charMap
-        val charMapEn = languages[LOCALE_EN]?.charMap
         val res = StringBuilder(letters.length)
-
-        for (c in letters) {
-            val number = charMap?.get(c) ?: charMapEn?.get(c)
-            if (number != null) res.append(number) else res.append(c)
-        }
-
+        for (c in letters) res.append(digitFor(c, language) ?: c)
         return res.toString()
     }
 
-    fun getSupportedSecondaryLanguages(): List<String> {
-        return supportedSecondaryLanguages ?: languages.keys.filter { it != LOCALE_EN }.sorted()
-            .also { supportedSecondaryLanguages = it }
-    }
+    fun getSupportedSecondaryLanguages(): List<String> = state.secondaryLanguages
 }

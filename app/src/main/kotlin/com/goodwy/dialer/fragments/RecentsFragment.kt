@@ -26,7 +26,6 @@ import com.goodwy.commons.extensions.isDynamicTheme
 import com.goodwy.commons.extensions.isSystemInDarkMode
 import com.goodwy.commons.extensions.launchActivityIntent
 import com.goodwy.commons.extensions.launchCallIntent
-import com.goodwy.commons.extensions.normalizeString
 import com.goodwy.commons.extensions.underlineText
 import com.goodwy.commons.helpers.CONTACT_ID
 import com.goodwy.commons.helpers.FontHelper
@@ -52,10 +51,8 @@ import com.goodwy.dialer.extensions.toSearchQuery
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL
 import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL_LIST
-import com.goodwy.dialer.helpers.DialpadT9
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_ALL
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_CONTACTS
-import com.goodwy.dialer.helpers.LANGUAGE_SYSTEM
 import com.goodwy.dialer.helpers.RECENT_CALL_CACHE_SIZE
 import com.goodwy.dialer.helpers.RecentsHelper
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
@@ -67,7 +64,6 @@ import com.goodwy.dialer.models.CallLogItem
 import com.goodwy.dialer.models.RecentCall
 import com.google.android.material.button.MaterialButton
 import com.goodwy.dialer.helpers.gson
-import java.util.Locale
 
 class RecentsFragment(
     context: Context, attributeSet: AttributeSet,

@@ -438,7 +438,7 @@ class ContactsAdapter(
 
     private fun String.highlightTextFromNumbers(textToHighlight: String, primaryColor: Int, language: String): SpannableString {
         val spannableString = SpannableString(this)
-        val digits = DialpadT9.convertLettersToNumbers(this.uppercase(), language)
+        val digits = DialpadT9.convertLettersToNumbers(this, language)
 
         val compressed = StringBuilder(digits.length)
         val originalPos = IntArray(digits.length)

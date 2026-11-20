@@ -179,5 +179,6 @@ dependencies {
     implementation(libs.liquid.glass)
     //timer
     implementation(libs.bundles.lifecycle)
+    testImplementation(libs.junit)
     ksp(libs.androidx.room.compiler)
 }
