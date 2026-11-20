@@ -5,7 +5,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.content.res.ColorStateList
+import android.graphics.ColorFilter
+import android.graphics.Path
+import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.drawable.Drawable
+import android.view.ViewGroup
+import androidx.core.view.children
 import android.util.LruCache
 import android.view.View
 import android.widget.ImageView
@@ -116,19 +124,34 @@ fun View.showSwipeActionsOnlyWhileSwiping(content: View, vararg actions: View) {
     // SwipeActionView has no callback for a swipe that starts and returns without activating, so the
     // row is polled. The check reads the views' real visibility (cheap field reads): the adapter may
     // show the action views again when it rebinds a recycled row, so a remembered state would go stale.
-    // While swiping, each action is clipped to the strip the row has uncovered, so nothing is drawn under the row.
+    // While swiping, each action paints only the strip the row has uncovered: its rounded shape minus the card's
+    // rounded shape, so the inner side curves around the card corners and nothing is drawn under the card.
+    val radius = resources.getDimension(R.dimen.glass_card_radius)
+    actions.forEach { action ->
+        val strip = SwipeStripDrawable(radius)
+        action.backgroundTintList?.let { strip.setTintList(it) }
+        action.background = strip
+    }
     val listener = ViewTreeObserver.OnPreDrawListener {
         val shift = content.translationX
         actions.forEach { action ->
-            val coverStart = (content.left + shift - action.left).toInt()
-            val coverEnd = (content.right + shift - action.left).toInt()
-            val visible = when {
-                shift > 0f -> Rect(0, 0, coverStart.coerceIn(0, action.width), action.height)
-                shift < 0f -> Rect(coverEnd.coerceIn(0, action.width), 0, action.width, action.height)
-                else -> null
-            }?.takeUnless { it.isEmpty }
-            if (visible != null && visible != action.clipBounds) action.clipBounds = visible
-            val hidden = visible == null
+            val coverStart = content.left + shift - action.left
+            val coverEnd = content.right + shift - action.left
+            val hidden = shift == 0f || (shift > 0f && coverStart <= 0f) || (shift < 0f && coverEnd >= action.width)
+            if (!hidden) {
+                (action.background as? SwipeStripDrawable)?.setCard(
+                    coverStart, (content.top - action.top).toFloat(), coverEnd, (content.bottom - action.top).toFloat()
+                )
+                // Icons stop at the card edge.
+                (action as? ViewGroup)?.children?.forEach { child ->
+                    val clip = if (shift > 0f) {
+                        Rect(0, 0, (coverStart - child.left).toInt().coerceIn(0, child.width), child.height)
+                    } else {
+                        Rect((coverEnd - child.left).toInt().coerceIn(0, child.width), 0, child.width, child.height)
+                    }
+                    if (clip != child.clipBounds) child.clipBounds = clip
+                }
+            }
             if (action.isInvisible != hidden) action.isInvisible = hidden
         }
         true
@@ -139,6 +162,47 @@ fun View.showSwipeActionsOnlyWhileSwiping(content: View, vararg actions: View) {
         override fun onViewDetachedFromWindow(v: View) = v.viewTreeObserver.removeOnPreDrawListener(listener)
     })
     if (isAttachedToWindow) viewTreeObserver.addOnPreDrawListener(listener)
+}
+
+/** Swipe action fill: the action's rounded rect minus the card's rounded rect. Colour comes from the view's backgroundTint. */
+private class SwipeStripDrawable(private val radius: Float) : Drawable() {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val card = RectF()
+    private val path = Path()
+    private val cardPath = Path()
+    private var tint: ColorStateList? = null
+
+    fun setCard(left: Float, top: Float, right: Float, bottom: Float) {
+        if (card.left == left && card.top == top && card.right == right && card.bottom == bottom) return
+        card.set(left, top, right, bottom)
+        invalidateSelf()
+    }
+
+    override fun draw(canvas: Canvas) {
+        paint.color = tint?.getColorForState(state, tint!!.defaultColor) ?: return
+        path.reset()
+        path.addRoundRect(RectF(bounds), radius, radius, Path.Direction.CW)
+        cardPath.reset()
+        cardPath.addRoundRect(card, radius, radius, Path.Direction.CW)
+        path.op(cardPath, Path.Op.DIFFERENCE)
+        canvas.drawPath(path, paint)
+    }
+
+    override fun setTintList(tint: ColorStateList?) {
+        this.tint = tint
+        invalidateSelf()
+    }
+
+    override fun setAlpha(alpha: Int) {
+        paint.alpha = alpha
+    }
+
+    override fun setColorFilter(colorFilter: ColorFilter?) {
+        paint.colorFilter = colorFilter
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 }
 
 /**
