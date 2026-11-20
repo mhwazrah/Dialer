@@ -842,6 +842,7 @@ class DialpadActivity : SimpleActivity() {
                         dialpad6Letters, dialpad7Letters, dialpad8Letters, dialpad9Letters
                     ).forEach {
                         it.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizeRu)
+                        it.applyDialpadLetterRows(twoRows = true)
                     }
                 } else {
                     val fontSize = getTextSize() - 8f
@@ -850,6 +851,7 @@ class DialpadActivity : SimpleActivity() {
                         dialpad6Letters, dialpad7Letters, dialpad8Letters, dialpad9Letters
                     ).forEach {
                         it.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize)
+                        it.applyDialpadLetterRows(twoRows = false)
                     }
                 }
             }
@@ -1340,9 +1342,14 @@ class DialpadActivity : SimpleActivity() {
                 refreshItemsListener = null,
                 showNumber = true,
                 allowLongClick = false,
+                // Tap opens the contact while swiping can call; without swipe actions a tap still calls
                 itemClick = {
-                    startCallWithConfirmationCheck(it as Contact)
-                    if (config.dialpadClearWhenStartCall) clearInputOnReturn()
+                    if (config.useSwipeToAction) {
+                        startContactDetailsIntent(it as Contact)
+                    } else {
+                        startCallWithConfirmationCheck(it as Contact)
+                        if (config.dialpadClearWhenStartCall) clearInputOnReturn()
+                    }
                 },
                 profileIconClick = {
                     startContactDetailsIntent(it as Contact)

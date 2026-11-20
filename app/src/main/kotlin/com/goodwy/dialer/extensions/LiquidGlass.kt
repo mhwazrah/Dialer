@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.util.LruCache
 import android.view.View
 import android.widget.ImageView
@@ -115,9 +116,21 @@ fun View.showSwipeActionsOnlyWhileSwiping(content: View, vararg actions: View) {
     // SwipeActionView has no callback for a swipe that starts and returns without activating, so the
     // row is polled. The check reads the views' real visibility (cheap field reads): the adapter may
     // show the action views again when it rebinds a recycled row, so a remembered state would go stale.
+    // While swiping, each action is clipped to the strip the row has uncovered, so nothing is drawn under the row.
     val listener = ViewTreeObserver.OnPreDrawListener {
-        val swiping = content.translationX != 0f
-        actions.forEach { if (it.isInvisible == swiping) it.isInvisible = !swiping }
+        val shift = content.translationX
+        actions.forEach { action ->
+            val coverStart = (content.left + shift - action.left).toInt()
+            val coverEnd = (content.right + shift - action.left).toInt()
+            val visible = when {
+                shift > 0f -> Rect(0, 0, coverStart.coerceIn(0, action.width), action.height)
+                shift < 0f -> Rect(coverEnd.coerceIn(0, action.width), 0, action.width, action.height)
+                else -> null
+            }?.takeUnless { it.isEmpty }
+            if (visible != null && visible != action.clipBounds) action.clipBounds = visible
+            val hidden = visible == null
+            if (action.isInvisible != hidden) action.isInvisible = hidden
+        }
         true
     }
     setTag(R.id.glass_swipe_listener, listener)

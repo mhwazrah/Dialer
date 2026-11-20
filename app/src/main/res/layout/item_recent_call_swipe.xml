@@ -15,7 +15,8 @@
         android:layout_width="@dimen/swipe_width"
         android:layout_height="match_parent"
         android:layout_gravity="left|center_vertical"
-        android:background="@color/primary"
+        android:background="@drawable/bg_swipe_action"
+        android:backgroundTint="@color/primary"
         tools:ignore="RtlHardcoded">
 
         <ImageView
@@ -34,7 +35,8 @@
         android:layout_width="@dimen/swipe_width"
         android:layout_height="match_parent"
         android:layout_gravity="right|center_vertical"
-        android:background="@color/red_call"
+        android:background="@drawable/bg_swipe_action"
+        android:backgroundTint="@color/red_call"
         tools:ignore="RtlHardcoded">
 
         <ImageView

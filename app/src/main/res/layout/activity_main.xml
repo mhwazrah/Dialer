@@ -145,13 +145,13 @@
         android:id="@+id/mainMenuGlass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/activity_margin"
-        android:layout_marginEnd="@dimen/activity_margin"
-        app:cornerRadius="@dimen/glass_bar_radius">
+        app:cornerRadius="@dimen/glass_bar_radius"
+        app:squareTopCorners="true">
 
         <com.goodwy.commons.views.MySearchMenu
             android:id="@+id/mainMenu"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/main_menu_bottom_padding"/>
     </com.goodwy.dialer.views.GlassPanel>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -25,6 +25,7 @@ class GlassPanel @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : LiquidGlassView(context, attrs, defStyleAttr) {
     private val useStaticGlass: Boolean
+    private val squareTopCorners = attrs?.getAttributeBooleanValue(RES_AUTO, "squareTopCorners", false) ?: false
 
     init {
         val hasExplicitBackdrop = (attrs?.getAttributeResourceValue(RES_AUTO, "backdropSourceId", 0) ?: 0) != 0
@@ -47,18 +48,20 @@ class GlassPanel @JvmOverloads constructor(
 
     private fun staticGlassDrawable(): LayerDrawable {
         val isLight = context.isLiquidLightTheme()
-        val radius = cornerRadius // clamped by GradientDrawable to half the short side
+        val r = cornerRadius // clamped by GradientDrawable to half the short side
+        val top = if (squareTopCorners) 0f else r
+        val radii = floatArrayOf(top, top, top, top, r, r, r, r)
         val frost = GradientDrawable().apply {
-            cornerRadius = radius
+            cornerRadii = radii
             // Fully opaque base: even 5% transparency left rows ghosting through (user rule).
             setColor(if (isLight) 0xFFF7FAFD.toInt() else 0xFF001123.toInt())
         }
         val sheen = GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
             intArrayOf(if (isLight) 0x66FFFFFF else 0x1FFFFFFF, 0x00FFFFFF, 0x00FFFFFF),
-        ).apply { cornerRadius = radius }
+        ).apply { cornerRadii = radii }
         val rim = GradientDrawable().apply {
-            cornerRadius = radius
+            cornerRadii = radii
             setColor(0)
             setStroke(resources.displayMetrics.density.toInt().coerceAtLeast(1), if (isLight) 0x8CFFFFFF.toInt() else 0x33FFFFFF)
         }

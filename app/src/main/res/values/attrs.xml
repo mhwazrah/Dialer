@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GlassPanel: square top corners, for a full-width panel under the status bar -->
+    <attr name="squareTopCorners" format="boolean" />
+</resources>

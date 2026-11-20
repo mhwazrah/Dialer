@@ -1,5 +1,6 @@
 package com.goodwy.dialer.adapters
 
+import android.content.res.ColorStateList
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -578,12 +579,12 @@ class ContactsAdapter(
                 val swipeLeftAction = if (isRTL) activity.config.swipeRightAction else activity.config.swipeLeftAction
                 swipeLeftIcon!!.setImageResource(swipeActionImageResource(swipeLeftAction))
                 swipeLeftIcon!!.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeLeftIconHolder!!.setBackgroundColor(swipeActionColor(swipeLeftAction))
+                swipeLeftIconHolder!!.backgroundTintList = ColorStateList.valueOf(swipeActionColor(swipeLeftAction))
 
                 val swipeRightAction = if (isRTL) activity.config.swipeLeftAction else activity.config.swipeRightAction
                 swipeRightIcon!!.setImageResource(swipeActionImageResource(swipeRightAction))
                 swipeRightIcon!!.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeRightIconHolder!!.setBackgroundColor(swipeActionColor(swipeRightAction))
+                swipeRightIconHolder!!.backgroundTintList = ColorStateList.valueOf(swipeActionColor(swipeRightAction))
 
                 itemContactSwipe!!.setDirectionEnabled(SwipeDirection.Left, swipeLeftAction != SWIPE_ACTION_NONE)
                 itemContactSwipe!!.setDirectionEnabled(SwipeDirection.Right, swipeRightAction != SWIPE_ACTION_NONE)

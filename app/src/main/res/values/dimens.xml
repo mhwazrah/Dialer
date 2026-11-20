@@ -57,7 +57,12 @@
     <dimen name="dialpad_margin_bottom_ios">28dp</dimen>
     <dimen name="dialpad_grid_height">420dp</dimen>
     <dimen name="dialpad_pill_text_size">28sp</dimen>
-    <dimen name="dialpad_pill_grid_height">376dp</dimen>
+    <dimen name="dialpad_pill_grid_height">440dp</dimen>
+    <dimen name="dialpad_pill_key_margin">3dp</dimen>
+    <dimen name="dialpad_letters_top_margin">-6dp</dimen>
+    <dimen name="dialpad_letter_rows_shift">2dp</dimen>
+    <dimen name="dialpad_number_underline_lift">6dp</dimen>
+    <dimen name="main_menu_bottom_padding">10dp</dimen>
     <dimen name="dialpad_number_side_margin">8dp</dimen>
     <dimen name="dialpad_ios_height">520dp</dimen>
 

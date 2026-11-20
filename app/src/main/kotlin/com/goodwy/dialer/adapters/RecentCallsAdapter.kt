@@ -3,6 +3,7 @@ package com.goodwy.dialer.adapters
 import com.goodwy.dialer.extensions.showSwipeActionsOnlyWhileSwiping
 import com.goodwy.dialer.extensions.loadBrandedContactImage
 
+import android.content.res.ColorStateList
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -995,12 +996,12 @@ class RecentCallsAdapter(
                 val swipeLeftAction = if (isRTL) activity.config.swipeRightAction else activity.config.swipeLeftAction
                 swipeLeftIcon.setImageResource(swipeActionImageResource(swipeLeftAction))
                 swipeLeftIcon.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeLeftIconHolder.setBackgroundColor(swipeActionColor(call, swipeLeftAction))
+                swipeLeftIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeLeftAction))
 
                 val swipeRightAction = if (isRTL) activity.config.swipeLeftAction else activity.config.swipeRightAction
                 swipeRightIcon.setImageResource(swipeActionImageResource(swipeRightAction))
                 swipeRightIcon.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeRightIconHolder.setBackgroundColor(swipeActionColor(call, swipeRightAction))
+                swipeRightIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeRightAction))
 
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Left, swipeLeftAction != SWIPE_ACTION_NONE)
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Right, swipeRightAction != SWIPE_ACTION_NONE)

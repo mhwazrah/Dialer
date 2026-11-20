@@ -532,6 +532,7 @@ class SettingsDialpadActivity : SimpleActivity() {
                         dialpad6Letters, dialpad7Letters, dialpad8Letters, dialpad9Letters
                     ).forEach {
                         it.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizeRu)
+                        it.applyDialpadLetterRows(twoRows = true)
                     }
                 } else {
                     dialpad1Letters.text = "ABC"
@@ -550,6 +551,7 @@ class SettingsDialpadActivity : SimpleActivity() {
                         dialpad6Letters, dialpad7Letters, dialpad8Letters, dialpad9Letters
                     ).forEach {
                         it.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize)
+                        it.applyDialpadLetterRows(twoRows = false)
                     }
                 }
             }

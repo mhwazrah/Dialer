@@ -911,6 +911,8 @@ class MainActivity : SimpleActivity() {
             fragment?.findViewById<View>(
                 if (fragment is RecentsFragment) R.id.recents_placeholder else R.id.fragment_placeholder
             )?.let { setTopMargin(it, top + extraTop) }
+            // The full-width top bar would cover the letter scroller (its thumb is aligned to it)
+            fragment?.findViewById<View>(R.id.letter_fastscroller)?.let { setTopMargin(it, top) }
         }
     }
 
@@ -1011,10 +1013,8 @@ class MainActivity : SimpleActivity() {
             if (config.showTabs and value != 0) {
                 binding.mainTabsHolder.newTab().setCustomView(R.layout.bottom_tablayout_item).apply {
                     customView?.findViewById<ImageView>(R.id.tab_item_icon)?.setImageDrawable(getTabIcon(index))
-                    customView?.findViewById<TextView>(R.id.tab_item_label)?.apply {
-                        text = getTabLabel(index)
-                        beGoneIf(config.useIconTabs)
-                    }
+                    // The bottom bar always shows its labels; "Use tab icons" only applies to the top tabs
+                    customView?.findViewById<TextView>(R.id.tab_item_label)?.text = getTabLabel(index)
                     AutofitHelper.create(customView?.findViewById(R.id.tab_item_label))
                     binding.mainTabsHolder.addTab(this)
                 }

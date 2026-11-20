@@ -493,6 +493,7 @@ class SettingsActivity : SimpleActivity() {
                 binding.settingsChangeColourTopBarHolder.beVisibleIf(config.bottomNavigationBar)
                 binding.settingsTopAppBarLabel.beVisibleIf(config.bottomNavigationBar)
                 binding.settingsTopAppBarHolder.beVisibleIf(config.bottomNavigationBar)
+                binding.settingsUseIconTabsHolder.beVisibleIf(!config.bottomNavigationBar)
             }
         }
     }
@@ -523,6 +524,8 @@ class SettingsActivity : SimpleActivity() {
 
     private fun setupUseIconTabs() {
         binding.apply {
+            // The bottom bar always shows icons and labels, so the option only matters for top tabs
+            settingsUseIconTabsHolder.beVisibleIf(!config.bottomNavigationBar)
             settingsUseIconTabs.isChecked = config.useIconTabs
             settingsUseIconTabsHolder.setOnClickListener {
                 settingsUseIconTabs.toggle()
