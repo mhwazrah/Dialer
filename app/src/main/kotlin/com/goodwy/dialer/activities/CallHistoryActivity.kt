@@ -10,9 +10,15 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.SpannableString
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.graphics.drawable.GradientDrawable
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.updatePaddingRelative
 import androidx.core.graphics.drawable.DrawableCompat
 import com.goodwy.commons.dialogs.CallConfirmationDialog
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
@@ -35,6 +41,8 @@ import com.goodwy.dialer.databinding.ItemViewMessengersActionsBinding
 import com.goodwy.dialer.dialogs.ChangeTextDialog
 import com.goodwy.dialer.dialogs.ChooseSocialDialog
 import com.goodwy.dialer.extensions.*
+import com.goodwy.dialer.models.SIMAccount
+import com.goodwy.dialer.databinding.ItemSimPopupBinding
 import com.goodwy.dialer.helpers.*
 import com.goodwy.dialer.models.RecentCall
 import kotlin.collections.ArrayList
@@ -43,6 +51,8 @@ import androidx.core.graphics.drawable.toDrawable
 import com.goodwy.commons.dialogs.QrCodeDialog
 
 class CallHistoryActivity : SimpleActivity() {
+    // Call button's padding from the layout, before the dual-SIM strip widens it.
+    private val callButtonPaddingEnd by lazy { binding.twoButton.paddingEnd }
     private val binding by viewBinding(ActivityCallHistoryBinding::inflate)
 
     private var allRecentCall = listOf<RecentCall>()
@@ -95,7 +105,8 @@ class CallHistoryActivity : SimpleActivity() {
                 initContact()
             }
         }
-        if (!initShowAll) refreshCallLog(false)
+        // Opened from a contact (no call list passed): load and show that number's calls, or the placeholder.
+        if (!initShowAll) refreshCallLog(load = currentRecentCallList == null)
         updateButtons()
         setupMenu()
         setupCallerNotes()
@@ -363,6 +374,7 @@ class CallHistoryActivity : SimpleActivity() {
                 runOnUiThread {
                     if (currentRecentCalls.isEmpty()) {
                         binding.apply {
+                            progressIndicator.hide()
                             callHistoryListContainer.beGone()
                             callHistoryPlaceholderContainer.beVisible()
                             callHistoryToolbar.menu.findItem(R.id.delete).isVisible = false
@@ -966,6 +978,21 @@ class CallHistoryActivity : SimpleActivity() {
                 setOnLongClickListener { toast(R.string.call); true; }
             }
 
+            val callSims = getAvailableSIMCardLabels()
+            val showCallSimDropdown = areMultipleSIMsAvailable() && callSims.size > 1 && !call.isUnknownNumber
+            binding.callSimDropdown.apply {
+                beVisibleIf(showCallSimDropdown)
+                applyColorFilter(getProperPrimaryColor())
+                setOnClickListener { showCallSimMenu(call, callSims) }
+            }
+            binding.callSimDivider.apply {
+                beVisibleIf(showCallSimDropdown)
+                setBackgroundColor(getProperTextColor())
+            }
+            // Centre the phone icon and label in the part left of the divider.
+            val dropdownWidth = if (showCallSimDropdown) resources.getDimensionPixelSize(R.dimen.call_sim_dropdown_width) else 0
+            binding.twoButton.updatePaddingRelative(end = callButtonPaddingEnd + dropdownWidth)
+
             if (areMultipleSIMsAvailable() && !call.isUnknownNumber) {
                 binding.defaultSimButtonContainer.beVisible()
                 updateDefaultSIMButton(call)
@@ -1054,6 +1081,58 @@ class CallHistoryActivity : SimpleActivity() {
         } else {
             launchCallIntent("$prefix$phoneNumber", key = BuildConfig.RIGHT_APP_KEY)
         }
+    }
+
+    // One-off call with a chosen SIM; the number's saved SIM is left as it is. A custom glass popup, not PopupMenu:
+    // the commons popup theme renders dark with square corners and can't follow the app's frosted style.
+    private fun showCallSimMenu(call: RecentCall, sims: List<SIMAccount>) {
+        val density = resources.displayMetrics.density
+        val textColor = getProperTextColor()
+        val isLight = isLiquidLightTheme()
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            minimumWidth = (240 * density).toInt()
+            val pad = (6 * density).toInt()
+            setPadding(0, pad, 0, pad)
+            background = GradientDrawable().apply {
+                cornerRadius = resources.getDimension(R.dimen.glass_card_radius)
+                setColor(if (isLight) 0xFFF7FAFD.toInt() else 0xFF001123.toInt())
+                setStroke(density.toInt().coerceAtLeast(1), if (isLight) 0x1A000000 else 0x40FFFFFF)
+            }
+            elevation = 8 * density
+            clipToOutline = true
+        }
+        val popup = PopupWindow(content, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+            isOutsideTouchable = true
+            elevation = 8 * density
+        }
+        val titles = listOf(com.goodwy.commons.R.string.call_from_sim_1, com.goodwy.commons.R.string.call_from_sim_2)
+        sims.take(2).forEachIndexed { index, sim ->
+            val row = ItemSimPopupBinding.inflate(layoutInflater, content, false)
+            row.simPopupIcon.background.mutate().setTint(sim.color)
+            row.simPopupIcon.setColorFilter(Color.WHITE)
+            row.simPopupId.text = sim.id.toString()
+            row.simPopupId.setTextColor(sim.color)
+            row.simPopupTitle.text = getString(titles[index])
+            row.simPopupTitle.setTextColor(textColor)
+            row.simPopupLabel.text = sim.label
+            row.simPopupLabel.setTextColor(textColor.adjustAlpha(0.65f))
+            row.root.contentDescription = "${getString(titles[index])}, ${sim.label}"
+            row.root.setOnClickListener {
+                popup.dismiss()
+                callContactWithSimWithConfirmationCheck(call.phoneNumber, call.name, index == 0)
+            }
+            content.addView(row.root)
+        }
+        // Measured up front: PopupWindow places and clamps itself to the screen only when it knows its size.
+        val maxWidth = minOf((300 * density).toInt(), resources.displayMetrics.widthPixels - (32 * density).toInt())
+        content.measure(
+            View.MeasureSpec.makeMeasureSpec(maxWidth, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        popup.width = content.measuredWidth
+        popup.height = content.measuredHeight
+        popup.showAsDropDown(binding.twoButton, 0, (4 * density).toInt(), Gravity.START)
     }
 
     private fun removeDefaultSIM() {
@@ -1170,7 +1249,8 @@ class CallHistoryActivity : SimpleActivity() {
 //    }
 
     private fun viewContactInfo(contact: Contact) {
-        this.startContactDetailsIntent(contact)
+        // Already on the in-app contact page: "view contact" goes to the phone's contacts app.
+        this.startSystemContactDetails(contact)
     }
 
     private fun launchShare() {

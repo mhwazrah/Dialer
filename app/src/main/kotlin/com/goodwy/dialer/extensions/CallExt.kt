@@ -1,6 +1,7 @@
 package com.goodwy.dialer.extensions
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
@@ -23,6 +24,8 @@ import com.goodwy.dialer.BuildConfig
 import com.goodwy.dialer.activities.DialerActivity
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.dialogs.SelectSIMDialog
+import com.goodwy.dialer.models.RecentCall
+import com.goodwy.dialer.models.SIMAccount
 import com.goodwy.dialer.dialogs.SelectSimButtonDialog
 import com.goodwy.dialer.helpers.SIM_DIALOG_STYLE_LIST
 
@@ -82,6 +85,21 @@ fun BaseSimpleActivity.callContactWithSim(
             .getOrNull(wantedSimIndex)?.handle
         launchCallIntent(recipient, handle, BuildConfig.RIGHT_APP_KEY)
     }
+}
+
+/**
+ * SIM a recent call is called back with: the number's saved SIM, else the call's own SIM when "call using the same SIM"
+ * is on, else the default outgoing SIM. Null means none applies and the user is asked.
+ */
+fun Context.recentCallSim(call: RecentCall, sims: List<SIMAccount>): SIMAccount? {
+    config.getCustomSIM(call.phoneNumber)?.let { saved -> sims.firstOrNull { it.handle == saved }?.let { return it } }
+    if (config.callUsingSameSim && call.simID > 0) sims.firstOrNull { it.id == call.simID }?.let { return it }
+    val defaultHandle = try {
+        telecomManager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL)
+    } catch (_: SecurityException) {
+        null
+    }
+    return sims.firstOrNull { it.handle == defaultHandle }
 }
 
 fun BaseSimpleActivity.callContactWithSimWithConfirmationCheck(

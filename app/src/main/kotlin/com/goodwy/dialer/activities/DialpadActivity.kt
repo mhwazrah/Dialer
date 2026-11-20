@@ -12,6 +12,8 @@ import android.os.Looper
 import android.provider.CallLog.Calls
 import android.telephony.PhoneNumberFormattingTextWatcher
 import android.telephony.TelephonyManager
+import com.goodwy.commons.views.MyTextView
+import android.os.Build
 import android.util.TypedValue
 import android.view.*
 import android.view.View.OnFocusChangeListener
@@ -224,6 +226,8 @@ class DialpadActivity : SimpleActivity() {
             return
         }
         hasMultipleSims = areMultipleSIMsAvailable()
+        // The saved SIM per number may have changed on the contact profile; the recents SIM pickers show it.
+        recentsAdapter?.let { it.notifyItemRangeChanged(0, it.itemCount) }
 
         if (storedToneVolume != config.toneVolume) {
             toneGeneratorHelper?.release()
@@ -1171,6 +1175,53 @@ class DialpadActivity : SimpleActivity() {
         maybePerformDialpadHapticFeedback(view)
     }
 
+    // Since Android 10 the IMEI is reserved for privileged apps; when Android refuses, point to where it is shown.
+    @SuppressLint("MissingPermission", "HardwareIds")
+    @Suppress("DEPRECATION")
+    private fun showDeviceIdentifiers() {
+        handlePermission(PERMISSION_READ_PHONE_STATE) { granted ->
+            val telephony = getSystemService(TelephonyManager::class.java)
+            val slots = when {
+                telephony == null -> 0
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> telephony.activeModemCount
+                else -> telephony.phoneCount
+            }
+            val imeis = if (granted && telephony != null) {
+                (0 until slots).mapNotNull { slot ->
+                    try {
+                        telephony.getImei(slot)?.takeIf { it.isNotBlank() }
+                    } catch (_: Exception) { // SecurityException without privileges; others on devices without telephony
+                        null
+                    }
+                }
+            } else {
+                emptyList()
+            }
+            val message = if (imeis.isEmpty()) {
+                getString(R.string.imei_unavailable)
+            } else {
+                imeis.mapIndexed { index, imei -> if (imeis.size > 1) "IMEI ${index + 1}\n$imei" else imei }.joinToString("\n\n")
+            }
+            val padding = resources.getDimensionPixelSize(com.goodwy.commons.R.dimen.activity_margin)
+            val view = MyTextView(this).apply {
+                text = message
+                setTextIsSelectable(imeis.isNotEmpty())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, if (imeis.isEmpty()) 16f else 18f)
+                setPadding(padding, padding / 2, padding, 0)
+            }
+            getAlertDialogBuilder()
+                .setPositiveButton(R.string.ok, null)
+                .apply {
+                    if (imeis.isEmpty()) {
+                        setNeutralButton(R.string.about_phone) { _, _ ->
+                            launchActivityIntent(Intent(android.provider.Settings.ACTION_DEVICE_INFO_SETTINGS))
+                        }
+                    }
+                    setupDialogStuff(view, this, R.string.imei_title)
+                }
+        }
+    }
+
     private fun clearInput() {
         binding.dialpadInput.setText("")
     }
@@ -1206,6 +1257,15 @@ class DialpadActivity : SimpleActivity() {
         val view = dialpadView()
         if (len == 0 && view.isGone) {
             slideUp(view)
+        }
+        // *#06#: device identifiers, shown as soon as the code is typed (like the system dialers).
+        if (textFormat == "*#06#") {
+            clearInput()
+            // TelecomManager.handleMmi (NovaDial's approach) was tried: Samsung and stock Android both declined *#06#.
+            // The IMEI shows here only if Android lets the app read it (privileged apps, or the
+            // READ_DEVICE_IDENTIFIERS app-op granted over adb); otherwise the dialog points to About phone.
+            showDeviceIdentifiers()
+            return
         }
         //Only works for system apps, CALL_PRIVILEGED and MODIFY_PHONE_STATE permissions are required
         if (len > 8 && textFormat.startsWith("*#*#") && textFormat.endsWith("#*#*")) {
@@ -1698,7 +1758,7 @@ class DialpadActivity : SimpleActivity() {
                     val recentCall = it as RecentCall
                     val contact = findContactByCall(recentCall)
                     if (contact != null) {
-                        startContactDetailsIntent(contact)
+                        actionOpen(recentCall) // the row's own number, not the contact's main one
                     } else {
                         startAddNumberToContact(recentCall.phoneNumber)
                     }

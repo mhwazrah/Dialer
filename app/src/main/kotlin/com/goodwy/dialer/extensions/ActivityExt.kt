@@ -2,6 +2,9 @@ package com.goodwy.dialer.extensions
 
 import android.app.Activity
 import android.content.Intent
+import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL
+import com.goodwy.dialer.models.RecentCall
+import com.goodwy.dialer.activities.CallHistoryActivity
 import android.net.Uri
 import android.provider.ContactsContract
 import android.telephony.PhoneNumberUtils
@@ -39,7 +42,40 @@ fun SimpleActivity.launchCreateNewContactIntent() {
 }
 
 // handle private contacts differently, only Simple Contacts Pro can open them
+/** Opens the app's own contact page (CallHistoryActivity) for the contact's main number; without a number, the contacts app. */
 fun Activity.startContactDetailsIntent(contact: Contact) {
+    val number = (contact.phoneNumbers.firstOrNull { it.isPrimary } ?: contact.phoneNumbers.firstOrNull())?.value
+    if (number.isNullOrBlank()) {
+        startSystemContactDetails(contact)
+        return
+    }
+    // The page is built around a call: a call-less entry for the number makes it load that number's history itself.
+    val call = RecentCall(
+        id = -1,
+        phoneNumber = number,
+        name = contact.getNameToDisplay(),
+        photoUri = contact.photoUri,
+        startTS = 0L,
+        duration = 0,
+        type = 0,
+        simID = -1,
+        simColor = 0,
+        specificNumber = "",
+        specificType = "",
+        isUnknownNumber = false,
+        contactID = contact.id,
+        isVoiceMail = false,
+    )
+    Intent(this, CallHistoryActivity::class.java).apply {
+        putExtra(CURRENT_RECENT_CALL, call)
+        putExtra(CONTACT_ID, contact.id)
+        putExtra(IS_PRIVATE, contact.isPrivate())
+        launchActivityIntent(this)
+    }
+}
+
+/** Opens the contact in the phone's contacts app (full details / editing). */
+fun Activity.startSystemContactDetails(contact: Contact) {
     val simpleContacts = "com.goodwy.contacts"
     val simpleContactsDebug = "com.goodwy.contacts.debug"
     val newContacts = "dev.goodwy.contacts"
@@ -69,8 +105,10 @@ fun Activity.startContactDetailsIntent(contact: Contact) {
             runOnUiThread {
                 // Without a lookup key there is no contact to open (e.g. a company-only entry)
                 if (lookupKey.isNullOrBlank()) return@runOnUiThread
+                // ACTION_VIEW, not QUICK_CONTACT: some contacts apps (Samsung's) register no QUICK_CONTACT handler,
+                // which left "No valid app found"; every contacts app opens a contact for ACTION_VIEW.
                 Intent().apply {
-                    action = ContactsContract.QuickContact.ACTION_QUICK_CONTACT
+                    action = Intent.ACTION_VIEW
                     data = ContactsContract.Contacts.getLookupUri(contact.contactId.toLong(), lookupKey)
                     launchActivityIntent(this)
                 }

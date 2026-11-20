@@ -92,7 +92,7 @@
                 android:textDirection="firstStrongLtr"
                 android:textAlignment="viewStart"
                 app:layout_constraintStart_toEndOf="@+id/item_recents_image"
-                app:layout_constraintEnd_toStartOf="@+id/item_recents_info"
+                app:layout_constraintEnd_toStartOf="@+id/item_recents_end_barrier"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@+id/item_recents_type"
                 tools:text="John Doe"/>
@@ -173,7 +173,7 @@
                 android:maxLines="1"
                 android:textSize="@dimen/smaller_text_size"
                 app:layout_constraintBottom_toBottomOf="@+id/item_recents_type"
-                app:layout_constraintEnd_toStartOf="@+id/item_recents_info"
+                app:layout_constraintEnd_toStartOf="@+id/item_recents_end_barrier"
                 app:layout_constraintTop_toTopOf="@+id/item_recents_type"
                 tools:text="31.12"/>
 
@@ -198,6 +198,89 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
+
+            <!-- Dual-SIM picker on dialpad recents: chooses the SIM a swipe calls with (replaces the call button) -->
+            <LinearLayout
+                android:id="@+id/item_recents_sim_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/medium_margin"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <FrameLayout
+                    android:id="@+id/item_recents_sim1_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="0dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/select_sim">
+
+                    <ImageView
+                        android:id="@+id/item_recents_sim1_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/circle_background"
+                        android:contentDescription="@null"
+                        android:paddingStart="7dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="8dp"
+                        app:srcCompat="@drawable/ic_sim_vector"/>
+
+                    <TextView
+                        android:id="@+id/item_recents_sim1_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="@dimen/normal_text_size"
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/item_recents_sim2_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/select_sim">
+
+                    <ImageView
+                        android:id="@+id/item_recents_sim2_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/circle_background"
+                        android:contentDescription="@null"
+                        android:paddingStart="7dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="8dp"
+                        app:srcCompat="@drawable/ic_sim_vector"/>
+
+                    <TextView
+                        android:id="@+id/item_recents_sim2_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="2"
+                        android:textSize="@dimen/normal_text_size"
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText"/>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/item_recents_end_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="start"
+                app:constraint_referenced_ids="item_recents_info,item_recents_sim_picker"/>
 
             <ImageView
                 android:id="@+id/divider"

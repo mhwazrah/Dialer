@@ -273,6 +273,11 @@ class RecentsFragment(
         }
     }
 
+    /** Rebinds the visible rows: their SIM pickers show the per-number saved SIM, which can change on the profile. */
+    fun rebindRows() {
+        recentsAdapter?.let { it.notifyItemRangeChanged(0, it.itemCount) }
+    }
+
     override fun refreshItems(invalidate: Boolean, needUpdate: Boolean, callback: (() -> Unit)?) {
         val config = activity!!.config
         val version = ContactsRepository.version
@@ -461,7 +466,7 @@ class RecentsFragment(
                         val recentCall = it as RecentCall
                         val contact = findContactByCall(recentCall)
                         if (contact != null) {
-                            activity?.startContactDetailsIntent(contact)
+                            actionOpen(recentCall) // the row's own number, not the contact's main one
                         } else {
                             activity?.startAddNumberToContact(recentCall.phoneNumber)
                         }

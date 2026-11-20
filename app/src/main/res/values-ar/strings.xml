@@ -80,4 +80,6 @@
     <string name="send_whatsapp">إرسال واتساب</string>
     <string name="dialpad_number_font_size">حجم خط الأرقام</string>
     <string name="hang_up">إنهاء المكالمة</string>
+    <string name="imei_unavailable">لا يسمح أندرويد لهذا التطبيق بقراءة رقم IMEI. يمكنك العثور عليه في الإعدادات › حول الهاتف.</string>
+    <string name="about_phone">حول الهاتف</string>
 </resources>

@@ -73,4 +73,6 @@
     <!-- Liquid Glass -->
     <dimen name="glass_card_radius">20dp</dimen>
     <dimen name="glass_bar_radius">28dp</dimen>
+    <dimen name="call_sim_dropdown_width">32dp</dimen>
+    <dimen name="favorites_arrow_size">24dp</dimen>
 </resources>

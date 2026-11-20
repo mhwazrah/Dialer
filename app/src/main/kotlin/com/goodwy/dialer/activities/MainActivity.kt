@@ -313,6 +313,7 @@ class MainActivity : SimpleActivity() {
                 refreshItems()
             }
         }
+        getRecentsFragment()?.rebindRows()
 
         applyDisplaySettings()
 

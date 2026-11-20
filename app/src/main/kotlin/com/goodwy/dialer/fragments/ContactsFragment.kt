@@ -20,6 +20,7 @@ import com.goodwy.dialer.adapters.ContactsAdapter
 import com.goodwy.dialer.databinding.FragmentContactsBinding
 import com.goodwy.dialer.databinding.FragmentLettersLayoutBinding
 import com.goodwy.dialer.databinding.ItemFavoriteStripBinding
+import com.goodwy.dialer.extensions.isLiquidLightTheme
 import com.goodwy.dialer.extensions.config
 import com.goodwy.dialer.extensions.listedContacts
 import com.goodwy.dialer.extensions.launchCreateNewContactIntent
@@ -109,7 +110,8 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
             }
             fragmentPlaceholder.setTextColor(textColor)
             fragmentPlaceholder2.setTextColor(accentColor)
-            contactsBinding.contactsFavoritesTitle.setTextColor(accentColor)
+            // Accent reads well on the light backdrop; on dark it looks dim next to the white names, so use the text colour.
+            contactsBinding.contactsFavoritesTitle.setTextColor(if (context.isLiquidLightTheme()) accentColor else textColor)
             applyFavoritesExpanded() // re-tints the arrow to the new title colour
             favoritesAdapter.notifyDataSetChanged()
 
@@ -232,9 +234,11 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         val expanded = context.config.contactsFavoritesExpanded
         contactsBinding.contactsFavoritesList.beVisibleIf(expanded)
         contactsBinding.contactsFavoritesTitle.apply {
-            val arrow = context.getDrawable(if (expanded) R.drawable.ic_chevron_up_vector else R.drawable.ic_chevron_down_vector)?.mutate()
+            val arrow = context.getDrawable(if (expanded) R.drawable.ic_arrow_drop_up else R.drawable.ic_arrow_drop_down)?.mutate()
             arrow?.setTint(currentTextColor)
-            setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, arrow, null)
+            val size = resources.getDimensionPixelSize(R.dimen.favorites_arrow_size)
+            arrow?.setBounds(0, 0, size, size)
+            setCompoundDrawablesRelative(null, null, arrow, null)
         }
     }
 

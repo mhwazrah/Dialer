@@ -115,6 +115,38 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:ignore="SmallSp"/>
 
+            <!-- Dual SIM split button: the strip right of the divider opens "Call from SIM 1 / SIM 2" for a one-off call;
+                 the rest of the Call button calls as before -->
+            <ImageView
+                android:id="@+id/callSimDropdown"
+                android:layout_width="@dimen/call_sim_dropdown_width"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/tiny_margin"
+                android:layout_marginBottom="@dimen/small_margin"
+                android:layout_marginEnd="3dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="4dp"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/select_sim"
+                android:scaleType="center"
+                android:src="@drawable/ic_arrow_drop_down"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@+id/x50"
+                app:layout_constraintTop_toTopOf="@+id/twoButton"
+                app:layout_constraintBottom_toBottomOf="@+id/twoButton"/>
+
+            <View
+                android:id="@+id/callSimDivider"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                android:alpha="0.4"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@+id/callSimDropdown"
+                app:layout_constraintTop_toTopOf="@+id/twoButton"
+                app:layout_constraintBottom_toBottomOf="@+id/twoButton"/>
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/threeButton"
                 android:layout_width="0dp"

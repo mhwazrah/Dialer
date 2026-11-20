@@ -6,6 +6,7 @@ import com.goodwy.dialer.extensions.loadBrandedContactImage
 import android.content.res.ColorStateList
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
@@ -35,7 +36,10 @@ import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.extensions.addBlockedNumber
 import com.goodwy.commons.extensions.adjustAlpha
 import com.goodwy.commons.extensions.applyColorFilter
+import com.goodwy.commons.extensions.beGone
+import com.goodwy.commons.extensions.beVisible
 import com.goodwy.commons.extensions.beVisibleIf
+import com.goodwy.commons.extensions.performHapticFeedback
 import com.goodwy.commons.extensions.copyToClipboard
 import com.goodwy.commons.extensions.deleteBlockedNumber
 import com.goodwy.commons.extensions.formatDateOrTime
@@ -70,6 +74,7 @@ import com.goodwy.commons.helpers.CONTACT_ID
 import com.goodwy.commons.helpers.ELLIPSIZE_MODE_END
 import com.goodwy.commons.helpers.IS_PRIVATE
 import com.goodwy.commons.helpers.IS_RIGHT_APP
+import com.goodwy.commons.helpers.PERMISSION_READ_PHONE_STATE
 import com.goodwy.commons.helpers.PERMISSION_WRITE_CALL_LOG
 import com.goodwy.commons.helpers.SimpleContactsHelper
 import com.goodwy.commons.helpers.ensureBackgroundThread
@@ -77,6 +82,8 @@ import com.goodwy.commons.models.contacts.Contact
 import com.goodwy.commons.views.MyRecyclerView
 import com.goodwy.dialer.BuildConfig
 import com.goodwy.dialer.R
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import com.goodwy.dialer.activities.CallHistoryActivity
 import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.helpers.PlaceholderDrawableCache
@@ -85,7 +92,8 @@ import com.goodwy.dialer.databinding.ItemRecentCallBinding
 import com.goodwy.dialer.databinding.ItemRecentCallSwipeBinding
 import com.goodwy.dialer.databinding.ItemRecentsDateBinding
 import com.goodwy.dialer.extensions.areMultipleSIMsAvailable
-import com.goodwy.dialer.extensions.callContactWithSim
+import com.goodwy.dialer.extensions.getAvailableSIMCardLabels
+import com.goodwy.dialer.extensions.recentCallSim
 import com.goodwy.dialer.extensions.callContactWithSimWithConfirmationCheck
 import com.goodwy.dialer.extensions.config
 import com.goodwy.dialer.extensions.getCountryByNumber
@@ -95,7 +103,7 @@ import com.goodwy.dialer.extensions.launchSendWhatsAppIntent
 import com.goodwy.dialer.extensions.setWidth
 import com.goodwy.dialer.extensions.startAddNumberToContact
 import com.goodwy.dialer.extensions.startCallWithConfirmationCheck
-import com.goodwy.dialer.extensions.startContactDetailsIntent
+import com.goodwy.dialer.extensions.startSystemContactDetails
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL_LIST
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_ALL
@@ -109,6 +117,7 @@ import com.goodwy.dialer.helpers.SWIPE_ACTION_WHATSAPP
 import com.goodwy.dialer.interfaces.RefreshItemsListener
 import com.goodwy.dialer.models.CallLogItem
 import com.goodwy.dialer.models.RecentCall
+import com.goodwy.dialer.models.SIMAccount
 import me.thanel.swipeactionview.SwipeActionView
 import me.thanel.swipeactionview.SwipeDirection
 import me.thanel.swipeactionview.SwipeGestureListener
@@ -138,6 +147,7 @@ class RecentCallsAdapter(
     var fontSize: Float = activity.getTextSize()
     private var ellipsizeMode = activity.config.ellipsizeMode
     private val areMultipleSIMsAvailable = activity.areMultipleSIMsAvailable()
+    private val simAccounts by lazy { activity.getAvailableSIMCardLabels() }
     private val missedCallColor = resources.getColor(R.color.red_missed, activity.theme)
     private var secondaryTextColor = textColor.adjustAlpha(0.6f)
     private var textToHighlight = ""
@@ -385,6 +395,8 @@ class RecentCallsAdapter(
         val phoneNumber = getSelectedPhoneNumber()?.replace("+","%2B") ?: return
         activity.config.removeCustomSIM(phoneNumber)
         finishActMode()
+        // SIM pickers and swipe colours show the saved SIM.
+        notifyItemRangeChanged(0, itemCount)
     }
 
     private fun askConfirmBlock() {
@@ -545,8 +557,9 @@ class RecentCallsAdapter(
     private fun findContactByCall(recentCall: RecentCall): Contact? = ContactsRepository.snapshot.find(recentCall.phoneNumber)
 
     private fun launchContactDetailsIntent(contact: Contact?) {
+        // "View contact details" next to "Show call details": the full contact in the contacts app.
         if (contact != null) {
-            activity.startContactDetailsIntent(contact)
+            activity.startSystemContactDetails(contact)
         }
     }
 
@@ -991,17 +1004,41 @@ class RecentCallsAdapter(
                 itemRecentsFrameSelect.setupViewBackground(activity)
                 itemRecentsHolder.isSelected = selectedKeys.contains(call.id)
                 bindCallRow(call, rowViews, this@RecentCallSwipeViewHolder)
-                //swipe
                 val isRTL = activity.isRTLLayout
                 val swipeLeftAction = if (isRTL) activity.config.swipeRightAction else activity.config.swipeLeftAction
+                val swipeRightAction = if (isRTL) activity.config.swipeLeftAction else activity.config.swipeRightAction
+                // Resolved once per bind, and only when a swipe can call: it drives the picker, the call colour and the call.
+                val swipeCalls = swipeActionCalls(swipeLeftAction) || swipeActionCalls(swipeRightAction)
+                val callSim = if (areMultipleSIMsAvailable && swipeCalls) activity.recentCallSim(call, simAccounts) else null
+                // When a swipe can call, the call button is redundant: two SIMs get the SIM picker in its place, one SIM
+                // gets nothing. Without a calling swipe the call button stays, as it is then the only way to call.
+                val replaceCallButton = showCallIcon && showOverflowMenu && swipeCalls && !call.isUnknownNumber
+                val showSimPicker = replaceCallButton && areMultipleSIMsAvailable && simAccounts.size > 1
+                itemRecentsSimPicker.beVisibleIf(showSimPicker)
+                // The picker is wider than the call button: tighten the second line's gaps so the number type still fits.
+                // Set in both branches, as picker rows and call-button rows recycle in the same list.
+                val gap = resources.getDimensionPixelSize(com.goodwy.commons.R.dimen.medium_margin)
+                itemRecentsNumber.updatePaddingRelative(end = if (showSimPicker) gap / 2 else gap)
+                if (showSimPicker) itemRecentsDateTime.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    marginStart = 0
+                    marginEnd = gap / 2
+                }
+                if (replaceCallButton) {
+                    // The wide tap area behind the call button would place a call on a near miss.
+                    itemRecentsInfo.beGone()
+                    itemRecentsInfoHolder.beGone()
+                    if (showSimPicker) bindSimPicker(call, callSim, this@RecentCallSwipeViewHolder)
+                } else {
+                    itemRecentsInfoHolder.beVisible()
+                }
+                //swipe
                 swipeLeftIcon.setImageResource(swipeActionImageResource(swipeLeftAction))
                 swipeLeftIcon.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeLeftIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeLeftAction))
+                swipeLeftIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeLeftAction, callSim))
 
-                val swipeRightAction = if (isRTL) activity.config.swipeLeftAction else activity.config.swipeRightAction
                 swipeRightIcon.setImageResource(swipeActionImageResource(swipeRightAction))
                 swipeRightIcon.setColorFilter(properPrimaryColor.getContrastColor())
-                swipeRightIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeRightAction))
+                swipeRightIconHolder.backgroundTintList = ColorStateList.valueOf(swipeActionColor(call, swipeRightAction, callSim))
 
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Left, swipeLeftAction != SWIPE_ACTION_NONE)
                 itemRecentsHolder.setDirectionEnabled(SwipeDirection.Right, swipeRightAction != SWIPE_ACTION_NONE)
@@ -1015,8 +1052,8 @@ class RecentCallsAdapter(
                 }
 
                 if (activity.config.swipeRipple) {
-                    itemRecentsHolder.setRippleColor(SwipeDirection.Left, swipeActionColor(call, swipeLeftAction))
-                    itemRecentsHolder.setRippleColor(SwipeDirection.Right, swipeActionColor(call, swipeRightAction))
+                    itemRecentsHolder.setRippleColor(SwipeDirection.Left, swipeActionColor(call, swipeLeftAction, callSim))
+                    itemRecentsHolder.setRippleColor(SwipeDirection.Right, swipeActionColor(call, swipeRightAction, callSim))
                 }
 
                 itemRecentsHolder.useHapticFeedback = activity.config.swipeVibration
@@ -1049,6 +1086,39 @@ class RecentCallsAdapter(
                         else swipeLeftIcon.slideLeftReturn(swipeLeftIconHolder)
                     }
                 }
+            }
+        }
+    }
+
+    // Tapping a SIM saves it for the number (same setting as the profile's "Always use this SIM"); it never calls.
+    private fun ItemRecentCallSwipeBinding.bindSimPicker(call: RecentCall, selected: SIMAccount?, holder: ViewHolder) {
+        val buttons = listOf(
+            Triple(itemRecentsSim1Button, itemRecentsSim1Icon, itemRecentsSim1Id),
+            Triple(itemRecentsSim2Button, itemRecentsSim2Icon, itemRecentsSim2Id),
+        )
+        buttons.forEachIndexed { index, (button, icon, id) ->
+            val sim = simAccounts[index]
+            val isSelected = sim.handle == selected?.handle
+            icon.background.mutate().setTint(if (isSelected) sim.color else textColor)
+            icon.background.alpha = if (isSelected) 255 else 70
+            icon.setColorFilter(if (isSelected) Color.WHITE else textColor.adjustAlpha(0.6f))
+            id.setTextColor(if (isSelected) sim.color else textColor.adjustAlpha(0.6f).getContrastColor())
+            button.isSelected = isSelected
+            button.contentDescription = sim.label
+            button.setOnClickListener {
+                if (actModeCallback.isSelectable) {
+                    holder.viewClicked(call)
+                    return@setOnClickListener
+                }
+                if (activity.config.getCustomSIM(call.phoneNumber) == sim.handle) return@setOnClickListener
+                activity.config.saveCustomSIM(call.phoneNumber, sim.handle)
+                button.performHapticFeedback()
+                // Rows of the same number and the swipe colours depend on the saved SIM.
+                notifyItemRangeChanged(0, itemCount)
+            }
+            button.setOnLongClickListener {
+                showPopupMenu(overflowMenuAnchor, call)
+                true
             }
         }
     }
@@ -1099,12 +1169,16 @@ class RecentCallsAdapter(
         }
     }
 
-    private fun swipeActionColor(call: RecentCall, swipeAction: Int): Int {
+    // Mirrors swipeAction(): anything but these actions calls.
+    private fun swipeActionCalls(swipeAction: Int): Boolean = swipeAction !in
+        listOf(SWIPE_ACTION_NONE, SWIPE_ACTION_DELETE, SWIPE_ACTION_MESSAGE, SWIPE_ACTION_WHATSAPP, SWIPE_ACTION_BLOCK)
+
+    private fun swipeActionColor(call: RecentCall, swipeAction: Int, callSim: SIMAccount?): Int {
         val defaultSim = if (activity.config.currentSIMCardIndex == 0) 1 else 2
         // if we're calling with the same SIM that was used to call us then highlight using that SIMs color
         // but only if we have the sim ID
         val simIndex: Int = if (call.simID > 0 && call.simID < 5 && activity.config.callUsingSameSim) call.simID else defaultSim
-        val simColor = activity.config.simIconsColors[simIndex]
+        val simColor = callSim?.color ?: activity.config.simIconsColors[simIndex]
         return when (swipeAction) {
             SWIPE_ACTION_DELETE -> resources.getColor(R.color.red_call, activity.theme)
             SWIPE_ACTION_MESSAGE -> resources.getColor(R.color.ic_messages, activity.theme)
@@ -1154,12 +1228,14 @@ class RecentCallsAdapter(
     }
 
     private fun callRecentNumber(recentCall: RecentCall) {
-        if (activity.config.callUsingSameSim && recentCall.simID > 0) {
-            val sim = recentCall.simID == 1
-            activity.callContactWithSim(recentCall.phoneNumber, sim)
-        }
-        else {
+        if (!areMultipleSIMsAvailable) {
             activity.launchCallIntent(recentCall.phoneNumber, key = BuildConfig.RIGHT_APP_KEY)
+            return
+        }
+        // Same resolver as the dialpad SIM picker's highlight, so a swipe calls with the highlighted SIM.
+        activity.handlePermission(PERMISSION_READ_PHONE_STATE) { granted ->
+            val handle = if (granted) activity.recentCallSim(recentCall, simAccounts)?.handle else null
+            activity.launchCallIntent(recentCall.phoneNumber, handle, BuildConfig.RIGHT_APP_KEY)
         }
     }
 
