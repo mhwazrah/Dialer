@@ -5,6 +5,7 @@ import android.content.Intent
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import androidx.core.content.IntentCompat
 import com.goodwy.commons.R
 import com.goodwy.commons.activities.BaseSimpleActivity
 import com.goodwy.commons.dialogs.CallConfirmationDialog
@@ -73,7 +74,8 @@ fun BaseSimpleActivity.callContactWithSim(
     recipient: String,
     useMainSIM: Boolean
 ) {
-    handlePermission(PERMISSION_READ_PHONE_STATE) {
+    handlePermission(PERMISSION_READ_PHONE_STATE) { granted ->
+        if (!granted) return@handlePermission
         val wantedSimIndex = if (useMainSIM) 0 else 1
         val handle = getAvailableSIMCardLabels()
             .sortedBy { it.id }
@@ -105,22 +107,21 @@ fun SimpleActivity.getHandleToUse(
     callback: (handle: PhoneAccountHandle?) -> Unit
 ) {
     handlePermission(PERMISSION_READ_PHONE_STATE) {
-        if (it) {
-            val defaultHandle =
-                telecomManager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL)
-            when {
-                forceSimSelector -> showSelectSimDialog(phoneNumber, callback)
-                intent?.hasExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE) == true -> {
-                    callback(intent.getParcelableExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE)!!)
-                }
-
-                config.getCustomSIM(phoneNumber) != null && areMultipleSIMsAvailable() -> {
-                    callback(config.getCustomSIM(phoneNumber))
-                }
-
-                defaultHandle != null -> callback(defaultHandle)
-                else -> showSelectSimDialog(phoneNumber, callback)
-            }
+        if (!it) {
+            callback(null)
+            return@handlePermission
+        }
+        val defaultHandle = telecomManager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL)
+        val intentHandle = intent?.let { sourceIntent ->
+            IntentCompat.getParcelableExtra(sourceIntent, TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, PhoneAccountHandle::class.java)
+        }
+        val customHandle = config.getCustomSIM(phoneNumber)
+        when {
+            forceSimSelector -> showSelectSimDialog(phoneNumber, callback)
+            intentHandle != null -> callback(intentHandle)
+            customHandle != null && areMultipleSIMsAvailable() -> callback(customHandle)
+            defaultHandle != null -> callback(defaultHandle)
+            else -> showSelectSimDialog(phoneNumber, callback)
         }
     }
 }

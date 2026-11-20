@@ -25,15 +25,12 @@ import com.goodwy.dialer.extensions.*
 import com.goodwy.dialer.helpers.RecentsHelper
 import com.goodwy.dialer.models.RecentCall
 import com.goodwy.dialer.helpers.*
-import com.google.gson.Gson
-import com.mikhaellopez.rxanimation.RxAnimation
-import com.mikhaellopez.rxanimation.shake
+import com.goodwy.dialer.helpers.gson
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.system.exitProcess
 
 class SettingsActivity : SimpleActivity() {
     companion object {
@@ -83,26 +80,19 @@ class SettingsActivity : SimpleActivity() {
 
 //        setupEdgeToEdge(padBottomSystem = listOf(settingsNestedScrollview))
 
-        val iapList: ArrayList<String> = arrayListOf(productIdX1, productIdX2, productIdX3)
-        val subList: ArrayList<String> =
-            arrayListOf(
-                subscriptionIdX1, subscriptionIdX2, subscriptionIdX3,
-                subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3
-            )
-        val ruStoreList: ArrayList<String> =
-            arrayListOf(
-                productIdX1, productIdX2, productIdX3,
-                subscriptionIdX1, subscriptionIdX2, subscriptionIdX3,
-                subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3
-            )
-        PurchaseHelper().checkPurchase(
-            this@SettingsActivity,
-            iapList = iapList,
-            subList = subList,
-            ruStoreList = ruStoreList
-        ) { updatePro ->
-            if (updatePro) updatePro()
-        }
+        boundStateKey = externalStateKey()
+        bindSettings()
+    }
+
+    private var hasMultipleSims = false
+
+    // Colours, pro state and SIM count are the only inputs that change while this screen is away:
+    // the rows are rebound only when they changed, otherwise resume refreshes just the external-state rows.
+    private var boundStateKey = ""
+
+    private fun externalStateKey(): String {
+        hasMultipleSims = areMultipleSIMsAvailable()
+        return "${getProperTextColor()}|${getProperPrimaryColor()}|${getProperBackgroundColor()}|${checkPro()}|$hasMultipleSims"
     }
 
     override fun onResume() {
@@ -111,6 +101,18 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsAppbar.setBackgroundColor(Color.TRANSPARENT)
         binding.settingsToolbar.setBackgroundColor(Color.TRANSPARENT)
 
+        val stateKey = externalStateKey()
+        if (stateKey != boundStateKey) {
+            boundStateKey = stateKey
+            bindSettings()
+        } else {
+            setupPurchaseThankYou()
+            setupManageBlockedNumbers()
+        }
+    }
+
+    private fun bindSettings() {
+        updatePro()
         setupPurchaseThankYou()
 
         setupCustomizeColors()
@@ -183,7 +185,6 @@ class SettingsActivity : SimpleActivity() {
         setupShowSearchBar()
 
         setupGroupCalls()
-        setupGroupSubsequentCalls()
         setupQueryLimitRecent()
         setupShowDividers()
         setupShowContactThumbnails()
@@ -328,7 +329,8 @@ class SettingsActivity : SimpleActivity() {
             settingsUseEnglishHolder.setOnClickListener {
                 settingsUseEnglish.toggle()
                 config.useEnglish = settingsUseEnglish.isChecked
-                exitProcess(0)
+                config.needRestart = true
+                recreate()
             }
         }
     }
@@ -347,9 +349,20 @@ class SettingsActivity : SimpleActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun setupManageBlockedNumbers() = binding.apply {
-        settingsManageBlockedNumbersCount.text =
-            if (baseConfig.blockingEnabled) getBlockedNumbers().size.toString()
-            else getString(R.string.off)
+        if (baseConfig.blockingEnabled) {
+            ensureBackgroundThread {
+                val count = try {
+                    getBlockedNumbers().size.toString()
+                } catch (_: SecurityException) {
+                    "0"
+                }
+                runOnUiThread {
+                    if (!isDestroyed) settingsManageBlockedNumbersCount.text = count
+                }
+            }
+        } else {
+            settingsManageBlockedNumbersCount.text = getString(R.string.off)
+        }
 
         val getProperTextColor = getProperTextColor()
         val red = resources.getColor(R.color.red_missed, theme)
@@ -398,7 +411,6 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsChangeDateTimeFormatHolder.setOnClickListener {
             ChangeDateTimeFormatDialog(this, true) {
                 updateDateTimeFormat()
-                config.needRestart = true
             }
         }
     }
@@ -427,7 +439,6 @@ class SettingsActivity : SimpleActivity() {
             ) {
                 config.fontSize = it as Int
                 settingsFontSize.text = getFontSizeText()
-                config.needRestart = true
             }
         }
     }
@@ -544,7 +555,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = 1
             ) {
                 config.screenSlideAnimation = it as Int
-                config.needRestart = true
                 binding.settingsScreenSlideAnimation.text = getScreenSlideAnimationText()
             }
         }
@@ -565,7 +575,6 @@ class SettingsActivity : SimpleActivity() {
         settingsShowDividersHolder.setOnClickListener {
             settingsShowDividers.toggle()
             config.useDividers = settingsShowDividers.isChecked
-            config.needRestart = true
         }
     }
 
@@ -604,14 +613,7 @@ class SettingsActivity : SimpleActivity() {
                 ) {
                     config.contactThumbnailsSize = it as Int
                     settingsContactThumbnailsSize.text = getContactThumbnailsSizeText()
-                    config.needRestart = true
                 }
-            } else {
-                RxAnimation.from(settingsContactThumbnailsSizeHolder)
-                    .shake(shakeTranslation = 2f)
-                    .subscribe()
-
-                showSnackbar(binding.root)
             }
         }
     }
@@ -642,7 +644,6 @@ class SettingsActivity : SimpleActivity() {
             ) {
                 config.ellipsizeMode = it as Int
                 settingsEllipsizeMode.text = getEllipsizeModeText()
-                config.needRestart = true
             }
         }
     }
@@ -670,7 +671,6 @@ class SettingsActivity : SimpleActivity() {
             settingsColoredContacts.toggle()
             config.useColoredContacts = settingsColoredContacts.isChecked
             settingsContactColorListHolder.beVisibleIf(config.useColoredContacts)
-            config.needRestart = true
         }
     }
 
@@ -696,7 +696,6 @@ class SettingsActivity : SimpleActivity() {
                     if (config.contactColorList != newValue) {
                         config.contactColorList = newValue
                         settingsContactColorListIcon.setImageResource(getContactsColorListIcon(config.contactColorList))
-                        config.needRestart = true
                     }
                 }
             }
@@ -750,12 +749,6 @@ class SettingsActivity : SimpleActivity() {
                     if (pro) {
                         config.backgroundCallScreen = it
                         binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-                    } else {
-                        RxAnimation.from(binding.settingsBackgroundCallScreenHolder)
-                            .shake(shakeTranslation = 2f)
-                            .subscribe()
-
-                        showSnackbar(binding.root)
                     }
                 } else {
                     config.backgroundCallScreen = it
@@ -828,12 +821,6 @@ class SettingsActivity : SimpleActivity() {
                 if (pro) {
                     config.answerStyle = it
                     binding.settingsAnswerStyle.text = getAnswerStyleText()
-                } else {
-                    RxAnimation.from(binding.settingsAnswerStyleHolder)
-                        .shake(shakeTranslation = 2f)
-                        .subscribe()
-
-                    showSnackbar(binding.root)
                 }
             } else {
                 config.answerStyle = it
@@ -875,12 +862,6 @@ class SettingsActivity : SimpleActivity() {
                 if (pro) {
                     config.callButtonStyle = it
                     binding.settingsCallButtonStyle.text = getCallButtonStyleText()
-                } else {
-                    RxAnimation.from(binding.settingsCallButtonStyleHolder)
-                        .shake(shakeTranslation = 2f)
-                        .subscribe()
-
-                    showSnackbar(binding.root)
                 }
             } else {
                 config.callButtonStyle = it
@@ -1070,39 +1051,45 @@ class SettingsActivity : SimpleActivity() {
     }
 
     private fun importCallHistory(uri: Uri) {
-        try {
-            val jsonString = contentResolver.openInputStream(uri)!!.use { inputStream ->
-                inputStream.bufferedReader().readText()
-            }
+        ensureBackgroundThread {
+            try {
+                val jsonString = contentResolver.openInputStream(uri)!!.use { inputStream ->
+                    inputStream.bufferedReader().readText()
+                }
 
-            val objects = Json.decodeFromString<List<RecentCall>>(jsonString)
+                val objects = Json.decodeFromString<List<RecentCall>>(jsonString)
 
-            if (objects.isEmpty()) {
-                toast(R.string.no_entries_for_importing)
-                return
-            }
+                if (objects.isEmpty()) {
+                    toast(R.string.no_entries_for_importing)
+                    return@ensureBackgroundThread
+                }
 
-            RecentsHelper(this).restoreRecentCalls(this, objects) {
-                toast(R.string.importing_successful)
+                // permission handling must run on the UI thread
+                runOnUiThread {
+                    RecentsHelper(this).restoreRecentCalls(this, objects) { inserted ->
+                        toast(if (inserted > 0) R.string.importing_successful else R.string.no_entries_for_importing)
+                    }
+                }
+            } catch (_: SerializationException) {
+                toast(R.string.invalid_file_format)
+            } catch (_: IllegalArgumentException) {
+                toast(R.string.invalid_file_format)
+            } catch (e: Exception) {
+                showErrorToast(e)
             }
-        } catch (_: SerializationException) {
-            toast(R.string.invalid_file_format)
-        } catch (_: IllegalArgumentException) {
-            toast(R.string.invalid_file_format)
-        } catch (e: Exception) {
-            showErrorToast(e)
         }
     }
 
     private fun exportCallHistory(recents: List<RecentCall>, uri: Uri) {
         if (recents.isEmpty()) {
             toast(R.string.no_entries_for_exporting)
-        } else {
+            return
+        }
+        ensureBackgroundThread {
             try {
-                val outputStream = contentResolver.openOutputStream(uri)!!
-
                 val jsonString = Json.encodeToString(recents)
-                outputStream.use {
+                // "wt" truncates, so a shorter export over an existing file leaves no stale tail
+                contentResolver.openOutputStream(uri, "wt")!!.use {
                     it.write(jsonString.toByteArray())
                 }
                 toast(R.string.exporting_successful)
@@ -1194,16 +1181,6 @@ class SettingsActivity : SimpleActivity() {
     }
 
 
-    private fun setupGroupSubsequentCalls() {
-        binding.apply {
-            settingsGroupSubsequentCalls.isChecked = config.groupSubsequentCalls
-            settingsGroupSubsequentCallsHolder.setOnClickListener {
-                settingsGroupSubsequentCalls.toggle()
-                config.groupSubsequentCalls = settingsGroupSubsequentCalls.isChecked
-            }
-        }
-    }
-
 //    private fun setupGroupCallsByDate() {
 //        binding.apply {
 //            settingsGroupCallsByDate.isChecked = config.groupCallsByDate
@@ -1263,7 +1240,6 @@ class SettingsActivity : SimpleActivity() {
             settingsShowNicknameInsteadNamesHolder.setOnClickListener {
                 settingsShowNicknameInsteadNames.toggle()
                 config.showNicknameInsteadNames = settingsShowNicknameInsteadNames.isChecked
-                config.needRestart = true
             }
         }
     }
@@ -1273,7 +1249,6 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsFormatPhoneNumbersHolder.setOnClickListener {
             binding.settingsFormatPhoneNumbers.toggle()
             config.formatPhoneNumbers = binding.settingsFormatPhoneNumbers.isChecked
-            config.needRestart = true
         }
     }
 
@@ -1289,7 +1264,7 @@ class SettingsActivity : SimpleActivity() {
 
     private fun setupCallUsingSameSim() {
         binding.apply {
-            settingsCallFromSameSimHolder.beVisibleIf(areMultipleSIMsAvailable())
+            settingsCallFromSameSimHolder.beVisibleIf(hasMultipleSims)
             settingsCallFromSameSim.isChecked = config.callUsingSameSim
             settingsCallFromSameSimHolder.setOnClickListener {
                 settingsCallFromSameSim.toggle()
@@ -1309,7 +1284,7 @@ class SettingsActivity : SimpleActivity() {
     }
 
     private fun setupSimDialogStyle() {
-        binding.settingsSimDialogStyleHolder.beGoneIf(!areMultipleSIMsAvailable())
+        binding.settingsSimDialogStyleHolder.beGoneIf(!hasMultipleSims)
         binding.settingsSimDialogStyle.text = getSimDialogStyleText()
         binding.settingsSimDialogStyleHolder.setOnClickListener {
             val items = arrayListOf(
@@ -1398,7 +1373,7 @@ class SettingsActivity : SimpleActivity() {
 
     private fun setupColorSimIcons() {
         binding.apply {
-            settingsColorSimCardIconsHolder.beGoneIf(!areMultipleSIMsAvailable())
+            settingsColorSimCardIconsHolder.beGoneIf(!hasMultipleSims)
             settingsColorSimCardIcons.isChecked = config.colorSimIcons
             settingsColorSimCardIconsHolder.setOnClickListener {
                 settingsColorSimCardIcons.toggle()
@@ -1458,23 +1433,6 @@ class SettingsActivity : SimpleActivity() {
                         }
                     }
                 }
-            } else {
-                arrayOf(
-                    settingsSimCardColor1Holder,
-                    settingsSimCardColor2Holder
-                ).forEach {
-                    it.setOnClickListener { view ->
-                        RxAnimation.from(binding.settingsPurchaseThankYouHolder)
-                            .shake()
-                            .subscribe()
-
-                        RxAnimation.from(view)
-                            .shake(shakeTranslation = 2f)
-                            .subscribe()
-
-                        showSnackbar(binding.root)
-                    }
-                }
             }
         }
     }
@@ -1488,9 +1446,8 @@ class SettingsActivity : SimpleActivity() {
             ).forEach {
                 it.alpha = if (pro) 1f else 0.4f
             }
-            val areMultipleSIMsAvailable = areMultipleSIMsAvailable()
-            settingsSimCardColor2Holder.beVisibleIf(areMultipleSIMsAvailable)
-            if (areMultipleSIMsAvailable) settingsSimCardColor1Icon.setImageResource(R.drawable.ic_phone_one_vector)
+            settingsSimCardColor2Holder.beVisibleIf(hasMultipleSims)
+            if (hasMultipleSims) settingsSimCardColor1Icon.setImageResource(R.drawable.ic_phone_one_vector)
             settingsSimCardColor1Icon.background.setTint(config.simIconsColors[1])
             settingsSimCardColor2Icon.background.setTint(config.simIconsColors[2])
             settingsSimCardColor1Icon.setColorFilter(config.simIconsColors[1].getContrastColor())
@@ -1508,15 +1465,9 @@ class SettingsActivity : SimpleActivity() {
         baseConfig.simIconsColors = recentColors
 
         if (needUpdate) {
-            val recents = config.parseRecentCallsCache()
-            val recentsNew = mutableListOf<RecentCall>()
-            recents.forEach { recent ->
-                val recentNew = if (recent.simID == index) recent.copy(simColor = color) else recent
-                recentsNew.add(recentNew)
-            }
-            config.recentCallsCache = Gson().toJson(recentsNew.take(RECENT_CALL_CACHE_SIZE))
+            // The cached rows carry the old SIM colour; drop them and let the next load rebuild.
+            config.recentCallsCache = ""
             config.needUpdateRecents = true
-            config.needRestart = true
         }
     }
 
@@ -1588,7 +1539,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = SWIPE_ACTION_CALL
             ) {
                 config.onFavoriteClick = it as Int
-                config.needRestart = true
                 settingsOnFavoriteClick.text = getOnRecentOrContactClickText(config.onFavoriteClick, true)
             }
         }
@@ -1613,7 +1563,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = SWIPE_ACTION_CALL
             ) {
                 config.onRecentClick = it as Int
-                config.needRestart = true
                 settingsOnRecentClick.text = getOnRecentOrContactClickText(config.onRecentClick, false)
             }
         }
@@ -1639,7 +1588,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = SWIPE_ACTION_CALL
             ) {
                 config.onContactClick = it as Int
-                config.needRestart = true
                 settingsOnContactClick.text = getOnRecentOrContactClickText(config.onContactClick, true)
             }
         }
@@ -1663,7 +1611,6 @@ class SettingsActivity : SimpleActivity() {
             settingsUseSwipeToActionHolder.setOnClickListener {
                 settingsUseSwipeToAction.toggle()
                 config.useSwipeToAction = settingsUseSwipeToAction.isChecked
-                config.needRestart = true
                 updateSwipeToActionVisible()
             }
         }
@@ -1688,7 +1635,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = 2
             ) {
                 config.swipeToActionWidth = it as Int
-                config.needRestart = true
                 settingsSwipeWidth.text = getSwipeWidthText(config.swipeToActionWidth)
             }
         }
@@ -1720,7 +1666,6 @@ class SettingsActivity : SimpleActivity() {
             settingsSwipeVibrationHolder.setOnClickListener {
                 settingsSwipeVibration.toggle()
                 config.swipeVibration = settingsSwipeVibration.isChecked
-                config.needRestart = true
             }
         }
     }
@@ -1731,7 +1676,6 @@ class SettingsActivity : SimpleActivity() {
             settingsSwipeRippleHolder.setOnClickListener {
                 settingsSwipeRipple.toggle()
                 config.swipeRipple = settingsSwipeRipple.isChecked
-                config.needRestart = true
             }
         }
     }
@@ -1759,7 +1703,6 @@ class SettingsActivity : SimpleActivity() {
                 defaultItemId = SWIPE_ACTION_MESSAGE
             ) {
                 config.swipeRightAction = it as Int
-                config.needRestart = true
                 settingsSwipeRightAction.text = getSwipeActionText(false)
                 settingsSkipDeleteConfirmationHolder.beVisibleIf(config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE)
             }
@@ -1793,18 +1736,11 @@ class SettingsActivity : SimpleActivity() {
                     defaultItemId = SWIPE_ACTION_DELETE
                 ) {
                     config.swipeLeftAction = it as Int
-                    config.needRestart = true
                     settingsSwipeLeftAction.text = getSwipeActionText(true)
                     settingsSkipDeleteConfirmationHolder.beVisibleIf(
                         config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE
                     )
                 }
-            } else {
-                RxAnimation.from(settingsSwipeLeftActionHolder)
-                    .shake(shakeTranslation = 2f)
-                    .subscribe()
-
-                showSnackbar(binding.root)
             }
         }
     }
@@ -1928,7 +1864,6 @@ class SettingsActivity : SimpleActivity() {
             settingsRelativeDateHolder.setOnClickListener {
                 settingsRelativeDate.toggle()
                 config.useRelativeDate = settingsRelativeDate.isChecked
-                config.needRestart = true
             }
         }
     }

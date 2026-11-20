@@ -4,16 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.ContactsContract
+import android.telephony.PhoneNumberUtils
 import android.util.TypedValue
 import android.view.View
-import androidx.appcompat.content.res.AppCompatResources
-import com.goodwy.commons.dialogs.NewAppDialog
 import com.goodwy.commons.extensions.getContactPublicUri
-import com.goodwy.commons.extensions.isNewApp
 import com.goodwy.commons.extensions.isPackageInstalled
 import com.goodwy.commons.extensions.launchActivityIntent
-import com.goodwy.commons.extensions.launchSendSMSIntent
-import com.goodwy.commons.extensions.launchViewContactIntent
 import com.goodwy.commons.extensions.showSupportSnackbar
 import com.goodwy.commons.extensions.toast
 import com.goodwy.commons.helpers.CONTACT_ID
@@ -48,22 +44,18 @@ fun Activity.startContactDetailsIntent(contact: Contact) {
     val simpleContactsDebug = "com.goodwy.contacts.debug"
     val newContacts = "dev.goodwy.contacts"
     val newContactsDebug = "dev.goodwy.contacts.debug"
+    val contactsPackage = listOf(newContacts, simpleContacts, newContactsDebug, simpleContactsDebug)
+        .firstOrNull { isPackageInstalled(it) }
     val isPrivateContact = contact.rawId > FIRST_CONTACT_ID
         && contact.contactId > FIRST_CONTACT_ID
         && contact.rawId == contact.contactId
-        && (isPackageInstalled(simpleContacts) || isPackageInstalled(simpleContactsDebug) ||
-            isPackageInstalled(newContacts) || isPackageInstalled(newContactsDebug))
+        && contactsPackage != null
     if (isPrivateContact) {
         Intent().apply {
             action = Intent.ACTION_VIEW
             putExtra(CONTACT_ID, contact.rawId)
             putExtra(IS_PRIVATE, true)
-            `package` = when {
-                isPackageInstalled(newContacts) -> newContacts
-                isPackageInstalled(simpleContacts) -> simpleContacts
-                isPackageInstalled(newContactsDebug) -> newContactsDebug
-                else -> simpleContactsDebug
-            }
+            `package` = contactsPackage
             setDataAndType(
                 ContactsContract.Contacts.CONTENT_LOOKUP_URI,
                 "vnd.android.cursor.dir/person"
@@ -73,16 +65,13 @@ fun Activity.startContactDetailsIntent(contact: Contact) {
         }
     } else {
         ensureBackgroundThread {
-            val lookupKey =
-                SimpleContactsHelper(this).getContactLookupKey((contact).rawId.toString())
-            val publicUri =
-                Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey)
+            val lookupKey = SimpleContactsHelper(this).getContactLookupKey(contact.rawId.toString())
             runOnUiThread {
-//                launchViewContactIntent(publicUri)
+                // Without a lookup key there is no contact to open (e.g. a company-only entry)
+                if (lookupKey.isNullOrBlank()) return@runOnUiThread
                 Intent().apply {
                     action = ContactsContract.QuickContact.ACTION_QUICK_CONTACT
-                    data = publicUri
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    data = ContactsContract.Contacts.getLookupUri(contact.contactId.toLong(), lookupKey)
                     launchActivityIntent(this)
                 }
             }
@@ -176,36 +165,10 @@ fun SimpleActivity.showSnackbar(view: View) {
     showSupportSnackbar(view) { launchPurchase() }
 }
 
-fun Activity.launchSendSMSIntentRecommendation(recipient: String) {
-    val isNewApp = true //isNewApp()
-    val simpleSmsMessenger = "com.goodwy.smsmessenger"
-    val simpleSmsMessengerDebug = "com.goodwy.smsmessenger.debug"
-    val newSimpleSmsMessenger = "dev.goodwy.messages"
-    val newSimpleSmsMessengerDebug = "dev.goodwy.messages.debug"
-    if ((0..config.appRecommendationDialogCount).random() == 2 &&
-        (!isPackageInstalled(simpleSmsMessenger) && !isPackageInstalled(simpleSmsMessengerDebug) &&
-            !isPackageInstalled(newSimpleSmsMessenger) && !isPackageInstalled(newSimpleSmsMessengerDebug))
-    ) {
-        NewAppDialog(
-            activity = this,
-            packageName = if (isNewApp) newSimpleSmsMessenger else simpleSmsMessenger,
-            title = getString(R.string.recommendation_dialog_messages_g),
-            text = if (isNewApp) "AlRight Messages" else getString(R.string.right_sms_messenger),
-            drawable = AppCompatResources.getDrawable(
-                this,
-                if (isNewApp) R.drawable.ic_sms_messenger_new else R.drawable.ic_sms_messenger
-            )
-        ) {
-            launchSendSMSIntent(recipient)
-        }
-    } else {
-        launchSendSMSIntent(recipient)
-    }
-}
-
 fun Activity.launchSendWhatsAppIntent(phoneNumber: String) {
-    val digits = phoneNumber.filter { it.isDigit() }
-    if (digits.isEmpty()) {
+    // wa.me wants the international number without the "+"
+    val digits = PhoneNumberUtils.formatNumberToE164(phoneNumber, config.regionHint())?.drop(1)
+    if (digits.isNullOrEmpty()) {
         toast(R.string.no_app_found)
         return
     }
@@ -216,32 +179,6 @@ fun Activity.launchSendWhatsAppIntent(phoneNumber: String) {
         startActivity(intent)
     } catch (_: android.content.ActivityNotFoundException) {
         toast(R.string.no_app_found)
-    }
-}
-
-fun Activity.startContactDetailsIntentRecommendation(contact: Contact) {
-    val isNewApp = true //isNewApp()
-    val simpleContacts = "com.goodwy.contacts"
-    val simpleContactsDebug = "com.goodwy.contacts.debug"
-    val newContacts = "dev.goodwy.contacts"
-    val newContactsDebug = "dev.goodwy.contacts.debug"
-    if ((0..config.appRecommendationDialogCount).random() == 2 &&
-        (!isPackageInstalled(simpleContacts) && !isPackageInstalled(simpleContactsDebug)  &&
-            !isPackageInstalled(newContacts) && !isPackageInstalled(newContactsDebug))
-    ) {
-        NewAppDialog(
-            activity = this,
-            packageName = if (isNewApp) newContacts else simpleContacts,
-            title = getString(R.string.recommendation_dialog_contacts_g),
-            text = if (isNewApp) "AlRight Contacts" else getString(R.string.right_contacts),
-            drawable = AppCompatResources.getDrawable(
-                this,
-                if (isNewApp) R.drawable.ic_contacts_new else R.drawable.ic_contacts)
-        ) {
-            startContactDetailsIntent(contact)
-        }
-    } else {
-        startContactDetailsIntent(contact)
     }
 }
 
@@ -276,25 +213,6 @@ fun applyDialpadNumberFontSize(
         listOf(dialpad1Ios, dialpad2Ios, dialpad3Ios, dialpad4Ios, dialpad5Ios,
             dialpad6Ios, dialpad7Ios, dialpad8Ios, dialpad9Ios, dialpad0Ios, dialpadPlusIos).forEach {
             it.setTextSize(TypedValue.COMPLEX_UNIT_PX, scaledPx)
-        }
-    }
-}
-
-fun Activity.newAppRecommendation() {
-    if (resources.getBoolean(R.bool.is_foss)) {
-        if (!isNewApp()) {
-            if ((0..config.newAppRecommendationDialogCount).random() == 2) {
-                val packageName = "enohp.ywdoog.ved".reversed()
-                NewAppDialog(
-                    activity = this,
-                    packageName = packageName,
-                    title = getString(com.goodwy.strings.R.string.notification_of_new_application),
-                    text = "AlRight Phone",
-                    drawable = AppCompatResources.getDrawable(this, R.drawable.ic_dialer_new),
-                    showSubtitle = true
-                ) {
-                }
-            }
         }
     }
 }

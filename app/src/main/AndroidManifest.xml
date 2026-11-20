@@ -206,7 +206,6 @@
         <!--android:showWhenLocked="true" - do not add-->
         <activity
             android:name=".activities.CallActivity"
-            android:directBootAware="true"
             android:excludeFromRecents="true"
             android:configChanges="uiMode"
             android:exported="false"
@@ -285,7 +284,6 @@
 
         <service
             android:name=".services.CallService"
-            android:directBootAware="true"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_INCALL_SERVICE">
@@ -329,7 +327,6 @@
 
         <receiver
             android:name=".receivers.CallActionReceiver"
-            android:directBootAware="true"
             android:enabled="true"
             android:exported="false" />
 
@@ -339,9 +336,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
-                <action android:name="com.goodwy.phone.action.MISSED_CALL_CANCEL" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".receivers.MissedCallCancelReceiver"
+            android:exported="false" />
 
         <activity-alias
             android:name=".activities.SplashActivity.Original"

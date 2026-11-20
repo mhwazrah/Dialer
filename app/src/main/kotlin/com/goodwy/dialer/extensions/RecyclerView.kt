@@ -2,18 +2,20 @@ package com.goodwy.dialer.extensions
 
 import androidx.recyclerview.widget.RecyclerView
 
+// Callbacks are dropped once the list is detached, so a finished screen is never touched.
 fun RecyclerView.runAfterAnimations(callback: () -> Unit) {
     if (isComputingLayout) {
-        post { runAfterAnimations(callback) }
+        postOnAnimation { runAfterAnimations(callback) }
         return
     }
 
+    val runIfAttached = Runnable { if (isAttachedToWindow) callback() }
     val animator = itemAnimator
     if (animator == null) {
-        post(callback)
+        postOnAnimation(runIfAttached)
     } else {
         animator.isRunning {
-            post(callback)
+            postOnAnimation(runIfAttached)
         }
     }
 }

@@ -3,57 +3,56 @@ package com.goodwy.dialer.services
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import com.goodwy.commons.extensions.baseConfig
-import com.goodwy.commons.extensions.getMyContactsCursor
 import com.goodwy.commons.extensions.isNumberBlocked
 import com.goodwy.commons.helpers.BLOCKING_TYPE_REJECT
 import com.goodwy.commons.helpers.BLOCKING_TYPE_SILENCE
 import com.goodwy.commons.helpers.ContactLookupResult
-import com.goodwy.commons.helpers.SimpleContactsHelper
+
+import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.commons.helpers.isQPlus
 import com.goodwy.dialer.extensions.config
+import com.goodwy.dialer.extensions.lookupContactSync
 import com.goodwy.dialer.models.Events
 import org.greenrobot.eventbus.EventBus
 
 class SimpleCallScreeningService : CallScreeningService() {
 
+    // The blocked-number provider and contact lookup are I/O: decide on a worker thread, then respond (the system allows a few seconds).
     override fun onScreenCall(callDetails: Call.Details) {
-        val number = callDetails.handle?.schemeSpecificPart
-        when {
-            //To speed things up, we will not check any conditions if blocking is disabled
-            !baseConfig.blockingEnabled -> {
-                respondToCall(callDetails, isBlocked = false)
+        ensureBackgroundThread {
+            val isBlocked = try {
+                shouldBlock(callDetails)
+            } catch (_: SecurityException) {
+                false
             }
-
-            number != null && isNumberBlocked(number) && baseConfig.blockingEnabled -> {
-                if (baseConfig.doNotBlockContactsAndRecent) {
-                    if (number in config.recentOutgoingNumbers) respondToCall(callDetails, isBlocked = false)
-                    else {
-                        val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-                        val result = SimpleContactsHelper(this).existsSync(number, privateCursor)
-                        respondToCall(callDetails, isBlocked = result == ContactLookupResult.NotFound)
-                    }
-                } else {
-                    respondToCall(callDetails, isBlocked = true)
-                }
-            }
-
-            number != null && baseConfig.blockUnknownNumbers && baseConfig.blockingEnabled -> {
-                if (number in config.recentOutgoingNumbers) respondToCall(callDetails, isBlocked = false)
-                else {
-                    val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-                    val result = SimpleContactsHelper(this).existsSync(number, privateCursor)
-                    respondToCall(callDetails, isBlocked = result == ContactLookupResult.NotFound)
-                }
-            }
-
-            number == null && baseConfig.blockHiddenNumbers && baseConfig.blockingEnabled -> {
-                respondToCall(callDetails, isBlocked = true)
-            }
-
-            else -> {
-                respondToCall(callDetails, isBlocked = false)
-            }
+            respondToCall(callDetails, isBlocked)
         }
+    }
+
+    private fun shouldBlock(callDetails: Call.Details): Boolean {
+        val number = callDetails.handle?.schemeSpecificPart
+        return when {
+            // Blocking only applies to incoming calls; outgoing calls (our app, another app, a car) must go through
+            isQPlus() && callDetails.callDirection == Call.Details.DIRECTION_OUTGOING -> false
+
+            //To speed things up, we will not check any conditions if blocking is disabled
+            !baseConfig.blockingEnabled -> false
+
+            number != null && isNumberBlocked(number) -> {
+                if (baseConfig.doNotBlockContactsAndRecent) isUnknownCaller(number) else true
+            }
+
+            number != null && baseConfig.blockUnknownNumbers -> isUnknownCaller(number)
+
+            number == null && baseConfig.blockHiddenNumbers -> true
+
+            else -> false
+        }
+    }
+
+    private fun isUnknownCaller(number: String): Boolean {
+        if (number in config.recentOutgoingNumbers) return false
+        return lookupContactSync(number) == ContactLookupResult.NotFound
     }
 
     private fun respondToCall(callDetails: Call.Details, isBlocked: Boolean) {

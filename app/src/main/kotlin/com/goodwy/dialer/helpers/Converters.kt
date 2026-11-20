@@ -10,10 +10,9 @@ import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
 
 class Converters {
-    private val gson = Gson()
     private val stringType = object : TypeToken<List<String>>() {}.type
 
-    fun jsonToStringList(value: String) = gson.fromJson<ArrayList<String>>(value, stringType)
+    fun jsonToStringList(value: String): ArrayList<String> = gson.fromJson<ArrayList<String>>(value, stringType) ?: arrayListOf()
 
     fun stringListToJson(list: ArrayList<String>) = gson.toJson(list)
 
@@ -36,10 +35,22 @@ class Converters {
     fun jsonToTimerState(value: String?): TimerState {
         if (value.isNullOrEmpty()) return TimerState.Idle
         return try {
-            gsonTimer.fromJson(value, StateWrapper::class.java).state
+            val state = gsonTimer.fromJson(value, StateWrapper::class.java).state
+            if (state is TimerState.Running && state.endTime == 0L) migrateLegacyRunning(state, value) else state
         } catch (_: Exception) {
             TimerState.Idle
         }
+    }
+
+    // Before 1.0.19 a running timer stored its remaining time as `tick` (rewritten every second) instead of an end
+    // time: continue it from that remaining time rather than treating it as already finished.
+    private fun migrateLegacyRunning(state: TimerState.Running, json: String): TimerState {
+        val tick = LEGACY_TICK.find(json)?.groupValues?.get(1)?.toLongOrNull() ?: return TimerState.Finished
+        return TimerState.Running(state.duration, System.currentTimeMillis() + tick)
+    }
+
+    private companion object {
+        val LEGACY_TICK = Regex(""""tick"\s*:\s*(\d+)""")
     }
 
     @TypeConverter

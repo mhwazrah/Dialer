@@ -20,24 +20,27 @@ class SelectSimButtonDialog(
 
     init {
 
-        val textColor = activity.baseConfig.simIconsColors[1].getContrastColor()
+        val sim1Color = activity.baseConfig.simIconsColors[1]
+        val sim2Color = activity.baseConfig.simIconsColors[2]
+        val cancelColor = 0xFFEB5545.toInt()
+        val padding = (2 * activity.resources.displayMetrics.density).toInt()
 
         activity.getAvailableSIMCardLabels().forEachIndexed { index, SIMAccount ->
             val indexText = index + 1
             if (indexText == 1) {
                 binding.sim1Button.apply {
-                    val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, activity.baseConfig.simIconsColors[1])
+                    val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, sim1Color)
                     background = drawable
-                    setPadding(2, 2, 2, 2)
-                    setTextColor(textColor)
+                    setPadding(padding, padding, padding, padding)
+                    setTextColor(sim1Color.getContrastColor())
                     setOnClickListener { selectedSIM(SIMAccount.handle, SIMAccount.label) }
                 }
             } else if (indexText == 2) {
                 binding.sim2Button.apply {
-                    val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, activity.baseConfig.simIconsColors[2])
+                    val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, sim2Color)
                     background = drawable
-                    setPadding(2,2,2,2)
-                    setTextColor(textColor)
+                    setPadding(padding, padding, padding, padding)
+                    setTextColor(sim2Color.getContrastColor())
                     setOnClickListener { selectedSIM(SIMAccount.handle, SIMAccount.label) }
                 }
             }
@@ -48,18 +51,15 @@ class SelectSimButtonDialog(
                 val title = activity.getString(R.string.select_sim)
                 activity.setupDialogStuff(binding.root, this, titleText = title) { alertDialog ->
                     dialog = alertDialog
+                    alertDialog.setOnDismissListener { onDismiss() }
                 }
             }
 
-        dialog?.setOnDismissListener {
-            onDismiss()
-        }
-
         binding.cancelButton.apply {
-            val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, 0xFFEB5545.toInt())
+            val drawable = resources.getColoredDrawableWithColor(activity, R.drawable.button_gray_bg, cancelColor)
             background = drawable
-            setPadding(2,2,2,2)
-            setTextColor(textColor)
+            setPadding(padding, padding, padding, padding)
+            setTextColor(cancelColor.getContrastColor())
             setOnClickListener {
                 dialog?.dismiss()
             }

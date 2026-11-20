@@ -1,6 +1,7 @@
 package com.goodwy.dialer.activities
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
@@ -11,6 +12,7 @@ import android.telecom.TelecomManager
 import android.widget.Toast
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.IS_RIGHT_APP
+import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.commons.helpers.REQUEST_CODE_SET_DEFAULT_DIALER
 import com.goodwy.dialer.BuildConfig
 import com.goodwy.dialer.R
@@ -39,12 +41,13 @@ class DialerActivity : SimpleActivity() {
             } else {
                 val key = intent.getStringExtra(IS_RIGHT_APP) ?: ""
                 if (config.blockCallFromAnotherApp && key != BuildConfig.RIGHT_APP_KEY) {
-                    val number = Uri.decode(intent.dataString).substringAfter("tel:")
+                    val number = Uri.decode(intent.data?.schemeSpecificPart.orEmpty())
                     Intent(Intent.ACTION_DIAL).apply {
                         data = Uri.fromParts("tel", number, null)
                         putExtra(SHOW_RECENT_CALLS_ON_DIALPAD, true)
                         launchActivityIntent(this)
                     }
+                    finish()
                 } else initOutgoingCall()
             }
         } else {
@@ -53,15 +56,29 @@ class DialerActivity : SimpleActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun initOutgoingCall() {
-        try {
-            if (isNumberBlocked(callNumber.toString().replace("tel:", ""), getBlockedNumbers())) {
-                toast(R.string.calling_blocked_number)
-                finish()
-                return
+        val number = Uri.decode(callNumber?.schemeSpecificPart.orEmpty())
+        ensureBackgroundThread {
+            val isBlocked = try {
+                isNumberBlocked(number, getBlockedNumbers())
+            } catch (_: SecurityException) {
+                false
             }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (isBlocked) {
+                    toast(R.string.calling_blocked_number)
+                    finish()
+                } else {
+                    placeOutgoingCall()
+                }
+            }
+        }
+    }
 
+    @SuppressLint("MissingPermission")
+    private fun placeOutgoingCall() {
+        try {
             getHandleToUse(intent, callNumber.toString()) { handle ->
                 if (handle != null) {
                     Bundle().apply {
@@ -91,7 +108,8 @@ class DialerActivity : SimpleActivity() {
                         startActivity(this)
                     }
                     toast(R.string.default_phone_app_prompt, Toast.LENGTH_LONG)
-                } catch (ignored: Exception) {
+                } catch (_: ActivityNotFoundException) {
+                    // no settings screen to open; nothing else to do
                 }
                 finish()
             } else {

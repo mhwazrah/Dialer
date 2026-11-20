@@ -1,6 +1,7 @@
 package com.goodwy.dialer.helpers
 
 import android.content.Context
+import com.goodwy.dialer.BuildConfig
 import android.net.Uri
 import android.graphics.Typeface
 import android.media.RingtoneManager
@@ -9,26 +10,30 @@ import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
 import androidx.core.content.ContextCompat
 import com.goodwy.commons.extensions.getDefaultAlarmSound
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.goodwy.commons.helpers.BaseConfig
 import com.goodwy.dialer.extensions.getPhoneAccountHandleModel
 import com.goodwy.dialer.extensions.putPhoneAccountHandle
-import com.goodwy.dialer.models.CallerNote
 import com.goodwy.dialer.models.RecentCall
 import com.goodwy.dialer.models.SpeedDial
 import androidx.core.content.edit
 import com.goodwy.commons.helpers.ON_CONTACT_CLICK
 import java.util.Locale
 
-class Config(context: Context) : BaseConfig(context) {
+class Config private constructor(context: Context) : BaseConfig(context) {
     companion object {
-        fun newInstance(context: Context) = Config(context)
+        @Volatile
+        private var instance: Config? = null
+
+        // Created on first access, never in App.onCreate: direct-boot-aware components run before the user unlocks.
+        fun getInstance(context: Context): Config =
+            instance ?: synchronized(this) { instance ?: Config(context.applicationContext).also { instance = it } }
     }
 
-    private val regionHint: String by lazy {
+    // Read per call: the SIM / network country changes while the process lives.
+    fun regionHint(): String {
         val telephonyManager = context.getSystemService(TelephonyManager::class.java)
-        listOf(
+        return listOf(
             telephonyManager?.simCountryIso,
             telephonyManager?.networkCountryIso,
             Locale.getDefault().country
@@ -40,7 +45,7 @@ class Config(context: Context) : BaseConfig(context) {
 
     fun getSpeedDialValues(): ArrayList<SpeedDial> {
         val speedDialType = object : TypeToken<List<SpeedDial>>() {}.type
-        val speedDialValues = Gson().fromJson<ArrayList<SpeedDial>>(speedDial, speedDialType) ?: ArrayList(1)
+        val speedDialValues = gson.fromJson<ArrayList<SpeedDial>>(speedDial, speedDialType) ?: ArrayList(1)
 
         for (i in 1..9) {
             val speedDial = SpeedDial(i, "", "")
@@ -62,33 +67,25 @@ class Config(context: Context) : BaseConfig(context) {
     }
 
     fun getCustomSIM(number: String): PhoneAccountHandle? {
-        val key = getKeyForCustomSIM(number)
-        prefs.getPhoneAccountHandleModel(key, null)?.let {
-            return it.toPhoneAccountHandle()
-        }
+        migrateLegacyCustomSIMKeys()
+        return prefs.getPhoneAccountHandleModel(getKeyForCustomSIM(number), null)?.toPhoneAccountHandle()
+    }
 
-        // fallback for old unstable keys. should be removed in future versions
-        val migratedHandle = prefs.all.keys
-            .filterIsInstance<String>()
-            .filter { it.startsWith(REMEMBER_SIM_PREFIX) }
-            .firstOrNull {
-                @Suppress("DEPRECATION")
-                PhoneNumberUtils.compare(
-                    it.removePrefix(REMEMBER_SIM_PREFIX),
-                    normalizeCustomSIMNumber(number)
-                )
-            }?.let { legacyKey ->
-                prefs.getPhoneAccountHandleModel(legacyKey, null)?.let {
-                    val handle = it.toPhoneAccountHandle()
-                    prefs.edit {
-                        remove(legacyKey)
-                        putPhoneAccountHandle(key, handle)
-                    }
-                    handle
-                }
+    // Old unstable keys (remember_sim_<raw number>) are rewritten to the normalized key once, then the flag stops further scans.
+    @Synchronized
+    private fun migrateLegacyCustomSIMKeys() {
+        if (prefs.getBoolean(LEGACY_SIM_KEYS_MIGRATED, false)) return
+        val legacyKeys = prefs.all.keys.filter { it.startsWith(REMEMBER_SIM_PREFIX) }
+        prefs.edit {
+            legacyKeys.forEach { legacyKey ->
+                // A value that can't be read is left untouched rather than lost.
+                val handle = prefs.getPhoneAccountHandleModel(legacyKey, null)?.toPhoneAccountHandle() ?: return@forEach
+                val newKey = getKeyForCustomSIM(legacyKey.removePrefix(REMEMBER_SIM_PREFIX))
+                if (newKey != legacyKey) remove(legacyKey)
+                putPhoneAccountHandle(newKey, handle)
             }
-
-        return migratedHandle
+            putBoolean(LEGACY_SIM_KEYS_MIGRATED, true)
+        }
     }
 
     fun removeCustomSIM(number: String) {
@@ -101,7 +98,7 @@ class Config(context: Context) : BaseConfig(context) {
 
     private fun normalizeCustomSIMNumber(number: String): String {
         val decoded = Uri.decode(number).removePrefix("tel:")
-        val formatted = PhoneNumberUtils.formatNumberToE164(decoded, regionHint)
+        val formatted = PhoneNumberUtils.formatNumberToE164(decoded, regionHint())
         return formatted ?: PhoneNumberUtils.normalizeNumber(decoded)
     }
 
@@ -137,17 +134,13 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(HIDE_DIALPAD_NUMBERS, false)
         set(hideDialpadNumbers) = prefs.edit { putBoolean(HIDE_DIALPAD_NUMBERS, hideDialpadNumbers) }
 
-    var dialpadSecondaryLanguage: String?
-        get() = prefs.getString(DIALPAD_SECONDARY_LANGUAGE, LANGUAGE_SYSTEM)
+    var dialpadSecondaryLanguage: String
+        get() = prefs.getString(DIALPAD_SECONDARY_LANGUAGE, LANGUAGE_SYSTEM) ?: LANGUAGE_NONE
         set(dialpadSecondaryLanguage) = prefs.edit { putString(DIALPAD_SECONDARY_LANGUAGE, dialpadSecondaryLanguage) }
 
     var dialpadBeeps: Boolean
         get() = prefs.getBoolean(DIALPAD_BEEPS, false)
         set(dialpadBeeps) = prefs.edit { putBoolean(DIALPAD_BEEPS, dialpadBeeps) }
-
-    var alwaysShowFullscreen: Boolean // not used showIncomingCallsFullScreen
-        get() = prefs.getBoolean(ALWAYS_SHOW_FULLSCREEN, false)
-        set(alwaysShowFullscreen) = prefs.edit { putBoolean(ALWAYS_SHOW_FULLSCREEN, alwaysShowFullscreen) }
 
     //Goodwy
     var showIncomingCallsFullScreen: Boolean
@@ -234,13 +227,29 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(NEED_UPDATE_RECENTS, false)
         set(needUpdateRecents) = prefs.edit { putBoolean(NEED_UPDATE_RECENTS, needUpdateRecents) }
 
+    // Own file so rewriting the 200-row blob never rewrites the main prefs. Opened lazily: direct-boot components never touch it.
+    private val recentsCachePrefs by lazy {
+        context.getSharedPreferences(RECENTS_CACHE_FILE, Context.MODE_PRIVATE).also {
+            // The cache used to live in the main prefs.
+            prefs.edit { remove(RECENT_CALL).remove(RECENT_CALL_CACHE_VERSION) }
+        }
+    }
+
+    // The cache is Gson-serialized RecentCall rows: a cache written by another app version may lack fields, so it is ignored.
     var recentCallsCache: String
-        get() = prefs.getString(RECENT_CALL, "")!!
-        set(recentCallsCache) = prefs.edit { putString(RECENT_CALL, recentCallsCache) }
+        get() = if (recentsCachePrefs.getInt(RECENT_CALL_CACHE_VERSION, 0) == BuildConfig.VERSION_CODE) recentsCachePrefs.getString(RECENT_CALL, "")!! else ""
+        set(recentCallsCache) = recentsCachePrefs.edit {
+            putString(RECENT_CALL, recentCallsCache)
+            putInt(RECENT_CALL_CACHE_VERSION, BuildConfig.VERSION_CODE)
+        }
+
+    fun saveRecentCallsCache(calls: List<RecentCall>) {
+        recentCallsCache = gson.toJson(calls.take(RECENT_CALL_CACHE_SIZE))
+    }
 
     fun parseRecentCallsCache(): ArrayList<RecentCall> {
         val listType = object : TypeToken<List<RecentCall>>() {}.type
-        return Gson().fromJson<ArrayList<RecentCall>>(recentCallsCache, listType) ?: ArrayList(1)
+        return gson.fromJson<ArrayList<RecentCall>>(recentCallsCache, listType) ?: ArrayList(1)
     }
 
     var queryLimitRecent: Int
@@ -258,9 +267,11 @@ class Config(context: Context) : BaseConfig(context) {
                 ContextCompat.getString(context, com.goodwy.dialer.R.string.message_on_my_way),
                 ContextCompat.getString(context, com.goodwy.dialer.R.string.message_cant_talk_right_now)
             )
-            return ArrayList(prefs.getString(QUICK_ANSWERS, null)?.lines()?.map { it } ?: defaultList)
+            // Callers index 0..2: anything but exactly three saved lines falls back to the defaults.
+            val saved = prefs.getString(QUICK_ANSWERS, null)?.lines()
+            return if (saved != null && saved.size == 3) ArrayList(saved) else defaultList
         }
-        set(quickAnswers) = prefs.edit { putString(QUICK_ANSWERS, quickAnswers.joinToString(separator = "\n")) }
+        set(quickAnswers) = prefs.edit { putString(QUICK_ANSWERS, quickAnswers.joinToString(separator = "\n") { it.replace('\n', ' ') }) }
 
     var callUsingSameSim: Boolean
         get() = prefs.getBoolean(CALL_USING_SAME_SIM, false)
@@ -298,10 +309,10 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getString(CALLER_NOTES, "")!!
         set(callerNotes) = prefs.edit { putString(CALLER_NOTES, callerNotes) }
 
-    fun parseCallerNotes(): ArrayList<CallerNote> {
-        val notesType = object : TypeToken<List<CallerNote>>() {}.type
-        return Gson().fromJson<ArrayList<CallerNote>>(callerNotes, notesType) ?: ArrayList(1)
-    }
+    // Last caller-notes text that failed to parse, kept so a format problem never silently erases the notes.
+    var callerNotesBackup: String
+        get() = prefs.getString(CALLER_NOTES_BACKUP, "")!!
+        set(backup) = prefs.edit { putString(CALLER_NOTES_BACKUP, backup) }
 
     var backPressedEndCall: Boolean
         get() = prefs.getBoolean(BACK_PRESSED_END_CALL, false)
@@ -324,7 +335,7 @@ class Config(context: Context) : BaseConfig(context) {
         set(initCallBlockingSetup) = prefs.edit { putBoolean(INIT_CALL_BLOCKING_SETUP, initCallBlockingSetup) }
 
     var recentOutgoingNumbers: MutableSet<String>
-        get() = prefs.getStringSet(RECENT_OUTGOING_NUMBERS, hashSetOf(".")) as HashSet
+        get() = HashSet(prefs.getStringSet(RECENT_OUTGOING_NUMBERS, hashSetOf("."))!!)
         set(recentOutgoingNumbers) = prefs.edit {
             remove(RECENT_OUTGOING_NUMBERS).putStringSet(RECENT_OUTGOING_NUMBERS, recentOutgoingNumbers)
         }

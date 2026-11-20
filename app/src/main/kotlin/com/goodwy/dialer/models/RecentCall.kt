@@ -32,15 +32,20 @@ data class RecentCall(
     var features: Int? = null,
     val isVoiceMail: Boolean,
     var blockReason: Int? = 0,
+    val phoneAccountId: String? = null,
+    val phoneAccountComponentName: String? = null,
+    val countryIso: String? = null,
+    val numberPresentation: Int? = null,
 ) : CallLogItem(), Serializable {
     val dayCode = startTS.getDayCode()
 
     fun doesContainPhoneNumber(text: String): Boolean {
         return if (text.toLongOrNull() != null) {
             val normalizedText = text.normalizePhoneNumber()
-            PhoneNumberUtils.compare(phoneNumber.normalizePhoneNumber(), normalizedText) ||
+            val normalizedNumber = phoneNumber.normalizePhoneNumber()
+            PhoneNumberUtils.compare(normalizedNumber, normalizedText) ||
                 phoneNumber.contains(text) ||
-                phoneNumber.normalizePhoneNumber().contains(normalizedText) ||
+                normalizedNumber.contains(normalizedText) ||
                 phoneNumber.contains(normalizedText)
         } else {
             false

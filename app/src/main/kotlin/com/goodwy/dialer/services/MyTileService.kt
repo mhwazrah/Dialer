@@ -53,12 +53,13 @@ class MyTileService : TileService() {
     }
 
     private fun updateTile() {
-        qsTile?.state = if (baseConfig.blockingEnabled) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        val enabled = baseConfig.blockingEnabled
+        qsTile?.state = if (enabled) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         if (isQPlus()) qsTile?.subtitle =
-            if (baseConfig.blockingEnabled) getString(R.string.on) else getString(R.string.off)
+            if (enabled) getString(R.string.on) else getString(R.string.off)
         qsTile?.icon = Icon.createWithResource(
             applicationContext,
-            if (baseConfig.blockingEnabled) R.drawable.ic_call_missed_vector else R.drawable.ic_call_received_vector
+            if (enabled) R.drawable.ic_call_missed_vector else R.drawable.ic_call_received_vector
         )
         qsTile?.updateTile()
     }

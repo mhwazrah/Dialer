@@ -3,24 +3,25 @@ package com.goodwy.dialer.dialogs
 import androidx.appcompat.app.AlertDialog
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.ContactsHelper
-import com.goodwy.commons.helpers.MyContactsContentProvider
 import com.goodwy.commons.helpers.SMT_PRIVATE
-import com.goodwy.commons.models.contacts.Contact
+import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.commons.models.contacts.ContactSource
 import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.adapters.FilterContactSourcesAdapter
 import com.goodwy.dialer.databinding.DialogFilterContactSourcesBinding
 import com.goodwy.dialer.extensions.config
+import com.goodwy.dialer.extensions.loadPrivateContacts
+import com.goodwy.dialer.helpers.ContactsRepository
 
 class FilterContactSourcesDialog(val activity: SimpleActivity, private val callback: () -> Unit) {
     private val binding by activity.viewBinding(DialogFilterContactSourcesBinding::inflate)
 
     private var dialog: AlertDialog? = null
     private var contactSources = ArrayList<ContactSource>()
-    private var contacts = ArrayList<Contact>()
-    private var isContactSourcesReady = false
-    private var isContactsReady = false
+    private var contactCounts = emptyMap<String, Int>()
+    @Volatile private var isContactSourcesReady = false
+    @Volatile private var isContactsReady = false
 
     init {
         val contactHelper = ContactsHelper(activity)
@@ -31,25 +32,31 @@ class FilterContactSourcesDialog(val activity: SimpleActivity, private val callb
             processDataIfReady()
         }
 
-        contactHelper.getContacts(getAll = true) {
-            it.mapTo(contacts) { contact -> contact.copy() }
-            val privateCursor = activity.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-            val privateContacts = MyContactsContentProvider.getContacts(activity, privateCursor)
-            this.contacts.addAll(privateContacts)
-            isContactsReady = true
-            processDataIfReady()
+        ContactsRepository.ensureLoaded(activity) { snapshot ->
+            ensureBackgroundThread {
+                val counts = snapshot.contacts.groupingBy { it.source }.eachCount().toMutableMap()
+                // The snapshot has no private contacts while that source is hidden, but the dialog must still count them.
+                if (SMT_PRIVATE in activity.config.ignoredContactSources) {
+                    counts[SMT_PRIVATE] = activity.loadPrivateContacts(includeIgnored = true).size
+                }
+                contactCounts = counts
+                isContactsReady = true
+                processDataIfReady()
+            }
         }
     }
 
+    // Called from two background callbacks; the second one to arrive must see the first one's data.
+    @Synchronized
     private fun processDataIfReady() {
-        if (!isContactSourcesReady) {
+        if (!isContactSourcesReady || activity.isFinishing || activity.isDestroyed) {
             return
         }
 
         val contactSourcesWithCount = ArrayList<ContactSource>()
         for (contactSource in contactSources) {
             val count = if (isContactsReady) {
-                contacts.count { it.source == contactSource.name }
+                contactCounts[contactSource.name] ?: 0
             } else {
                 -1
             }
@@ -82,11 +89,16 @@ class FilterContactSourcesDialog(val activity: SimpleActivity, private val callb
             if (it.type == SMT_PRIVATE) SMT_PRIVATE else it.getFullIdentifier()
         }.toHashSet()
 
-        if (activity.getVisibleContactSources() != ignoredContactSources) {
+        val previouslyIgnored = activity.config.ignoredContactSources
+        if (previouslyIgnored != ignoredContactSources) {
             activity.config.ignoredContactSources = ignoredContactSources
-            val contactHelper = ContactsHelper(activity)
-            contactHelper.clearContactSourcesCache()
-            callback()
+            ContactsHelper(activity).clearContactSourcesCache()
+            // Device contacts are filtered when listed; the private source is left out of the snapshot while hidden.
+            if ((SMT_PRIVATE in previouslyIgnored) != (SMT_PRIVATE in ignoredContactSources)) {
+                ContactsRepository.refresh(activity) { callback() }
+            } else {
+                callback()
+            }
         }
         dialog?.dismiss()
     }

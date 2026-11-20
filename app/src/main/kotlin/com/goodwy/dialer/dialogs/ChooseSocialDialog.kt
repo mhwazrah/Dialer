@@ -17,8 +17,7 @@ class ChooseSocialDialog(val activity: Activity, actions: ArrayList<SocialAction
 
     init {
         val binding = DialogChooseSocialBinding.inflate(activity.layoutInflater)
-        actions.sortBy { it.type }
-        actions.forEach { action ->
+        actions.sortedBy { it.type }.forEach { action ->
             val item = ItemChooseSocialBinding.inflate(activity.layoutInflater).apply {
                 itemSocialLabel.text = action.label
                 root.setOnClickListener {

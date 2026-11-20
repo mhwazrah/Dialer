@@ -14,7 +14,7 @@ class ChangeSortingDialog(val activity: BaseSimpleActivity, private val showCust
     private val binding by activity.viewBinding(DialogChangeSortingBinding::inflate)
 
     private var currSorting = 0
-    private var config = activity.config
+    private val config = activity.config
 
     init {
         activity.getAlertDialogBuilder()
@@ -88,6 +88,10 @@ class ChangeSortingDialog(val activity: BaseSimpleActivity, private val showCust
             sorting = sorting or SORT_DESCENDING
         }
 
+        val symbolsFirst = binding.sortingDialogSymbolsFirstCheckbox.isChecked
+        val unchanged = symbolsFirst == config.sortingSymbolsFirst && sorting == currSorting
+        if (unchanged) return
+
         if (showCustomSorting) {
             if (sorting == SORT_BY_CUSTOM) {
                 config.isCustomOrderSelected = true
@@ -99,7 +103,7 @@ class ChangeSortingDialog(val activity: BaseSimpleActivity, private val showCust
             config.sorting = sorting
         }
 
-        config.sortingSymbolsFirst = binding.sortingDialogSymbolsFirstCheckbox.isChecked
+        config.sortingSymbolsFirst = symbolsFirst
 
         callback()
     }

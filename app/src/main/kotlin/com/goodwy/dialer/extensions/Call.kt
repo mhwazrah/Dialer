@@ -31,11 +31,14 @@ fun Call?.getCallDuration(): Int {
 }
 
 fun Call.isOutgoing(): Boolean {
-    return if (isQPlus()) {
-        details.callDirection == Call.Details.DIRECTION_OUTGOING
-    } else {
-        OUTGOING_CALL_STATES.contains(getStateCompat())
+    if (isQPlus()) {
+        when (details.callDirection) {
+            Call.Details.DIRECTION_OUTGOING -> return true
+            Call.Details.DIRECTION_INCOMING -> return false
+        }
     }
+    // Pre-Q, or DIRECTION_UNKNOWN: decide by state
+    return OUTGOING_CALL_STATES.contains(getStateCompat())
 }
 
 fun Call.hasCapability(capability: Int): Boolean = (details.callCapabilities and capability) != 0

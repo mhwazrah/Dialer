@@ -21,6 +21,15 @@ import org.greenrobot.eventbus.EventBus
 class CallService : InCallService() {
     private val context = this
     private val callNotificationManager by lazy { CallNotificationManager(this) }
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var lastAudioKey: Pair<Boolean, Int>? = null
+
+    // A blocked background activity launch is silent, so surface outgoing calls via a full-screen notification if the UI never showed.
+    private val fullScreenFallback = Runnable {
+        if (!CallActivity.isActivityVisible && CallManager.getPhoneState() != NoCall) {
+            callNotificationManager.setupNotification(lowPriority = false, forceFullScreen = true)
+        }
+    }
 
     private val callListener = object : Call.Callback() {
         override fun onStateChanged(call: Call, state: Int) {
@@ -40,8 +49,8 @@ class CallService : InCallService() {
 
     override fun onCallAdded(call: Call) {
         super.onCallAdded(call)
-        CallManager.onCallAdded(call)
         CallManager.inCallService = this
+        CallManager.onCallAdded(call)
         call.registerCallback(callListener)
 
         // lowPriority == true  ➜ start the call activity directly + post a quiet notification
@@ -88,11 +97,8 @@ class CallService : InCallService() {
         // If the call screen hasn't appeared shortly, escalate to a high-priority
         // full-screen-intent notification so the system itself surfaces the call.
         if (isOutgoing) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (!CallActivity.isActivityVisible && CallManager.getPhoneState() != NoCall) {
-                    callNotificationManager.setupNotification(lowPriority = false, forceFullScreen = true)
-                }
-            }, 2000)
+            mainHandler.removeCallbacks(fullScreenFallback)
+            mainHandler.postDelayed(fullScreenFallback, 2000)
         }
     }
 
@@ -108,12 +114,17 @@ class CallService : InCallService() {
         config.needUpdateRecents = true
         EventBus.getDefault().post(Events.RefreshCallLog)
         if (CallManager.getPhoneState() == NoCall) {
-            CallManager.inCallService = null
-//            callNotificationManager.cancelNotification()
+            mainHandler.removeCallbacks(fullScreenFallback)
+            lastAudioKey = null
+            CallManager.clear(this)
         } else {
             callNotificationManager.setupNotification()
             if (wasPrimaryCall) {
-                startActivity(CallActivity.getStartIntent(this))
+                try {
+                    startActivity(CallActivity.getStartIntent(this))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -124,8 +135,17 @@ class CallService : InCallService() {
 
     override fun onCallAudioStateChanged(audioState: CallAudioState?) {
         super.onCallAudioStateChanged(audioState)
-        if (audioState != null) {
-            CallManager.onAudioStateChanged(audioState)
+        if (audioState == null) return
+        CallManager.onAudioStateChanged(audioState)
+
+        // Refresh the mute/speaker actions only on a real change: the first callback of a call
+        // must not re-post the notification at a different priority.
+        val key = audioState.isMuted to audioState.route
+        val changed = lastAudioKey != null && lastAudioKey != key
+        lastAudioKey = key
+        val state = CallManager.getState()
+        if (changed && state != null && state != Call.STATE_RINGING && state != Call.STATE_DISCONNECTED) {
+            callNotificationManager.setupNotification()
         }
     }
 
@@ -139,7 +159,9 @@ class CallService : InCallService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mainHandler.removeCallbacks(fullScreenFallback)
         callNotificationManager.cancelNotification()
+        CallManager.clear(this)
 
         try {
             if (baseConfig.flashForAlerts) MyCameraImpl.newInstance(this).stopSOS()

@@ -14,9 +14,10 @@ class TimerHelper(val context: Context) {
         }
     }
 
+    // The callback is skipped when the timer no longer exists (deleted while an event was in flight).
     fun getTimer(timerId: Int, callback: (timer: Timer) -> Unit) {
         ensureBackgroundThread {
-            callback.invoke(timerDao.getTimer(timerId)!!)
+            timerDao.getTimer(timerId)?.let(callback)
         }
     }
 

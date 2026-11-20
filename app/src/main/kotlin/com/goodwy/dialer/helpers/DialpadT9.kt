@@ -1,6 +1,8 @@
 package com.goodwy.dialer.helpers
 
+import android.content.Context
 import android.telephony.PhoneNumberUtils
+import com.goodwy.dialer.R
 import com.google.gson.JsonParser
 
 private typealias CharMap = HashMap<Char, Int>
@@ -16,6 +18,9 @@ object DialpadT9 {
     }
 
     private val languages = HashMap<String, T9Language>()
+
+    @Volatile
+    private var supportedSecondaryLanguages: List<String>? = null
 
     /**
      * Create a map for Latin (English) characters according to ITU E.161 and ISO/IEC 9995-8
@@ -36,10 +41,22 @@ object DialpadT9 {
         languages[LOCALE_EN] = lang
     }
 
+    @Volatile
     var Initialized = false
+        private set
 
     init {
         initLatinChars()
+    }
+
+    /**
+     * Loads the extra languages once. Warmed up from App on a background thread; callers that need the
+     * data right away block here until it is ready instead of reading the resource themselves.
+     */
+    @Synchronized
+    fun ensureInitialized(context: Context) {
+        if (Initialized) return
+        context.resources.openRawResource(R.raw.t9languages).bufferedReader().use { readFromJson(it.readText()) }
     }
 
     /**
@@ -63,6 +80,7 @@ object DialpadT9 {
             languages[lang] = language
         }
 
+        supportedSecondaryLanguages = null
         Initialized = true
     }
 
@@ -76,28 +94,20 @@ object DialpadT9 {
     }
 
     fun convertLettersToNumbers(letters: String, language: String): String {
-        var res = ""
-        val lang = languages[language]
-        val langEn = languages[LOCALE_EN]
+        val charMap = languages[language]?.charMap
+        val charMapEn = languages[LOCALE_EN]?.charMap
+        val res = StringBuilder(letters.length)
 
         for (c in letters) {
-            res += if (lang != null && lang.charMap.containsKey(c)) {
-                lang.charMap[c]
-            } else if (langEn != null && langEn.charMap.containsKey(c)) {
-                langEn.charMap[c]
-            } else c
+            val number = charMap?.get(c) ?: charMapEn?.get(c)
+            if (number != null) res.append(number) else res.append(c)
         }
 
-        return res
+        return res.toString()
     }
 
     fun getSupportedSecondaryLanguages(): List<String> {
-        val res = MutableList(0) {""}
-        for (lang in languages.keys) {
-            if (lang != LOCALE_EN)
-                res += lang
-        }
-        res.sort()
-        return res
+        return supportedSecondaryLanguages ?: languages.keys.filter { it != LOCALE_EN }.sorted()
+            .also { supportedSecondaryLanguages = it }
     }
 }

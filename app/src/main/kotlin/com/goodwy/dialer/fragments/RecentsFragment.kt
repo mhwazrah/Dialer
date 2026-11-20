@@ -16,7 +16,6 @@ import com.goodwy.commons.extensions.beGone
 import com.goodwy.commons.extensions.beGoneIf
 import com.goodwy.commons.extensions.beVisible
 import com.goodwy.commons.extensions.getContrastColor
-import com.goodwy.commons.extensions.getMyContactsCursor
 import com.goodwy.commons.extensions.getProperBackgroundColor
 import com.goodwy.commons.extensions.getProperPrimaryColor
 import com.goodwy.commons.extensions.getProperTextColor
@@ -30,10 +29,8 @@ import com.goodwy.commons.extensions.launchCallIntent
 import com.goodwy.commons.extensions.normalizeString
 import com.goodwy.commons.extensions.underlineText
 import com.goodwy.commons.helpers.CONTACT_ID
-import com.goodwy.commons.helpers.ContactsHelper
 import com.goodwy.commons.helpers.FontHelper
 import com.goodwy.commons.helpers.IS_PRIVATE
-import com.goodwy.commons.helpers.MyContactsContentProvider
 import com.goodwy.commons.helpers.PERMISSION_READ_CALL_LOG
 import com.goodwy.commons.helpers.SMT_PRIVATE
 import com.goodwy.commons.helpers.ensureBackgroundThread
@@ -41,20 +38,19 @@ import com.goodwy.commons.models.contacts.Contact
 import com.goodwy.dialer.BuildConfig
 import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.CallHistoryActivity
-import com.goodwy.dialer.activities.MainActivity
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.adapters.RecentCallsAdapter
 import com.goodwy.dialer.databinding.FragmentRecentsBinding
+import com.goodwy.dialer.extensions.loadPrivateContacts
 import com.goodwy.dialer.extensions.callContactWithSim
-import com.goodwy.dialer.extensions.callerNotesHelper
 import com.goodwy.dialer.extensions.config
-import com.goodwy.dialer.extensions.launchSendSMSIntentRecommendation
+import com.goodwy.commons.extensions.launchSendSMSIntent
 import com.goodwy.dialer.extensions.launchSendWhatsAppIntent
-import com.goodwy.dialer.extensions.numberForNotes
-import com.goodwy.dialer.extensions.runAfterAnimations
 import com.goodwy.dialer.extensions.startAddNumberToContact
 import com.goodwy.dialer.extensions.startContactDetailsIntent
+import com.goodwy.dialer.extensions.toSearchQuery
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL
+import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL_LIST
 import com.goodwy.dialer.helpers.DialpadT9
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_ALL
@@ -70,7 +66,7 @@ import com.goodwy.dialer.interfaces.RefreshItemsListener
 import com.goodwy.dialer.models.CallLogItem
 import com.goodwy.dialer.models.RecentCall
 import com.google.android.material.button.MaterialButton
-import com.google.gson.Gson
+import com.goodwy.dialer.helpers.gson
 import java.util.Locale
 
 class RecentsFragment(
@@ -78,11 +74,21 @@ class RecentsFragment(
 ) : MyViewPagerFragment<MyViewPagerFragment.RecentsInnerBinding>(context, attributeSet), RefreshItemsListener {
 
     private lateinit var binding: FragmentRecentsBinding
-    private var allRecentCalls = listOf<CallLogItem>()
+    @Volatile private var allRecentCalls = listOf<CallLogItem>()
     private var recentsAdapter: RecentCallsAdapter? = null
 
     private var searchQuery: String? = null
     private var recentsHelper = RecentsHelper(context)
+
+    // Drops results of a refresh that was overtaken by a newer one.
+    @Volatile private var refreshGeneration = 0
+    // Main thread only. One refresh runs at a time; changes arriving meanwhile queue a single follow-up,
+    // so a burst of notifications (e.g. a contacts sync) can't keep discarding the full pass.
+    private var refreshRunning = false
+    private var refreshQueued = false
+    // What the last started refresh was for: nothing is reloaded while these are unchanged.
+    private var loadedVersion = -1
+    private var loadedSettings = ""
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -95,13 +101,6 @@ class RecentsFragment(
         binding.recentsFragment.setBackgroundColor(Color.TRANSPARENT)
         binding.recentsFiltersHolder.setBackgroundColor(Color.TRANSPARENT)
 
-        val placeholderResId = if (context.hasPermission(PERMISSION_READ_CALL_LOG)) {
-            R.string.no_previous_calls
-        } else {
-            R.string.could_not_access_the_call_history
-        }
-
-        binding.recentsPlaceholder.text = context.getString(placeholderResId)
         binding.recentsPlaceholder2.apply {
             underlineText()
             setOnClickListener {
@@ -279,48 +278,76 @@ class RecentsFragment(
     }
 
     override fun refreshItems(invalidate: Boolean, needUpdate: Boolean, callback: (() -> Unit)?) {
+        val config = activity!!.config
+        val version = ContactsRepository.version
+        val settings = settingsKey()
+        val unchanged = !invalidate && !needUpdate && searchQuery.isNullOrEmpty() && !config.needUpdateRecents &&
+            version == loadedVersion && settings == loadedSettings
+        if (unchanged) {
+            callback?.invoke()
+            return
+        }
+        if (refreshRunning && !invalidate) {
+            refreshQueued = true
+            callback?.invoke()
+            return
+        }
+        loadedVersion = version
+        loadedSettings = settings
+        refreshRunning = true
+        val generation = ++refreshGeneration
+
         if (invalidate) {
             allRecentCalls = emptyList()
-            activity!!.config.recentCallsCache = ""
+            config.recentCallsCache = ""
         }
 
-        if (needUpdate || !searchQuery.isNullOrEmpty() || activity!!.config.needUpdateRecents) {
-            refreshCallLog(loadAll = false) {
-                binding.recentsList.runAfterAnimations {
-                    refreshCallLog(loadAll = true)
-                }
-            }
-        } else {
-            var recents = emptyList<RecentCall>()
-            if (!invalidate) {
-                try {
-                    recents = activity!!.config.parseRecentCallsCache()
+        // Quick pass (paints from the call log's cached names), then one full pass that resolves against the contact book.
+        val mustReload = needUpdate || !searchQuery.isNullOrEmpty() || config.needUpdateRecents
+        if (!mustReload && !invalidate && context.hasPermission(PERMISSION_READ_CALL_LOG)) {
+            // Render the cache instantly; the quick pass then picks up calls made while the app was closed.
+            ensureBackgroundThread {
+                val cached = try {
+                    config.parseRecentCallsCache()
                 } catch (_: Exception) {
-                    activity!!.config.recentCallsCache = ""
+                    config.recentCallsCache = ""
+                    emptyList()
                 }
-            }
-
-            if (recents.isNotEmpty()) {
-                // Render the cache instantly, then replace it with fresh data via the quick
-                // (limited) query before the slow full pass — otherwise new calls made while
-                // the app was closed stay invisible until the full query finishes.
-                refreshCallLogFromCache(recents) {
-                    binding.recentsList.runAfterAnimations {
-                        refreshCallLog(loadAll = false) {
-                            binding.recentsList.runAfterAnimations {
-                                refreshCallLog(loadAll = true)
-                            }
-                        }
-                    }
-                }
-            } else {
-                refreshCallLog(loadAll = false) {
-                    binding.recentsList.runAfterAnimations {
-                        refreshCallLog(loadAll = true)
-                    }
+                activity?.runOnUiThread {
+                    // A real load may have arrived while the cache was parsing; never paint over it.
+                    if (cached.isNotEmpty() && generation == refreshGeneration && allRecentCalls.isEmpty()) gotRecents(cached)
                 }
             }
         }
+        val fullPass = {
+            refreshCallLog(loadAll = true, generation = generation) {
+                callback?.invoke()
+                finishRefresh(generation)
+            }
+        }
+        // The quick pass only matters while nothing is on screen; a change-driven refresh goes straight to the full pass.
+        if (invalidate || allRecentCalls.isEmpty()) refreshCallLog(loadAll = false, generation = generation) { fullPass() } else fullPass()
+    }
+
+    private fun finishRefresh(generation: Int) {
+        if (generation != refreshGeneration) return
+        refreshRunning = false
+        if (refreshQueued) {
+            refreshQueued = false
+            refreshItems(invalidate = false, needUpdate = true, callback = null)
+        }
+    }
+
+    // Settings that change what the list contains without a restart.
+    private fun settingsKey(): String = with(context.config) {
+        "$groupSubsequentCalls|$groupAllCalls|$queryLimitRecent|${context.baseConfig.ignoredContactSources}|${context.baseConfig.showNicknameInsteadNames}"
+    }
+
+    override fun rebuildAdapter() {
+        if (recentsAdapter == null) return
+        recentsAdapter = null
+        binding.recentsList.adapter = null
+        gotRecents(allRecentCalls)
     }
 
     override fun onSearchClosed() {
@@ -342,7 +369,7 @@ class RecentsFragment(
     @Suppress("UNCHECKED_CAST")
     private fun updateSearchResult() {
         ensureBackgroundThread {
-            val fixedText = searchQuery!!.trim().replace("\\s+".toRegex(), " ")
+            val fixedText = searchQuery!!.toSearchQuery()
             val recentCalls = allRecentCalls
                 .filterIsInstance<RecentCall>()
                 .filter {
@@ -367,51 +394,10 @@ class RecentsFragment(
         }
     }
 
-    private fun updateSearchDialpadResult() {
-        ensureBackgroundThread {
-            val fixedText = searchQuery!!.trim().replace("\\s+".toRegex(), " ")
-            val recentCalls = allRecentCalls
-                .filterIsInstance<RecentCall>()
-                .filter { recentCall ->
-                    val langPref = context.config.dialpadSecondaryLanguage ?: ""
-                    val langLocale = Locale.getDefault().language
-                    val isAutoLang = DialpadT9.getSupportedSecondaryLanguages().contains(langLocale) && langPref == LANGUAGE_SYSTEM
-                    val lang = if (isAutoLang) langLocale else langPref
-
-                    val convertedName = DialpadT9.convertLettersToNumbers(
-                        recentCall.name.normalizeString().uppercase(), lang)
-                    val convertedNameWithoutSpaces = convertedName.filterNot { it.isWhitespace() }
-                    val convertedNickname = DialpadT9.convertLettersToNumbers(
-                        recentCall.nickname.normalizeString().uppercase(), lang)
-                    val convertedCompany = DialpadT9.convertLettersToNumbers(
-                        recentCall.company.normalizeString().uppercase(), lang)
-                    val convertedJobPosition = DialpadT9.convertLettersToNumbers(
-                        recentCall.jobPosition.normalizeString().uppercase(), lang)
-
-                    recentCall.doesContainPhoneNumber(fixedText)
-                        || (convertedName.contains(fixedText, true))
-                        || (convertedNameWithoutSpaces.contains(fixedText, true))
-                        || (convertedNickname.contains(fixedText, true))
-                        || (convertedCompany.contains(fixedText, true))
-                }
-                .sortedWith(
-                    compareByDescending<RecentCall> { it.dayCode }
-                        .thenByDescending { it.name.startsWith(fixedText, true) }
-                        .thenByDescending { it.startTS }
-                )
-
-            prepareCallLog(recentCalls) {
-                activity?.runOnUiThread {
-                    showOrHidePlaceholder(recentCalls.isEmpty())
-                    recentsAdapter?.updateItems(it, fixedText)
-                }
-            }
-        }
-    }
-
     private fun requestCallLogPermission() {
         activity?.handlePermission(PERMISSION_READ_CALL_LOG) {
             if (it) {
+                ContactsRepository.onPermissionGranted(context)
                 binding.recentsPlaceholder.text = context.getString(R.string.no_previous_calls)
                 binding.recentsPlaceholder2.beGone()
                 refreshCallLog()
@@ -421,6 +407,10 @@ class RecentsFragment(
 
     private fun showOrHidePlaceholder(show: Boolean) {
         if (show /*&& !binding.progressIndicator.isVisible()*/) {
+            // Always from the current permission: it can be revoked while the app is open
+            binding.recentsPlaceholder.text = context.getString(
+                if (context.hasPermission(PERMISSION_READ_CALL_LOG)) R.string.no_previous_calls else R.string.could_not_access_the_call_history
+            )
             binding.recentsPlaceholder.beVisible()
         } else {
             binding.recentsPlaceholder.beGone()
@@ -462,7 +452,8 @@ class RecentsFragment(
                     showCallIcon = context.config.onRecentClick == SWIPE_ACTION_OPEN,
                     hideTimeAtOtherDays = true,
                     itemDelete = { deleted ->
-                        allRecentCalls = allRecentCalls.filter { it !in deleted }
+                        val deletedSet = deleted.toHashSet()
+                        allRecentCalls = allRecentCalls.filter { it !in deletedSet }
                     },
                     itemClick = {
                         itemClickAction(context.config.onRecentClick, it as RecentCall)
@@ -501,36 +492,17 @@ class RecentsFragment(
         }
     }
 
-    private fun refreshCallLog(loadAll: Boolean = false, callback: (() -> Unit)? = null) {
+    private fun refreshCallLog(loadAll: Boolean = false, generation: Int = refreshGeneration, callback: (() -> Unit)? = null) {
         getRecentCalls(loadAll) {
+            if (generation != refreshGeneration) return@getRecentCalls // superseded by an invalidating refresh, which owns the running flag
             allRecentCalls = it
-            if (searchQuery.isNullOrEmpty()) {
-                activity?.runOnUiThread { gotRecents(it) }
-                callback?.invoke()
-
-                context.config.recentCallsCache = Gson().toJson(it.take(RECENT_CALL_CACHE_SIZE))
-            } else {
-                updateSearchResult()
+            val showAll = searchQuery.isNullOrEmpty()
+            // Only the full pass is worth persisting; the quick pass is a subset built from cached names.
+            if (showAll && loadAll) context.config.saveRecentCallsCache(it)
+            activity?.runOnUiThread {
+                if (showAll) gotRecents(it) else updateSearchResult()
                 callback?.invoke()
             }
-
-            //Deleting notes if a call has already been deleted
-            context.callerNotesHelper.removeCallerNotes(
-                it.map { recentCall -> recentCall.phoneNumber.numberForNotes()}
-            )
-        }
-    }
-
-    // Derives the outgoing-numbers whitelist (used by the call screener) from the calls that were
-    // just loaded, instead of re-querying the whole call log with a second full contacts load.
-    private fun updateRecentOutgoingNumbers(calls: List<RecentCall>) {
-        ensureBackgroundThread {
-            val outgoingNumbers = calls
-                .flatMap { listOf(it) + (it.groupedCalls ?: emptyList()) }
-                .filter { it.type == Calls.OUTGOING_TYPE }
-                .map { it.phoneNumber }
-
-            context.config.recentOutgoingNumbers = outgoingNumbers.toMutableSet()
         }
     }
 
@@ -551,12 +523,12 @@ class RecentsFragment(
                 // updateCallsCache on the full pass keeps CACHED_NAME/CACHED_PHOTO_URI correct,
                 // which the quick pass depends on for its instant first paint.
                 getGroupedRecentCalls(existingRecentCalls, queryCount, updateCallsCache = loadAll, useCachedNames = !loadAll) {
-                    if (loadAll) updateRecentOutgoingNumbers(it)
+                    if (loadAll) recentsHelper.updateRecentOutgoingNumbers(it)
                     finalizeCallLog(it, callback)
                 }
             } else {
                 getRecentCalls(existingRecentCalls, queryCount, updateCallsCache = loadAll, useCachedNames = !loadAll) { it ->
-                    if (loadAll) updateRecentOutgoingNumbers(it)
+                    if (loadAll) recentsHelper.updateRecentOutgoingNumbers(it)
                     val calls = if (context.config.groupAllCalls) it.distinctBy { it.phoneNumber } else it
                     finalizeCallLog(calls, callback)
                 }
@@ -584,25 +556,16 @@ class RecentsFragment(
             return
         }
 
-        ContactsHelper(context).getContacts(showOnlyContactsWithNumbers = true) { contacts ->
+        ContactsRepository.ensureLoaded(context) { snapshot ->
             ensureBackgroundThread {
                 val privateContacts = getPrivateContacts()
-                val updatedCalls = updateNamesIfEmpty(
-                    calls = maybeFilterPrivateCalls(calls, privateContacts),
-                    contacts = contacts,
-                    privateContacts = privateContacts
-                )
-
-                callback(
-                    updatedCalls
-                )
+                callback(updateNamesIfEmpty(maybeFilterPrivateCalls(calls, privateContacts), snapshot, privateContacts))
             }
         }
     }
 
     private fun getPrivateContacts(): ArrayList<Contact> {
-        val privateCursor = context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-        return MyContactsContentProvider.getContacts(context, privateCursor)
+        return context.loadPrivateContacts(includeIgnored = true)
     }
 
     private fun maybeFilterPrivateCalls(calls: List<RecentCall>, privateContacts: List<Contact>): List<RecentCall> {
@@ -615,23 +578,22 @@ class RecentsFragment(
         }
     }
 
-    private fun updateNamesIfEmpty(calls: List<RecentCall>, contacts: List<Contact>, privateContacts: List<Contact>): List<RecentCall> {
-        if (calls.isEmpty()) return mutableListOf()
-
-        val contactsWithNumbers = contacts.filter { it.phoneNumbers.isNotEmpty() }
+    private fun updateNamesIfEmpty(
+        calls: List<RecentCall>,
+        snapshot: ContactsRepository.Snapshot,
+        privateContacts: List<Contact>
+    ): List<RecentCall> {
+        // Misses are memoised too: repeated unknown numbers must not rescan the private contacts every row.
+        val contactsByNumber = HashMap<String, Contact?>()
         return calls.map { call ->
-            if (call.phoneNumber == call.name) {
-                val privateContact = privateContacts.firstOrNull { it.doesContainPhoneNumber(call.phoneNumber) }
-                val contact = contactsWithNumbers.firstOrNull { it.phoneNumbers.first().normalizedNumber == call.phoneNumber }
-
-                when {
-                    privateContact != null -> withUpdatedName(call = call, name = privateContact.getNameToDisplay())
-                    contact != null -> withUpdatedName(call = call, name = contact.getNameToDisplay())
-                    else -> call
-                }
+            if (call.phoneNumber != call.name) return@map call
+            val contact = if (contactsByNumber.containsKey(call.phoneNumber)) {
+                contactsByNumber[call.phoneNumber]
             } else {
-                call
+                (privateContacts.firstOrNull { it.doesContainPhoneNumber(call.phoneNumber) } ?: snapshot.find(call.phoneNumber))
+                    .also { contactsByNumber[call.phoneNumber] = it }
             }
+            if (contact == null) call else withUpdatedName(call = call, name = contact.getNameToDisplay())
         }
     }
 
@@ -662,8 +624,7 @@ class RecentsFragment(
 //    }
 
     private fun findContactByCall(recentCall: RecentCall): Contact? {
-        return (activity as MainActivity).cachedContacts
-            .find { /*it.name == recentCall.name &&*/ it.doesHavePhoneNumber(recentCall.phoneNumber) }
+        return ContactsRepository.snapshot.find(recentCall.phoneNumber)
     }
 
     override fun myRecyclerView() = binding.recentsList
@@ -690,7 +651,7 @@ class RecentsFragment(
     }
 
     private fun actionSMS(call: RecentCall) {
-        activity?.launchSendSMSIntentRecommendation(call.phoneNumber)
+        activity?.launchSendSMSIntent(call.phoneNumber)
     }
 
     private fun actionWhatsApp(call: RecentCall) {
@@ -708,20 +669,6 @@ class RecentsFragment(
                 putExtra(IS_PRIVATE, contact.isPrivate())
             }
             activity?.launchActivityIntent(this)
-        }
-    }
-}
-
-class BottomSpaceDecoration(private val spaceHeight: Int) : RecyclerView.ItemDecoration() {
-    override fun getItemOffsets(
-        outRect: Rect,
-        view: View,
-        parent: RecyclerView,
-        state: RecyclerView.State
-    ) {
-        val position = parent.getChildAdapterPosition(view)
-        if (position == parent.adapter?.itemCount?.minus(1) ?: 0) {
-            outRect.bottom = spaceHeight
         }
     }
 }

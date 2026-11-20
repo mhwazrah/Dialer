@@ -3,7 +3,7 @@ package com.goodwy.dialer.fragments
 import android.graphics.Color
 import android.content.Context
 import android.util.AttributeSet
-import com.google.gson.Gson
+import com.goodwy.dialer.helpers.gson
 import com.goodwy.commons.adapters.MyRecyclerViewAdapter
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
@@ -17,14 +17,15 @@ import com.goodwy.dialer.adapters.ContactsAdapter
 import com.goodwy.dialer.databinding.FragmentFavoritesBinding
 import com.goodwy.dialer.databinding.FragmentLettersLayoutBinding
 import com.goodwy.dialer.extensions.config
-import com.goodwy.dialer.extensions.launchSendSMSIntentRecommendation
+import com.goodwy.dialer.extensions.listedContacts
 import com.goodwy.dialer.extensions.launchSendWhatsAppIntent
 import com.goodwy.dialer.extensions.setupWithContacts
+import com.goodwy.dialer.extensions.toSearchQuery
 import com.goodwy.dialer.extensions.startCallWithConfirmationCheck
 import com.goodwy.dialer.extensions.startContactDetailsIntent
-import com.goodwy.dialer.extensions.startContactDetailsIntentRecommendation
 import com.goodwy.dialer.extensions.startContactEdit
-import com.goodwy.dialer.helpers.Converters
+import com.google.gson.reflect.TypeToken
+import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
 import com.goodwy.dialer.helpers.SWIPE_ACTION_EDIT
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
@@ -36,6 +37,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     RefreshItemsListener {
     private lateinit var binding: FragmentLettersLayoutBinding
     private var allContacts = ArrayList<Contact>()
+    private var letterFastScrollerReady = false
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -76,36 +78,27 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     }
 
     override fun refreshItems(invalidate: Boolean, needUpdate: Boolean, callback: (() -> Unit)?) {
-        val privateCursor = context?.getMyContactsCursor(favoritesOnly = true, withPhoneNumbersOnly = true)
-        ContactsHelper(context).getContacts { contacts ->
-            allContacts = contacts
-
-            if (SMT_PRIVATE !in context.baseConfig.ignoredContactSources) {
-                val privateContacts = MyContactsContentProvider.getContacts(context, privateCursor).map {
-                    it.copy(starred = 1)
+        ContactsRepository.ensureLoaded(context) { snapshot ->
+            ensureBackgroundThread {
+                val favorites = context.listedContacts(snapshot.favorites)
+                allContacts = activity?.sortFavoritesByCustomOrder(favorites) ?: return@ensureBackgroundThread
+                activity?.runOnUiThread {
+                    gotContacts(allContacts)
+                    callback?.invoke()
                 }
-                if (privateContacts.isNotEmpty()) {
-                    allContacts.addAll(privateContacts)
-                    allContacts.sort()
-                }
-            }
-            val favorites = contacts.filter { it.starred == 1 } as ArrayList<Contact>
-
-            allContacts = activity!!.sortFavoritesByCustomOrder(favorites)
-
-            activity?.runOnUiThread {
-                gotContacts(allContacts)
-                callback?.invoke()
             }
         }
     }
 
     private fun gotContacts(contacts: ArrayList<Contact>) {
-        setupLetterFastScroller(contacts)
+        setupLetterFastScroller()
         binding.apply {
             if (contacts.isEmpty()) {
                 fragmentPlaceholder.beVisible()
                 fragmentList.beGone()
+                // The last favourite was removed: the adapter and the dynamic shortcuts must not keep it.
+                (fragmentList.adapter as? ContactsAdapter)?.updateItems(contacts)
+                (activity as MainActivity).cacheFavorites(contacts)
             } else {
                 fragmentPlaceholder.beGone()
                 fragmentList.beVisible()
@@ -155,7 +148,6 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
                     if (adapter is ContactsAdapter) {
                         val items = adapter.contacts
                         saveCustomOrderToPrefs(items)
-                        setupLetterFastScroller(items)
                         (activity as MainActivity).cacheFavorites(items)
                         activity?.findViewById<ContactsFragment>(R.id.contacts_fragment)?.updateFavoritesStrip()
                     }
@@ -187,49 +179,55 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     private fun saveCustomOrderToPrefs(items: List<Contact>) {
         activity?.apply {
             val orderIds = items.map { it.contactId }
-            val orderGsonString = Gson().toJson(orderIds)
+            val orderGsonString = gson.toJson(orderIds)
             config.favoritesContactsOrder = orderGsonString
             allContacts = ArrayList(items)
         }
     }
 
-    private fun setupLetterFastScroller(contacts: List<Contact>) {
-        binding.letterFastscroller.setupWithContacts(binding.fragmentList, contacts)
+    // Once is enough: the scroller follows the adapter's list (see setupWithContacts).
+    private fun setupLetterFastScroller() {
+        if (letterFastScrollerReady) return
+        letterFastScrollerReady = true
+        binding.letterFastscroller.setupWithContacts(binding.fragmentList)
+    }
+
+    override fun rebuildAdapter() {
+        if (binding.fragmentList.adapter == null) return
+        binding.fragmentList.adapter = null
+        gotContacts(allContacts)
     }
 
     override fun onSearchClosed() {
         binding.fragmentPlaceholder.beVisibleIf(allContacts.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(allContacts)
-        setupLetterFastScroller(allContacts)
     }
 
     override fun onSearchQueryChanged(text: String) {
-        val fixedText = text.trim().replace("\\s+".toRegex(), " ")
+        val fixedText = text.toSearchQuery()
         val shouldNormalize = fixedText.normalizeString() == fixedText
+        val snapshot = ContactsRepository.snapshot
+        val normalizedNumberQuery = if (fixedText.toLongOrNull() != null) fixedText.normalizePhoneNumber() else ""
         val contacts = allContacts.filter { contact ->
             getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.nickname, shouldNormalize).contains(fixedText, true) ||
-                (fixedText.toLongOrNull() != null && contact.phoneNumbers.any {
-                    fixedText.normalizePhoneNumber().isNotEmpty() && it.normalizedNumber.contains(fixedText.normalizePhoneNumber(), true)
-                }) ||
-                contact.emails.any { it.value.contains(fixedText, true) } ||
-                contact.addresses.any { getProperText(it.value, shouldNormalize).contains(fixedText, true) } ||
-                contact.IMs.any { it.value.contains(fixedText, true) } ||
-                getProperText(contact.notes, shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.organization.company, shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.organization.jobPosition, shouldNormalize).contains(fixedText, true) ||
-                contact.websites.any { it.contains(fixedText, true) }
+                (normalizedNumberQuery.isNotEmpty() && contact.phoneNumbers.any { it.normalizedNumber.contains(normalizedNumberQuery, true) }) ||
+                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
         }.sortedByDescending {
             it.name.startsWith(fixedText, true)
         }.toMutableList() as ArrayList<Contact>
 
         binding.fragmentPlaceholder.beVisibleIf(contacts.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(contacts, fixedText)
-        setupLetterFastScroller(contacts)
     }
 
     private fun setViewType(viewType: Int, size: Int = 0) {
         val spanCount = context.config.contactsGridColumnCount
+        val current = binding.fragmentList.layoutManager
+        // Keep the layout manager (and the scroll position) unless the view type changed
+        if (current != null && (current is MyGridLayoutManager) == (viewType == VIEW_TYPE_GRID)) {
+            (current as? MyGridLayoutManager)?.spanCount = spanCount
+            return
+        }
 
         val layoutManager = if (viewType == VIEW_TYPE_GRID) {
             binding.letterFastscroller.beGone()
@@ -262,7 +260,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     }
 
     private fun actionSMS(contact: Contact) {
-        activity?.initiateCall(contact) { activity?.launchSendSMSIntentRecommendation(it) }
+        activity?.initiateCall(contact) { activity?.launchSendSMSIntent(it) }
     }
 
     private fun actionWhatsApp(contact: Contact) {
@@ -270,7 +268,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     }
 
     private fun actionOpen(contact: Contact) {
-        activity?.startContactDetailsIntentRecommendation(contact)
+        activity?.startContactDetailsIntent(contact)
     }
 }
 
@@ -279,7 +277,11 @@ fun Context.sortFavoritesByCustomOrder(favorites: List<Contact>): ArrayList<Cont
     val favoritesOrder = config.favoritesContactsOrder
     if (!config.isCustomOrderSelected || favoritesOrder.isEmpty()) return ArrayList(favorites)
 
-    val orderList = Converters().jsonToStringList(favoritesOrder)
+    val orderList = try {
+        gson.fromJson<List<String>>(favoritesOrder, object : TypeToken<List<String>>() {}.type)
+    } catch (_: Exception) {
+        null
+    } ?: return ArrayList(favorites)
     val map = orderList.withIndex().associate { it.value to it.index }
     return ArrayList(favorites.sortedBy { map[it.contactId.toString()] })
 }

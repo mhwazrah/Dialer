@@ -46,8 +46,9 @@ class CallHistoryActivity : SimpleActivity() {
     private val binding by viewBinding(ActivityCallHistoryBinding::inflate)
 
     private var allRecentCall = listOf<RecentCall>()
-    private var contact: Contact? = null
-    private var duplicateContacts = ArrayList<Contact>()
+    // Written by the background contact loader, read on the UI thread: immutable snapshots only.
+    @Volatile private var contact: Contact? = null
+    @Volatile private var duplicateContacts: List<Contact> = emptyList()
     private var contactSources = ArrayList<ContactSource>()
     private var recentsAdapter: CallHistoryAdapter? = null
     private var currentRecentCall: RecentCall? = null
@@ -55,6 +56,11 @@ class CallHistoryActivity : SimpleActivity() {
     private var recentsHelper = RecentsHelper(this)
     private var initShowAll = false
     private var showAll = false
+
+    // The contact is loaded again only when it may have changed: first resume, after leaving to edit it, or when the
+    // contact book changed.
+    private var contactStale = true
+    private var seenRepositoryVersion = ContactsRepository.version
 
     @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,8 +88,12 @@ class CallHistoryActivity : SimpleActivity() {
         super.onResume()
         binding.callHistoryPlaceholderContainer.beGone()
         updateTextColors(binding.callHistoryHolder)
-        ensureBackgroundThread {
-            initContact()
+        if (contactStale || seenRepositoryVersion != ContactsRepository.version) {
+            contactStale = false
+            seenRepositoryVersion = ContactsRepository.version
+            ensureBackgroundThread {
+                initContact()
+            }
         }
         if (!initShowAll) refreshCallLog(false)
         updateButtons()
@@ -133,17 +143,20 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun initShowAll() {
-        try {
-            val recents = config.parseRecentCallsCache()
-            val currentRecentCalls = recents.filter { it.phoneNumber == currentRecentCall!!.phoneNumber}
-
-            if (currentRecentCallList != null) {
-                if (currentRecentCalls.size > currentRecentCallList!!.size) {
-                    binding.callHistoryShowAll.beVisible()
-                    initShowAll = true
+        val phoneNumber = currentRecentCall?.phoneNumber ?: return
+        ensureBackgroundThread {
+            try {
+                val currentRecentCalls = config.parseRecentCallsCache().filter { RecentsHelper.isSameNumber(it.phoneNumber, phoneNumber) }
+                val visibleCount = currentRecentCallList?.size ?: return@ensureBackgroundThread
+                if (currentRecentCalls.size > visibleCount) {
+                    runOnUiThread {
+                        if (isDestroyed) return@runOnUiThread
+                        binding.callHistoryShowAll.beVisible()
+                        initShowAll = true
+                    }
                 }
-            }
-        } catch (_: Exception) { }
+            } catch (_: Exception) { }
+        }
     }
 
     private fun showAll() {
@@ -164,14 +177,12 @@ class CallHistoryActivity : SimpleActivity() {
             // Action show all
             binding.callHistoryShowAll.beInvisible()
             binding.progressIndicator.show()
-            refreshCallLog(load = true, loadAll = false) {
-                refreshCallLog(load = true, loadAll = true) {
-                    runOnUiThread {
-                        showAll = true
-                        binding.callHistoryShowAll.apply {
-                            text = getString(R.string.hide)
-                            beVisible()
-                        }
+            refreshCallLog(load = true) {
+                runOnUiThread {
+                    showAll = true
+                    binding.callHistoryShowAll.apply {
+                        text = getString(R.string.hide)
+                        beVisible()
                     }
                 }
             }
@@ -179,7 +190,6 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun updateButtons() {
-        val red = resources.getColor(R.color.red_missed, theme)
         val properPrimaryColor = getProperPrimaryColor()
 
         val phoneNumber = if (config.formatPhoneNumbers) currentRecentCall!!.phoneNumber.formatPhoneNumber() else currentRecentCall!!.phoneNumber
@@ -212,13 +222,7 @@ class CallHistoryActivity : SimpleActivity() {
             contactActionsHolder.setBackgroundColor(Color.TRANSPARENT)
             collapsingToolbar.setBackgroundColor(Color.TRANSPARENT)
 
-            if (isNumberBlocked(currentRecentCall!!.phoneNumber, getBlockedNumbers())) {
-                blockButton.text = getString(R.string.unblock_number)
-                blockButton.setTextColor(properPrimaryColor)
-            } else {
-                blockButton.text = getString(R.string.block_number)
-                blockButton.setTextColor(red)
-            }
+            updateBlockButton()
 
             val typeface = FontHelper.getTypeface(this@CallHistoryActivity)
             arrayOf(
@@ -287,8 +291,9 @@ class CallHistoryActivity : SimpleActivity() {
             }
 
             findItem(R.id.qr_code).setOnMenuItemClickListener {
-                if (contact != null) {
-                    showContactQrCode(contact!!)
+                val qrContact = contact
+                if (qrContact != null) {
+                    showContactQrCode(qrContact)
                 } else {
                     val exporter = VcfExporter()
                     val vCard =
@@ -350,14 +355,13 @@ class CallHistoryActivity : SimpleActivity() {
 
     private fun getStarDrawable(on: Boolean) = AppCompatResources.getDrawable(this, if (on) R.drawable.ic_star_vector else R.drawable.ic_star_outline_vector)
 
-    private fun refreshCallLog(load: Boolean, loadAll: Boolean = false, callback: (() -> Unit)? = null) {
-        getRecentCalls { recents ->
-            allRecentCall = recents
-            val currentRecentCalls = recents.filter { it.phoneNumber == currentRecentCall!!.phoneNumber}
+    private fun refreshCallLog(load: Boolean, callback: (() -> Unit)? = null) {
+        getRecentCalls { currentRecentCalls ->
+            allRecentCall = currentRecentCalls
 
             if (load) {
                 runOnUiThread {
-                    if (recents.isEmpty() || currentRecentCalls.isEmpty()) {
+                    if (currentRecentCalls.isEmpty()) {
                         binding.apply {
                             callHistoryListContainer.beGone()
                             callHistoryPlaceholderContainer.beVisible()
@@ -385,14 +389,8 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun getRecentCalls(callback: (List<RecentCall>) -> Unit) {
-        val queryCount = config.queryLimitRecent
-        val existingRecentCalls = allRecentCall
-
-        with(recentsHelper) {
-            getRecentCalls(existingRecentCalls, queryCount) {
-                callback(it)
-            }
-        }
+        val phoneNumber = currentRecentCall?.phoneNumber ?: return
+        recentsHelper.getRecentCallsOfNumber(phoneNumber, config.queryLimitRecent, callback)
     }
 
     private fun gotRecents(recents: List<RecentCall>, callback: (() -> Unit)? = null) {
@@ -404,7 +402,8 @@ class CallHistoryActivity : SimpleActivity() {
                 refreshItemsListener = null,
                 hideTimeAtOtherDays = false,
                 itemDelete = { deleted ->
-                    allRecentCall = allRecentCall.filter { it !in deleted }
+                    val deletedSet = deleted.toHashSet()
+                    allRecentCall = allRecentCall.filter { it !in deletedSet }
                 },
                 itemClick = {}
             )
@@ -444,7 +443,7 @@ class CallHistoryActivity : SimpleActivity() {
         if (contactId == 0 ) {
             val data = intent.data
             if (data != null) {
-                val rawId = if (data.path!!.contains("lookup")) {
+                val rawId = if (data.path?.contains("lookup") == true) {
                     val lookupKey = getLookupKeyFromUri(data)
                     if (lookupKey != null) {
                         contact = ContactsHelper(this).getContactWithLookupKey(lookupKey)
@@ -468,14 +467,10 @@ class CallHistoryActivity : SimpleActivity() {
                 val isPrivate = intent.getBooleanExtra(IS_PRIVATE, false)
                 if (granted) contact =
                     ContactsHelper(this).getContactWithId(contactId, isPrivate)
+            }
 
-                if (contact == null && isPrivate) {
-                    ContactsHelper(this).getContacts(showOnlyContactsWithNumbers = true) { _ ->
-                        val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-                        val privateContacts = MyContactsContentProvider.getContacts(this, privateCursor)
-                        contact = privateContacts.firstOrNull { it.id == contactId }
-                    }
-                }
+            if (contact == null && intent.getBooleanExtra(IS_PRIVATE, false)) {
+                contact = loadPrivateContacts().firstOrNull { it.id == contactId }
             }
 
             if (contact == null) {
@@ -486,14 +481,7 @@ class CallHistoryActivity : SimpleActivity() {
                 getDuplicateContacts {
                     ContactsHelper(this).getContactSources {
                         contactSources = it
-                        runOnUiThread {
-                            setupMenuForContact()
-                            setupVideoCallActions()
-                            setupMessengersActions()
-                            setupEmails()
-                            setupEvents()
-                            updateButton()
-                        }
+                        bindContactActions { setupMenuForContact() }
                     }
                 }
             }
@@ -505,14 +493,7 @@ class CallHistoryActivity : SimpleActivity() {
                 }
             } else {
                 getDuplicateContacts {
-                    runOnUiThread {
-                        //setupFavorite()
-                        setupVideoCallActions()
-                        setupMessengersActions()
-                        setupEmails()
-                        setupEvents()
-                        updateButton()
-                    }
+                    bindContactActions {}
                 }
             }
         }
@@ -535,30 +516,32 @@ class CallHistoryActivity : SimpleActivity() {
 
     private fun addContact() {
         val phoneNumber = if (config.formatPhoneNumbers) currentRecentCall!!.phoneNumber.formatPhoneNumber() else currentRecentCall!!.phoneNumber
+        contactStale = true
         startAddNumberToContact(phoneNumber)
     }
 
     private fun setupMenuForContact() {
+        val currentContact = contact ?: return
         val contrastColor = getProperBackgroundColor().getContrastColor()
         val itemColor = if (baseConfig.topAppBarColorIcon) getProperPrimaryColor() else contrastColor
 
         val favoriteMenu = binding.callHistoryToolbar.menu.findItem(R.id.favorite)
         favoriteMenu.isVisible = true
-        val favoriteIcon = getStarDrawable(contact!!.starred == 1)
+        val favoriteIcon = getStarDrawable(currentContact.starred == 1)
         favoriteIcon!!.setTint(itemColor)
         favoriteMenu.icon = favoriteIcon
         favoriteMenu.setOnMenuItemClickListener {
-            val newIsStarred = if (contact!!.starred == 1) 0 else 1
+            val newIsStarred = if (currentContact.starred == 1) 0 else 1
             ensureBackgroundThread {
-                val contacts = arrayListOf(contact!!)
+                val contacts = arrayListOf(currentContact)
                 if (newIsStarred == 1) {
                     ContactsHelper(this@CallHistoryActivity).addFavorites(contacts)
                 } else {
                     ContactsHelper(this@CallHistoryActivity).removeFavorites(contacts)
                 }
             }
-            contact!!.starred = newIsStarred
-            val favoriteIconNew = getStarDrawable(contact!!.starred == 1)
+            currentContact.starred = newIsStarred
+            val favoriteIconNew = getStarDrawable(currentContact.starred == 1)
             favoriteIconNew!!.setTint(itemColor)
             favoriteMenu.icon = favoriteIconNew
             true
@@ -567,29 +550,27 @@ class CallHistoryActivity : SimpleActivity() {
         val editMenu = binding.callHistoryToolbar.menu.findItem(R.id.edit)
         editMenu.isVisible = true
         editMenu.setOnMenuItemClickListener {
-            contact?.let { startContactEdit(it) }
+            contactStale = true
+            startContactEdit(currentContact)
             true
         }
 
         val openWithMenu = binding.callHistoryToolbar.menu.findItem(R.id.open_with)
         openWithMenu.isVisible = true
         openWithMenu.setOnMenuItemClickListener {
+            contactStale = true
             openWith()
             true
         }
     }
 
     private fun getDuplicateContacts(callback: () -> Unit) {
-        ContactsHelper(this).getDuplicatesOfContact(contact!!, false) { contacts ->
+        val baseContact = contact ?: run { callback(); return }
+        ContactsHelper(this).getDuplicatesOfContact(baseContact, false) { contacts ->
             ensureBackgroundThread {
-                duplicateContacts.clear()
                 val displayContactSources = getVisibleContactSources()
-                contacts.filter { displayContactSources.contains(it.source) }.forEach {
-                    val duplicate = ContactsHelper(this).getContactWithId(it.id, it.isPrivate())
-                    if (duplicate != null) {
-                        duplicateContacts.add(duplicate)
-                    }
-                }
+                duplicateContacts = contacts.filter { displayContactSources.contains(it.source) }
+                    .mapNotNull { ContactsHelper(this).getContactWithId(it.id, it.isPrivate()) }
 
                 runOnUiThread {
                     callback()
@@ -598,379 +579,151 @@ class CallHistoryActivity : SimpleActivity() {
         }
     }
 
-    private fun setupVideoCallActions() {
-        if (contact != null) {
-            var sources = HashMap<Contact, String>()
-            sources[contact!!] = getPublicContactSourceSync(contact!!.source, contactSources)
+    // The contact and its duplicates with their public source names, ordered by name.
+    private fun contactSourceNames(): Map<Contact, String> {
+        val currentContact = contact ?: return emptyMap()
+        val sources = LinkedHashMap<Contact, String>()
+        sources[currentContact] = getPublicContactSourceSync(currentContact.source, contactSources)
+        duplicateContacts.forEach { sources[it] = getPublicContactSourceSync(it.source, contactSources) }
+        return sources.entries.sortedBy { it.value.lowercase() }.associate { it.key to it.value }
+    }
 
-            duplicateContacts.forEach {
-                sources[it] = getPublicContactSourceSync(it.source, contactSources)
+    // One query per messenger source, on a background thread; the video and messenger rows share the result.
+    private fun loadSocialActions(sources: Map<Contact, String>): Map<Contact, List<SocialAction>> =
+        sources.filterValues { it.lowercase() in MESSENGER_SOURCES }.mapValues { getSocialActions(it.key.id) }
+
+    private fun bindContactActions(bindMenu: () -> Unit) {
+        ensureBackgroundThread {
+            val sources = contactSourceNames()
+            val socialActions = loadSocialActions(sources)
+            runOnUiThread {
+                if (isDestroyed) return@runOnUiThread
+                bindMenu()
+                setupVideoCallActions(socialActions)
+                setupMessengersActions(sources, socialActions)
+                setupEmails()
+                setupEvents()
+                updateButton()
             }
+        }
+    }
 
-            if (sources.size > 1) {
-                sources = sources.toList().sortedBy { (_, value) -> value.lowercase() }.toMap() as LinkedHashMap<Contact, String>
-            }
-
-            val videoActions = arrayListOf<SocialAction>()
-            for ((key, value) in sources) {
-
-                if (value.lowercase() == WHATSAPP) {
-                    val actions = getSocialActions(key.id)
-                    if (actions.firstOrNull() != null) {
-                        val whatsappVideoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                        videoActions.addAll(whatsappVideoActions)
-                    }
-                }
-
-                if (value.lowercase() == SIGNAL) {
-                    val actions = getSocialActions(key.id)
-                    if (actions.firstOrNull() != null) {
-                        val signalVideoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                        videoActions.addAll(signalVideoActions)
-                    }
-                }
-
-                if (value.lowercase() == VIBER) {
-                    val actions = getSocialActions(key.id)
-                    if (actions.firstOrNull() != null) {
-                        val viberVideoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                        videoActions.addAll(viberVideoActions)
-                    }
-                }
-
-                if (value.lowercase() == TELEGRAM) {
-                    val actions = getSocialActions(key.id)
-                    if (actions.firstOrNull() != null) {
-                        val telegramVideoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                        videoActions.addAll(telegramVideoActions)
-                    }
-                }
-
-                if (value.lowercase() == THREEMA) {
-                    val actions = getSocialActions(key.id)
-                    if (actions.firstOrNull() != null) {
-                        val threemaVideoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                        videoActions.addAll(threemaVideoActions)
-                    }
-                }
-            }
-
-            binding.threeButton.apply {
-                alpha = if (videoActions.isNotEmpty()) 1f else 0.5f
-                isEnabled = videoActions.isNotEmpty()
-                setOnLongClickListener { toast(R.string.video_call); true; }
-                if (videoActions.isNotEmpty()) setOnClickListener { showVideoCallAction(videoActions) }
-            }
+    private fun setupVideoCallActions(socialActions: Map<Contact, List<SocialAction>>) {
+        if (contact == null) return
+        val videoActions = socialActions.values.flatMap { actions -> actions.filter { it.type == 1 } }
+        binding.threeButton.apply {
+            alpha = if (videoActions.isNotEmpty()) 1f else 0.5f
+            isEnabled = videoActions.isNotEmpty()
+            setOnLongClickListener { toast(R.string.video_call); true; }
+            if (videoActions.isNotEmpty()) setOnClickListener { showVideoCallAction(ArrayList(videoActions)) }
         }
     }
 
     private fun showVideoCallAction(actions: ArrayList<SocialAction>) {
-        ensureBackgroundThread {
-            runOnUiThread {
-                if (!isDestroyed && !isFinishing) {
-                    ChooseSocialDialog(this@CallHistoryActivity, actions) { action ->
-                        Intent(Intent.ACTION_VIEW).apply {
-                            val uri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, action.dataId)
-                            setDataAndType(uri, action.mimetype)
-                            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            try {
-                                startActivity(this)
-                            } catch (_: SecurityException) {
-                                handlePermission(PERMISSION_CALL_PHONE) { success ->
-                                    if (success) {
-                                        startActivity(this)
-                                    } else {
-                                        toast(R.string.no_phone_call_permission)
-                                    }
-                                }
-                            } catch (_: ActivityNotFoundException) {
-                                toast(R.string.no_app_found)
-                            } catch (e: Exception) {
-                                showErrorToast(e)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        if (isDestroyed || isFinishing) return
+        ChooseSocialDialog(this@CallHistoryActivity, actions) { action -> openSocialAction(action) }
     }
 
-    private fun setupMessengersActions() {
+    private fun setupMessengersActions(sources: Map<Contact, String>, socialActions: Map<Contact, List<SocialAction>>) {
+        val currentContact = contact
         binding.contactMessengersActionsHolder.removeAllViews()
-        if (contact != null) {
-            var sources = HashMap<Contact, String>()
-            sources[contact!!] = getPublicContactSourceSync(contact!!.source, contactSources)
+        if (currentContact == null) {
+            binding.contactMessengersActionsHolder.beGone()
+            return
+        }
 
-            duplicateContacts.forEach {
-                sources[it] = getPublicContactSourceSync(it.source, contactSources)
-            }
+        val properTextColor = getProperTextColor()
+        val properPrimaryColor = getProperPrimaryColor()
+        val lastSource = sources.keys.last()
+        for ((key, value) in sources) {
+            ItemViewMessengersActionsBinding.inflate(layoutInflater, binding.contactMessengersActionsHolder, false).apply {
+                contactMessengerActionName.text = if (value == "") getString(R.string.phone_storage) else value
+                val text = " (ID:" + key.source + ")"
+                contactMessengerActionAccount.text = text
+                contactMessengerActionName.setTextColor(properTextColor)
+                contactMessengerActionAccount.setTextColor(properTextColor)
+                contactMessengerActionHolder.setOnClickListener {
+                    if (contactMessengerActionAccount.isVisible()) contactMessengerActionAccount.beGone()
+                    else contactMessengerActionAccount.beVisible()
+                }
+                contactMessengerActionNumber.setTextColor(properPrimaryColor)
+                binding.contactMessengersActionsHolder.addView(root)
 
-            if (sources.size > 1) {
-                sources = sources.toList().sortedBy { (_, value) -> value.lowercase() }.toMap() as LinkedHashMap<Contact, String>
-            }
-            for ((key, value) in sources) {
-                val isLastItem = sources.keys.last()
-                ItemViewMessengersActionsBinding.inflate(layoutInflater, binding.contactMessengersActionsHolder, false).apply {
-                    contactMessengerActionName.text = if (value == "") getString(R.string.phone_storage) else value
-                    val text = " (ID:" + key.source + ")"
-                    contactMessengerActionAccount.text = text
-                    val properTextColor = getProperTextColor()
-                    contactMessengerActionName.setTextColor(properTextColor)
-                    contactMessengerActionAccount.setTextColor(properTextColor)
-                    contactMessengerActionHolder.setOnClickListener {
-                        if (contactMessengerActionAccount.isVisible()) contactMessengerActionAccount.beGone()
-                        else contactMessengerActionAccount.beVisible()
-                    }
-                    val properPrimaryColor = getProperPrimaryColor()
-                    contactMessengerActionNumber.setTextColor(properPrimaryColor)
-                    binding.contactMessengersActionsHolder.addView(root)
+                arrayOf(
+                    contactMessengerActionMessageIcon, contactMessengerActionCallIcon, contactMessengerActionVideoIcon,
+                ).forEach {
+                    it.background.setTint(properTextColor)
+                    it.background.alpha = 40
+                    it.setColorFilter(properPrimaryColor)
+                }
 
-                    arrayOf(
-                        contactMessengerActionMessageIcon, contactMessengerActionCallIcon, contactMessengerActionVideoIcon,
-                    ).forEach {
-                        it.background.setTint(properTextColor)
-                        it.background.alpha = 40
-                        it.setColorFilter(properPrimaryColor)
-                    }
+                dividerContactMessengerAction.setBackgroundColor(properTextColor)
+                dividerContactMessengerAction.beGoneIf(lastSource == key)
 
-                    dividerContactMessengerAction.setBackgroundColor(properTextColor)
-                    dividerContactMessengerAction.beGoneIf(isLastItem == key)
-
-                    if (value.lowercase() == WHATSAPP) {
-                        val actions = getSocialActions(key.id)
-                        if (actions.firstOrNull() != null) {
-                            val plus = if (actions.firstOrNull()!!.label.contains("+", ignoreCase = true)) "+" else ""
-                            val number = plus + actions.firstOrNull()!!.label.filter { it.isDigit() }
-                            contactMessengerActionNumber.text = number
-                            root.copyOnLongClick(number)
-                            binding.contactMessengersActionsHolder.beVisible()
-                            contactMessengerActionHolder.beVisible()
-                            val callActions = actions.filter { it.type == 0 } as ArrayList<SocialAction>
-                            val videoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                            val messageActions = actions.filter { it.type == 2 } as ArrayList<SocialAction>
-                            if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(messageActions)
-                                }
-                            }
-                            if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(callActions)
-                                }
-                            }
-                            if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(videoActions)
-                                }
-                            }
-                        }
-                    }
-
-                    if (value.lowercase() == SIGNAL) {
-                        val actions = getSocialActions(key.id)
-                        if (actions.firstOrNull() != null) {
-                            val plus = if (actions.firstOrNull()!!.label.contains("+", ignoreCase = true)) "+" else ""
-                            val number = plus + actions.firstOrNull()!!.label.filter { it.isDigit() }
-                            contactMessengerActionNumber.text = number
-                            root.copyOnLongClick(number)
-                            binding.contactMessengersActionsHolder.beVisible()
-                            contactMessengerActionHolder.beVisible()
-                            val callActions = actions.filter { it.type == 0 } as ArrayList<SocialAction>
-                            val videoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                            val messageActions = actions.filter { it.type == 2 } as ArrayList<SocialAction>
-                            if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(messageActions)
-                                }
-                            }
-                            if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(callActions)
-                                }
-                            }
-                            if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(videoActions)
-                                }
-                            }
-                        }
-                    }
-
-                    if (value.lowercase() == VIBER) {
-                        val actions = getSocialActions(key.id)
-                        if (actions.firstOrNull() != null) {
-                            val plus = if (actions.firstOrNull()!!.label.contains("+", ignoreCase = true)) "+" else ""
-                            val number = plus + actions.firstOrNull()!!.label.filter { it.isDigit() }
-                            contactMessengerActionNumber.text = number
-                            root.copyOnLongClick(number)
-                            binding.contactMessengersActionsHolder.beVisible()
-                            contactMessengerActionHolder.beVisible()
-                            val callActions = actions.filter { it.type == 0 } as ArrayList<SocialAction>
-                            val videoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                            val messageActions = actions.filter { it.type == 2 } as ArrayList<SocialAction>
-                            contactMessengerActionNumber.beGoneIf(contact!!.phoneNumbers.size > 1 && messageActions.isEmpty())
-                            if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(messageActions)
-                                }
-                            }
-                            if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(callActions)
-                                }
-                            }
-                            if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(videoActions)
-                                }
-                            }
-                        }
-                    }
-
-                    if (value.lowercase() == TELEGRAM) {
-                        val actions = getSocialActions(key.id)
-                        if (actions.firstOrNull() != null) {
-                            val plus = if (actions.firstOrNull()!!.label.contains("+", ignoreCase = true)) "+" else ""
-                            val number = plus + actions.firstOrNull()!!.label.filter { it.isDigit() }
-                            contactMessengerActionNumber.text = number
-                            root.copyOnLongClick(number)
-                            binding.contactMessengersActionsHolder.beVisible()
-                            contactMessengerActionHolder.beVisible()
-                            val callActions = actions.filter { it.type == 0 } as ArrayList<SocialAction>
-                            val videoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                            val messageActions = actions.filter { it.type == 2 } as ArrayList<SocialAction>
-                            if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    //startMessengerAction(messageActions)
-                                    showMessengerAction(messageActions)
-                                }
-                            }
-                            if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    //startMessengerAction(callActions)
-                                    showMessengerAction(callActions)
-                                }
-                            }
-                            if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    //startMessengerAction(videoActions)
-                                    showMessengerAction(videoActions)
-                                }
-                            }
-                        }
-                    }
-
-                    if (value.lowercase() == THREEMA) {
-                        val actions = getSocialActions(key.id)
-                        if (actions.firstOrNull() != null) {
-                            val plus = if (actions.firstOrNull()!!.label.contains("+", ignoreCase = true)) "+" else ""
-                            val number = plus + actions.firstOrNull()!!.label.filter { it.isDigit() }
-                            contactMessengerActionNumber.text = number
-                            root.copyOnLongClick(number)
-                            binding.contactMessengersActionsHolder.beVisible()
-                            contactMessengerActionHolder.beVisible()
-                            val callActions = actions.filter { it.type == 0 } as ArrayList<SocialAction>
-                            val videoActions = actions.filter { it.type == 1 } as ArrayList<SocialAction>
-                            val messageActions = actions.filter { it.type == 2 } as ArrayList<SocialAction>
-                            if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(messageActions)
-                                }
-                            }
-                            if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(callActions)
-                                }
-                            }
-                            if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
-                                beVisible()
-                                setOnClickListener {
-                                    showMessengerAction(videoActions)
-                                }
-                            }
-                        }
-                    }
+                val actions = socialActions[key].orEmpty()
+                val firstAction = actions.firstOrNull() ?: return@apply
+                val plus = if (firstAction.label.contains("+", ignoreCase = true)) "+" else ""
+                val number = plus + firstAction.label.filter { it.isDigit() }
+                contactMessengerActionNumber.text = number
+                root.copyOnLongClick(number)
+                binding.contactMessengersActionsHolder.beVisible()
+                contactMessengerActionHolder.beVisible()
+                val callActions = actions.filter { it.type == 0 }
+                val videoActions = actions.filter { it.type == 1 }
+                val messageActions = actions.filter { it.type == 2 }
+                if (value.lowercase() == VIBER) {
+                    contactMessengerActionNumber.beGoneIf(currentContact.phoneNumbers.size > 1 && messageActions.isEmpty())
+                }
+                if (messageActions.isNotEmpty()) contactMessengerActionMessage.apply {
+                    beVisible()
+                    setOnClickListener { showMessengerAction(messageActions) }
+                }
+                if (callActions.isNotEmpty()) contactMessengerActionCall.apply {
+                    beVisible()
+                    setOnClickListener { showMessengerAction(callActions) }
+                }
+                if (videoActions.isNotEmpty()) contactMessengerActionVideo.apply {
+                    beVisible()
+                    setOnClickListener { showMessengerAction(videoActions) }
                 }
             }
-            //binding.contactMessengersActionsHolder.beVisible()
-        } else {
-            binding.contactMessengersActionsHolder.beGone()
         }
     }
 
-    private fun showMessengerAction(actions: ArrayList<SocialAction>) {
-        ensureBackgroundThread {
-            runOnUiThread {
-                if (!isDestroyed && !isFinishing) {
-                    if (actions.size > 1) {
-//                        ChooseSocialDialog(this@ViewContactActivity, actions) { action ->
-//                            Intent(Intent.ACTION_VIEW).apply {
-//                                val uri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, action.dataId)
-//                                setDataAndType(uri, action.mimetype)
-//                                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-//                                try {
-//                                    startActivity(this)
-//                                } catch (e: SecurityException) {
-//                                    handlePermission(PERMISSION_CALL_PHONE) { success ->
-//                                        if (success) {
-//                                            startActivity(this)
-//                                        } else {
-//                                            toast(R.string.no_phone_call_permission)
-//                                        }
-//                                    }
-//                                } catch (e: ActivityNotFoundException) {
-//                                    toast(R.string.no_app_found)
-//                                } catch (e: Exception) {
-//                                    showErrorToast(e)
-//                                }
-//                            }
-//                        }
+    private fun showMessengerAction(actions: List<SocialAction>) {
+        if (isDestroyed || isFinishing) return
+        val action = actions.singleOrNull() ?: return
+        openSocialAction(action)
+    }
+
+    private fun openSocialAction(action: SocialAction) {
+        Intent(Intent.ACTION_VIEW).apply {
+            val uri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, action.dataId)
+            setDataAndType(uri, action.mimetype)
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+            try {
+                startActivity(this)
+            } catch (_: SecurityException) {
+                handlePermission(PERMISSION_CALL_PHONE) { success ->
+                    if (success) {
+                        startActivity(this)
                     } else {
-                        val action = actions.first()
-                        Intent(Intent.ACTION_VIEW).apply {
-                            val uri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, action.dataId)
-                            setDataAndType(uri, action.mimetype)
-                            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            try {
-                                startActivity(this)
-                            } catch (_: SecurityException) {
-                                handlePermission(PERMISSION_CALL_PHONE) { success ->
-                                    if (success) {
-                                        startActivity(this)
-                                    } else {
-                                        toast(R.string.no_phone_call_permission)
-                                    }
-                                }
-                            } catch (_: ActivityNotFoundException) {
-                                toast(R.string.no_app_found)
-                            } catch (e: Exception) {
-                                showErrorToast(e)
-                            }
-                        }
+                        toast(R.string.no_phone_call_permission)
                     }
                 }
+            } catch (_: ActivityNotFoundException) {
+                toast(R.string.no_app_found)
+            } catch (e: Exception) {
+                showErrorToast(e)
             }
         }
     }
 
     // a contact cannot have different emails per contact source. Such contacts are handled as separate ones, not duplicates of each other
     private fun setupEmails() {
+        val currentContact = contact ?: return
         binding.contactEmailsHolder.removeAllViews()
-        val emails = contact!!.emails
+        val emails = currentContact.emails
         if (emails.isNotEmpty()) {
 
             binding.fourButton.apply {
@@ -1037,8 +790,9 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun setupEvents() {
-        if (contact != null) {
-            var events = contact!!.events.toMutableSet() as LinkedHashSet<Event>
+        val currentContact = contact
+        if (currentContact != null) {
+            var events = currentContact.events.toMutableSet() as LinkedHashSet<Event>
 
             duplicateContacts.forEach {
                 events.addAll(it.events)
@@ -1106,8 +860,9 @@ class CallHistoryActivity : SimpleActivity() {
                 if (!isFinishing && !isDestroyed) binding.topDetails.callHistoryImage.loadBrandedContactImage(call.photoUri, call.name)
             }
 
-            if (contact != null) {
-                val contactPhoneNumber = contact!!.phoneNumbers
+            val currentContact = contact
+            if (currentContact != null) {
+                val contactPhoneNumber = currentContact.phoneNumbers
                     .firstOrNull { it.normalizedNumber == currentRecentCall!!.phoneNumber }
                 if (contactPhoneNumber != null) {
                     binding.callHistoryNumberTypeContainer.beVisible()
@@ -1126,7 +881,7 @@ class CallHistoryActivity : SimpleActivity() {
                 arrayOf(
                     binding.topDetails.callHistoryImage, binding.topDetails.callHistoryName
                 ).forEach {
-                    it.setOnClickListener { viewContactInfo(contact!!) }
+                    it.setOnClickListener { viewContactInfo(currentContact) }
                 }
                 binding.topDetails.callHistoryImage.apply {
                     setOnLongClickListener { toast(R.string.contact_details); true; }
@@ -1199,7 +954,7 @@ class CallHistoryActivity : SimpleActivity() {
 
             binding.oneButton.apply {
                 setOnClickListener {
-                    launchSendSMSIntentRecommendation(call.phoneNumber)
+                    launchSendSMSIntent(call.phoneNumber)
                 }
                 setOnLongClickListener { toast(R.string.send_sms); true; }
             }
@@ -1217,7 +972,7 @@ class CallHistoryActivity : SimpleActivity() {
                 val phoneNumber = call.phoneNumber.replace("+", "%2B")
                 val simList = getAvailableSIMCardLabels()
                 binding.defaultSim1Button.setOnClickListener {
-                    val sim1 = simList[0]
+                    val sim1 = simList.firstOrNull() ?: return@setOnClickListener
                     if ((config.getCustomSIM("tel:$phoneNumber") ?: "") == sim1.handle) {
                         removeDefaultSIM()
                     } else {
@@ -1306,32 +1061,65 @@ class CallHistoryActivity : SimpleActivity() {
         config.removeCustomSIM("tel:$phoneNumber")
     }
 
-    private fun askConfirmBlock() {
-        if (isDefaultDialer()) {
-            val baseString = if (isNumberBlocked(currentRecentCall!!.phoneNumber, getBlockedNumbers())) {
-                R.string.unblock_confirmation
-            } else { R.string.block_confirmation }
-            val question = String.format(resources.getString(baseString), currentRecentCall!!.phoneNumber)
+    /** Blocked-number provider reads must not run on the main thread. */
+    private fun isCurrentNumberBlocked(): Boolean = try {
+        isNumberBlocked(currentRecentCall!!.phoneNumber, getBlockedNumbers())
+    } catch (_: SecurityException) {
+        false
+    }
 
-            ConfirmationDialog(this, question) {
-                blockNumbers()
+    private fun updateBlockButton() {
+        ensureBackgroundThread {
+            val isBlocked = isCurrentNumberBlocked()
+            runOnUiThread { showBlockButton(isBlocked) }
+        }
+    }
+
+    private fun showBlockButton(isBlocked: Boolean) {
+        if (isDestroyed) return
+        if (isBlocked) {
+            binding.blockButton.text = getString(R.string.unblock_number)
+            binding.blockButton.setTextColor(getProperPrimaryColor())
+        } else {
+            binding.blockButton.text = getString(R.string.block_number)
+            binding.blockButton.setTextColor(resources.getColor(R.color.red_missed, theme))
+        }
+    }
+
+    private fun askConfirmBlock() {
+        if (!isDefaultDialer()) {
+            toast(R.string.default_phone_app_prompt, Toast.LENGTH_LONG)
+            return
+        }
+        ensureBackgroundThread {
+            val isBlocked = isCurrentNumberBlocked()
+            runOnUiThread {
+                if (isDestroyed) return@runOnUiThread
+                val baseString = if (isBlocked) R.string.unblock_confirmation else R.string.block_confirmation
+                val question = String.format(resources.getString(baseString), currentRecentCall!!.phoneNumber)
+                ConfirmationDialog(this, question) {
+                    blockNumbers()
+                }
             }
-        } else toast(R.string.default_phone_app_prompt, Toast.LENGTH_LONG)
+        }
     }
 
     private fun blockNumbers() {
         config.needUpdateRecents = true
-        val red = resources.getColor(R.color.red_missed, theme)
-        runOnUiThread {
-            if (isNumberBlocked(currentRecentCall!!.phoneNumber, getBlockedNumbers())) {
-                deleteBlockedNumber(currentRecentCall!!.phoneNumber)
-                binding.blockButton.text = getString(R.string.block_number)
-                binding.blockButton.setTextColor(red)
-            } else {
-                addBlockedNumber(currentRecentCall!!.phoneNumber)
-                binding.blockButton.text = getString(R.string.unblock_number)
-                binding.blockButton.setTextColor(getProperPrimaryColor())
+        val phoneNumber = currentRecentCall!!.phoneNumber
+        ensureBackgroundThread {
+            val isBlocked = try {
+                if (isNumberBlocked(phoneNumber, getBlockedNumbers())) {
+                    deleteBlockedNumber(phoneNumber)
+                    false
+                } else {
+                    addBlockedNumber(phoneNumber)
+                    true
+                }
+            } catch (_: SecurityException) {
+                isCurrentNumberBlocked()
             }
+            runOnUiThread { showBlockButton(isBlocked) }
         }
     }
 
@@ -1340,20 +1128,21 @@ class CallHistoryActivity : SimpleActivity() {
             if (showAll) getString(R.string.clear_history_confirmation)
             else getString(R.string.remove_confirmation)
         ConfirmationDialog(this, message) {
-            handlePermission(PERMISSION_WRITE_CALL_LOG) {
-                removeRecents()
+            handlePermission(PERMISSION_WRITE_CALL_LOG) { granted ->
+                if (granted) removeRecents() else toast(com.goodwy.commons.R.string.no_permission)
             }
         }
     }
 
     private fun removeRecents() {
-        if (currentRecentCall!!.phoneNumber.isEmpty()) {
+        val number = currentRecentCall?.phoneNumber
+        if (number.isNullOrEmpty()) {
             return
         }
         config.needUpdateRecents = true
 
         val callsToRemove =
-            if (showAll) allRecentCall.filter { currentRecentCall!!.phoneNumber.contains(it.phoneNumber) } as ArrayList<RecentCall>
+            if (showAll) allRecentCall
             else currentRecentCallList
 
         if (callsToRemove == null) {
@@ -1367,11 +1156,11 @@ class CallHistoryActivity : SimpleActivity() {
         }
 
         RecentsHelper(this).removeRecentCalls(idsToRemove) {
-            val callerNote = callerNotesHelper.getCallerNotes(currentRecentCall!!.phoneNumber)
-            callerNotesHelper.deleteCallerNotes(callerNote)
+            // Only the "clear all history" path removes every call of this number, so only then drop its note.
+            if (showAll) callerNotesHelper.deleteCallerNotesForNumber(number)
 
             runOnUiThread {
-                onBackPressed()
+                if (!isFinishing) finish()
             }
         }
     }
@@ -1381,7 +1170,7 @@ class CallHistoryActivity : SimpleActivity() {
 //    }
 
     private fun viewContactInfo(contact: Contact) {
-        this.startContactDetailsIntentRecommendation(contact)
+        this.startContactDetailsIntent(contact)
     }
 
     private fun launchShare() {
@@ -1391,7 +1180,11 @@ class CallHistoryActivity : SimpleActivity() {
             putExtra(Intent.EXTRA_SUBJECT, text)
             putExtra(Intent.EXTRA_TEXT, text)
             type = "text/plain"
-            startActivity(Intent.createChooser(this, getString(R.string.invite_via)))
+            try {
+                startActivity(Intent.createChooser(this, getString(R.string.invite_via)))
+            } catch (e: ActivityNotFoundException) {
+                showErrorToast(e)
+            }
         }
     }
 
@@ -1403,8 +1196,9 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun openWith() {
-        if (contact != null) {
-            val uri = getContactPublicUri(contact!!)
+        val currentContact = contact
+        if (currentContact != null) {
+            val uri = getContactPublicUri(currentContact)
             launchViewContactIntent(uri)
         }
     }
@@ -1439,3 +1233,6 @@ class CallHistoryActivity : SimpleActivity() {
 //        }
 //    } as ArrayList
 //}
+
+// Contact sources whose social actions (message / call / video rows) the history screen shows.
+private val MESSENGER_SOURCES = setOf(WHATSAPP, SIGNAL, VIBER, TELEGRAM, THREEMA)

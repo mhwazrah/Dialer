@@ -18,12 +18,17 @@ class ToneGeneratorHelper(context: Context, private val minToneLengthMs: Long) {
     }
 
     private var toneStartTimeMs = 0L
+    private val handler = Handler(Looper.getMainLooper())
+    private val stopToneRunnable = Runnable { toneGenerator?.stopTone() }
 
     private fun isSilent(): Boolean {
-        return audioManager.ringerMode in arrayOf(AudioManager.RINGER_MODE_SILENT, AudioManager.RINGER_MODE_VIBRATE)
+        val ringerMode = audioManager.ringerMode
+        return ringerMode == AudioManager.RINGER_MODE_SILENT || ringerMode == AudioManager.RINGER_MODE_VIBRATE
     }
 
     fun startTone(char: Char) {
+        // A delayed stop left over from the previous key would cut this tone short
+        handler.removeCallbacks(stopToneRunnable)
         toneStartTimeMs = System.currentTimeMillis()
         startTone(charToTone[char] ?: -1)
     }
@@ -37,12 +42,15 @@ class ToneGeneratorHelper(context: Context, private val minToneLengthMs: Long) {
     fun stopTone() {
         val timeSinceStartMs = System.currentTimeMillis() - toneStartTimeMs
         if (timeSinceStartMs < minToneLengthMs) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                toneGenerator?.stopTone()
-            }, minToneLengthMs - timeSinceStartMs)
+            handler.postDelayed(stopToneRunnable, minToneLengthMs - timeSinceStartMs)
         } else {
             toneGenerator?.stopTone()
         }
+    }
+
+    fun release() {
+        handler.removeCallbacks(stopToneRunnable)
+        toneGenerator?.release()
     }
 
     companion object {

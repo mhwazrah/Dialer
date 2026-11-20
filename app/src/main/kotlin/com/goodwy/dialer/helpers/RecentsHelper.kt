@@ -1,17 +1,21 @@
 package com.goodwy.dialer.helpers
 
 import android.annotation.SuppressLint
+import android.content.ContentProviderOperation
 import android.content.ContentValues
+import android.content.OperationApplicationException
 import android.content.Context
 import android.database.sqlite.SQLiteFullException
-import android.os.Build
+import android.os.RemoteException
+import android.provider.CallLog
 import android.provider.CallLog.Calls
+import android.telephony.PhoneNumberUtils
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import android.provider.CallLog.Calls.PRESENTATION_UNAVAILABLE
 import android.provider.CallLog.Calls.PRESENTATION_UNKNOWN
-import android.telephony.PhoneNumberUtils
-import android.text.TextUtils
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
+import com.goodwy.commons.models.BlockedNumber
 import com.goodwy.commons.models.contacts.Contact
 import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.SimpleActivity
@@ -27,10 +31,55 @@ class RecentsHelper(private val context: Context) {
     companion object {
 //        private const val COMPARABLE_PHONE_NUMBER_LENGTH = 9
         const val QUERY_LIMIT = 100
+
+        /** Calls.PHONE_ACCOUNT_COMPONENT_NAME is hidden API; the column name is stable. */
+        private const val PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name"
+
+        /** +4670... and 070... are the same person's history. */
+        @Suppress("DEPRECATION")
+        /**
+         * Same subscriber number, e.g. 05x vs +9665x. Deliberately stricter than PhoneNumberUtils.compare, which only
+         * checks the last 7 digits and would treat 00000111 as 0500000111 (deleting another number's history).
+         * libphonenumber's SHORT_NSN_MATCH (one number merely ending in the other) is rejected for the same reason.
+         */
+        fun isSameNumber(a: String, b: String): Boolean {
+            if (a == b) return true
+            if (a.isBlank() || b.isBlank()) return false
+            // Cheap loose check first: most pairs (different numbers) end here without libphonenumber parsing
+            @Suppress("DEPRECATION")
+            if (!PhoneNumberUtils.compare(a, b)) return false
+            return when (PhoneNumberUtil.getInstance().isNumberMatch(a, b)) {
+                PhoneNumberUtil.MatchType.EXACT_MATCH, PhoneNumberUtil.MatchType.NSN_MATCH -> true
+                else -> false
+            }
+        }
     }
 
     private val contentUri = Calls.CONTENT_URI
-    private var queryLimit = QUERY_LIMIT
+
+    /** Per-load lookups: SIM maps, voicemail and blocked numbers are resolved once per getRecentCalls, not per query. */
+    private class LoadLookups(
+        val accountIdToSimIDMap: Map<String, Int>,
+        val accountIdToSimColorMap: Map<String, Int>,
+        val voiceMailNumbers: List<String>,
+        /** Null when blocked numbers are shown, so nothing is filtered. */
+        val blockedNumbers: ArrayList<BlockedNumber>?,
+    )
+
+    private fun loadLookups(): LoadLookups {
+        val sims = context.getAvailableSIMCardLabels()
+        val blocked = if (context.config.showBlockedNumbers) null else try {
+            context.getBlockedNumbers()
+        } catch (_: SecurityException) {
+            ArrayList()
+        }
+        return LoadLookups(
+            accountIdToSimIDMap = sims.associate { it.handle.id to it.id },
+            accountIdToSimColorMap = sims.associate { it.handle.id to it.color },
+            voiceMailNumbers = loadVoiceMailNumbers(),
+            blockedNumbers = blocked,
+        )
+    }
 
     fun getRecentCalls(
         previousRecents: List<RecentCall> = ArrayList(),
@@ -45,11 +94,11 @@ class RecentsHelper(private val context: Context) {
             return
         }
 
-        fun proceed(contacts: ArrayList<Contact>) {
-            this.queryLimit = queryLimit
+        fun proceed(contacts: ContactsRepository.Snapshot) {
             //Do not use the current list if the recent ones have been changed in another activity.
             //The cached-names pass deliberately does NOT consume the flag, so the follow-up full
             //pass still starts from scratch and re-resolves every row against the contact book.
+            val lookups = loadLookups()
             val needUpdateRecents = context.config.needUpdateRecents
             val previousRecentsOrEmpty = if (needUpdateRecents) ArrayList() else previousRecents
             if (needUpdateRecents && !isDialpad && !useCachedNames) context.config.needUpdateRecents = false
@@ -69,6 +118,7 @@ class RecentsHelper(private val context: Context) {
                     val newerLimit = (queryLimit * 0.3).toInt() // 30% limit on new entries
                     val newerRecents = getRecents(
                         contacts = contacts,
+                        lookups = lookups,
                         selection = "${Calls.DATE} > ?",
                         selectionParams = arrayOf("${previousRecentCalls.first().startTS}"),
                         updateCallsCache = updateCallsCache,
@@ -78,6 +128,7 @@ class RecentsHelper(private val context: Context) {
                     val olderLimit = queryLimit - newerRecents.size // Remaining limit on old entries
                     val olderRecents = getRecents(
                         contacts = contacts,
+                        lookups = lookups,
                         selection = "${Calls.DATE} < ?",
                         selectionParams = arrayOf("${previousRecentCalls.last().startTS}"),
                         updateCallsCache = updateCallsCache,
@@ -87,7 +138,7 @@ class RecentsHelper(private val context: Context) {
                     newerRecents + previousRecentCalls + olderRecents
                 }
             } else {
-                getRecents(contacts, updateCallsCache = updateCallsCache, limit = queryLimit)
+                getRecents(contacts, lookups, updateCallsCache = updateCallsCache, limit = queryLimit)
             }
 
             callback(
@@ -102,19 +153,56 @@ class RecentsHelper(private val context: Context) {
             // Fast first paint: skip the full contact-book load and render from the call log's
             // own cached names/photos, which the full pass keeps up to date. The follow-up full
             // pass re-resolves everything against the real contact book.
-            ensureBackgroundThread { proceed(arrayListOf()) }
+            ensureBackgroundThread { proceed(ContactsRepository.Snapshot(emptyList(), emptyMap(), emptyList())) }
         } else {
-            val privateCursor = context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-            ContactsHelper(context).getContacts(getAll = true, showOnlyContactsWithNumbers = true) { contacts ->
-                ensureBackgroundThread {
-                    val privateContacts = MyContactsContentProvider.getContacts(context, privateCursor)
-                    if (privateContacts.isNotEmpty()) {
-                        contacts.addAll(privateContacts)
-                    }
-                    proceed(contacts)
-                }
+            ContactsRepository.ensureLoaded(context) { snapshot ->
+                ensureBackgroundThread { proceed(snapshot) }
             }
         }
+    }
+
+    /**
+     * One number's calls (any formatting of it, see [isSameNumber]) straight from the call log, newest first.
+     * Not grouped, and never touches the other numbers' rows.
+     */
+    fun getRecentCallsOfNumber(phoneNumber: String, queryLimit: Int, callback: (List<RecentCall>) -> Unit) {
+        if (!context.hasPermission(PERMISSION_READ_CALL_LOG)) {
+            callback(ArrayList())
+            return
+        }
+        ContactsRepository.ensureLoaded(context) { snapshot ->
+            ensureBackgroundThread {
+                val numbers = loggedNumbers().filter { isSameNumber(it, phoneNumber) }
+                if (numbers.isEmpty()) {
+                    callback(ArrayList())
+                    return@ensureBackgroundThread
+                }
+                var selection = "${Calls.NUMBER} IN (${getQuestionMarks(numbers.size)})"
+                if ("" in numbers) selection += " OR ${Calls.NUMBER} IS NULL"
+                callback(
+                    getRecents(snapshot, loadLookups(), selection, numbers.toTypedArray(), updateCallsCache = false, limit = queryLimit)
+                        .distinctBy { it.id }
+                )
+            }
+        }
+    }
+
+    private fun loggedNumbers(): Set<String> {
+        val numbers = HashSet<String>()
+        context.contentResolver.query(contentUri, arrayOf(Calls.NUMBER), null, null, null)?.use { cursor ->
+            while (cursor.moveToNext()) {
+                numbers.add(cursor.getStringValueOrNull(Calls.NUMBER).orEmpty())
+            }
+        }
+        return numbers
+    }
+
+    /** Keeps the outgoing-numbers whitelist (used by the call screener) in step with the calls just loaded. */
+    fun updateRecentOutgoingNumbers(calls: List<RecentCall>) {
+        context.config.recentOutgoingNumbers = calls
+            .flatMap { listOf(it) + (it.groupedCalls ?: emptyList()) }
+            .filter { it.type == Calls.OUTGOING_TYPE }
+            .mapTo(HashSet()) { it.phoneNumber }
     }
 
     fun getGroupedRecentCalls(
@@ -142,8 +230,8 @@ class RecentsHelper(private val context: Context) {
 
         if (differentSim || differentDay || namesAreBothRealAndDifferent) return false
 
-        @Suppress("DEPRECATION")
-        return PhoneNumberUtils.compare(callA.phoneNumber, callB.phoneNumber)
+        // Strict match: a group is deleted as a unit, so a different number ending in the same digits must not join it.
+        return isSameNumber(callA.phoneNumber, callB.phoneNumber)
     }
 
     private fun groupSubsequentCalls(calls: List<RecentCall>): List<RecentCall> {
@@ -171,31 +259,31 @@ class RecentsHelper(private val context: Context) {
 
     @SuppressLint("NewApi")
     private fun getRecents(
-        contacts: List<Contact>,
+        contacts: ContactsRepository.Snapshot,
+        lookups: LoadLookups,
         selection: String? = null,
         selectionParams: Array<String>? = null,
         updateCallsCache: Boolean,
-        limit: Int = queryLimit
+        limit: Int
     ): List<RecentCall> {
         val recentCalls = mutableListOf<RecentCall>()
-        var previousStartTS = 0L
+        // Same timestamp alone is not a duplicate (dual-SIM / imported rows share it); OEM duplicate rows match on all three.
+        val seenCalls = HashSet<Triple<Long, String?, Int>>()
 //        val contactsNumbersMap = HashMap<String, String>()
         val contactPhotosMap = HashMap<String, String>()
         // Caches misses (null) too, so a number with no matching contact — the common case for
         // repeated unknown callers — doesn't rescan the whole contact list for every log row.
         val contactsMap = HashMap<String, Contact?>()
 
-        val accountIdToSimIDMap = HashMap<String, Int>()
-        context.getAvailableSIMCardLabels().forEach {
-            accountIdToSimIDMap[it.handle.id] = it.id
-        }
-        val accountIdToSimColorMap = HashMap<String, Int>()
-        context.getAvailableSIMCardLabels().forEach {
-            accountIdToSimColorMap[it.handle.id] = it.color
-        }
-
         val isHuawei = context.config.isEmui
-        val voiceMailNumbers = loadVoiceMailNumbers()
+        val voiceMailNumbers = lookups.voiceMailNumbers
+        val accountIdToSimIDMap = lookups.accountIdToSimIDMap
+        val accountIdToSimColorMap = lookups.accountIdToSimColorMap
+        val blockedNumbers = lookups.blockedNumbers
+        val blockedCache = HashMap<String, Boolean>()
+        // Cached name/photo fixes, one per (number, country) per pass, written in a single batch afterwards
+        val cacheUpdateKeys = HashSet<Pair<String, String?>>()
+        val cacheUpdates = ArrayList<ContentProviderOperation>()
 
         val projection = if (isQPlus()) {
             arrayOf(
@@ -207,6 +295,7 @@ class RecentsHelper(private val context: Context) {
                 Calls.DURATION,
                 Calls.TYPE,
                 Calls.PHONE_ACCOUNT_ID,
+                PHONE_ACCOUNT_COMPONENT_NAME,
                 Calls.NUMBER_PRESENTATION,
                 Calls.FEATURES,
                 Calls.COUNTRY_ISO,
@@ -222,6 +311,7 @@ class RecentsHelper(private val context: Context) {
                 Calls.DURATION,
                 Calls.TYPE,
                 Calls.PHONE_ACCOUNT_ID,
+                PHONE_ACCOUNT_COMPONENT_NAME,
                 Calls.NUMBER_PRESENTATION,
                 Calls.FEATURES,
                 Calls.COUNTRY_ISO
@@ -229,8 +319,10 @@ class RecentsHelper(private val context: Context) {
         }
 
         // https://issuetracker.google.com/issues/175198972?pli=1#comment6
+        // ponytail: blocked rows are dropped after the query, so over-fetch 3x to keep the visible window full; heavy blocking can still come up short.
+        val fetchLimit = if (blockedNumbers.isNullOrEmpty()) limit else limit * 3
         val limitedUri = contentUri.buildUpon()
-            .appendQueryParameter(Calls.LIMIT_PARAM_KEY, limit.toString())
+            .appendQueryParameter(Calls.LIMIT_PARAM_KEY, fetchLimit.toString())
             .build()
         val sortOrder = "${Calls.DATE} DESC" //TODO Sort call
         val cursor = context.contentResolver.query(limitedUri, projection, selection, selectionParams, sortOrder)
@@ -262,7 +354,7 @@ class RecentsHelper(private val context: Context) {
                     contact = if (contactsMap.containsKey(number)) {
                         contactsMap[number]
                     } else {
-                        contacts.firstOrNull { it.doesContainPhoneNumber(number) } //contacts.firstOrNull { it.doesHavePhoneNumber(number) }
+                        contacts.find(number)
                             .also { contactsMap[number] = it }
                     }
                 }
@@ -292,14 +384,17 @@ class RecentsHelper(private val context: Context) {
                 }
 
                 val startTS = cursor.getLongValue(Calls.DATE)
-                if (previousStartTS == startTS) {
-                    continue
-                } else {
-                    previousStartTS = startTS
-                }
+                val type = cursor.getIntValue(Calls.TYPE)
+                if (!seenCalls.add(Triple(startTS, number, type))) continue
+
+                // Hidden/unknown callers have no number to match: commons compares trimmed forms, and a blocked entry
+                // without an E.164 form has an empty one, which would hide every private call. Hidden-caller blocking
+                // is its own setting, applied when the call arrives.
+                if (!isUnknownNumber && !blockedNumbers.isNullOrEmpty() &&
+                    blockedCache.getOrPut(number.orEmpty()) { context.isNumberBlocked(number.orEmpty(), blockedNumbers) }
+                ) continue
 
                 val duration = cursor.getIntValue(Calls.DURATION)
-                val type = cursor.getIntValue(Calls.TYPE)
                 val features = cursor.getIntValue(Calls.FEATURES)
                 val accountId = cursor.getStringValue(Calls.PHONE_ACCOUNT_ID)
                 //var simID = accountIdToSimIDMap[accountId] ?: -1
@@ -381,27 +476,33 @@ class RecentsHelper(private val context: Context) {
                         contactID = contactID,
                         features = features,
                         isVoiceMail = isVoiceMail,
-                        blockReason = blockReason
+                        blockReason = blockReason,
+                        phoneAccountId = accountId,
+                        phoneAccountComponentName = cursor.getStringValueOrNull(PHONE_ACCOUNT_COMPONENT_NAME),
+                        countryIso = cursor.getStringValueOrNull(Calls.COUNTRY_ISO),
+                        numberPresentation = presentation,
                     )
                 )
 
-                if (updateCallsCache) {
-                    updateRecentCallsContactInfo(
-                        number.orEmpty(),
-                        name,
-                        cursor.getStringValueOrNull(Calls.CACHED_NAME),
-                        photoUri,
-                        cursor.getStringValueOrNull(Calls.CACHED_PHOTO_URI)
-                    )
+                if (updateCallsCache && !isUnknownNumber && !number.isNullOrEmpty()) {
+                    val countryIso = cursor.getStringValueOrNull(Calls.COUNTRY_ISO)
+                    // Only a built update claims the key, so an older row with a stale cached name still gets fixed
+                    if ((number to countryIso) !in cacheUpdateKeys) {
+                        buildCachedInfoUpdate(
+                            number, countryIso, name, photoUri,
+                            cursor.getStringValueOrNull(Calls.CACHED_NAME),
+                            cursor.getStringValueOrNull(Calls.CACHED_PHOTO_URI)
+                        )?.let {
+                            cacheUpdateKeys.add(number to countryIso)
+                            cacheUpdates.add(it)
+                        }
+                    }
                 }
-            } while (cursor.moveToNext() && recentCalls.size < queryLimit)
+            } while (cursor.moveToNext() && recentCalls.size < limit)
         }
 
-        return if (context.config.showBlockedNumbers) recentCalls
-        else {
-            val blockedNumbers = context.getBlockedNumbers()
-            recentCalls.filter { !context.isNumberBlocked(it.phoneNumber, blockedNumbers) }
-        }
+        applyCachedInfoUpdates(cacheUpdates)
+        return recentCalls
     }
 
     @SuppressLint("MissingPermission")
@@ -422,12 +523,20 @@ class RecentsHelper(private val context: Context) {
     }
 
     fun removeRecentCalls(ids: List<Int>, callback: () -> Unit) {
+        if (!context.hasPermission(PERMISSION_WRITE_CALL_LOG)) {
+            callback()
+            return
+        }
         context.config.needUpdateRecents = true
         ensureBackgroundThread {
-            ids.chunked(30).forEach { chunk ->
-                val selection = "${Calls._ID} IN (${getQuestionMarks(chunk.size)})"
-                val selectionArgs = chunk.map { it.toString() }.toTypedArray()
-                context.contentResolver.delete(contentUri, selection, selectionArgs)
+            try {
+                ids.chunked(30).forEach { chunk ->
+                    val selection = "${Calls._ID} IN (${getQuestionMarks(chunk.size)})"
+                    val selectionArgs = chunk.map { it.toString() }.toTypedArray()
+                    context.contentResolver.delete(contentUri, selection, selectionArgs)
+                }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
             }
             callback()
         }
@@ -439,104 +548,178 @@ class RecentsHelper(private val context: Context) {
             if (it) {
                 context.config.needUpdateRecents = true
                 ensureBackgroundThread {
-                    context.contentResolver.delete(contentUri, null, null)
+                    try {
+                        context.contentResolver.delete(contentUri, null, null)
+                    } catch (e: SecurityException) {
+                        e.printStackTrace()
+                    }
                     callback()
                 }
             }
         }
     }
 
-    fun restoreRecentCalls(activity: SimpleActivity, objects: List<RecentCall>, callback: () -> Unit) {
+    /** Inserts the calls that are not already in the log; [callback] gets the number of inserted rows. */
+    fun restoreRecentCalls(activity: SimpleActivity, objects: List<RecentCall>, callback: (inserted: Int) -> Unit) {
         activity.handlePermission(PERMISSION_WRITE_CALL_LOG) { granted ->
-            if (granted) {
-                ensureBackgroundThread {
+            if (!granted) return@handlePermission
+            ensureBackgroundThread {
+                var inserted = 0
+                try {
+                    val existing = loadCallKeys(objects.minOf { it.startTS }, objects.maxOf { it.startTS })
                     val values = objects
+                        .filter { existing.add(Triple(it.startTS, it.phoneNumber, it.type)) }
                         .sortedBy { it.startTS }
-                        .map {
-                            ContentValues().apply {
-                                put(Calls.NUMBER, it.phoneNumber)
-                                put(Calls.TYPE, it.type)
-                                put(Calls.DATE, it.startTS)
-                                put(Calls.DURATION, it.duration)
-                                put(Calls.CACHED_NAME, it.name)
-                            }
-                        }.toTypedArray()
-
-                    context.contentResolver.bulkInsert(contentUri, values)
-                    callback()
+                        .map(::toContentValues)
+                        .toTypedArray()
+                    if (values.isNotEmpty()) inserted = context.contentResolver.bulkInsert(contentUri, values)
+                    if (inserted > 0) context.config.needUpdateRecents = true
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
                 }
+                callback(inserted)
             }
         }
     }
 
-    //https://android.googlesource.com/platform/packages/services/Telecomm/+/master/src/com/android/server/telecom/ui/MissedCallNotifierImpl.java#189
-    fun markMissedCallsAsRead() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val values = ContentValues().apply {
-                put(Calls.NEW, 0)
-                put(Calls.IS_READ, 1)
+    /** (date, number, type) of the logged calls in the range; the same triple identifies a duplicate on import. */
+    private fun loadCallKeys(from: Long, to: Long): HashSet<Triple<Long, String?, Int>> {
+        val keys = HashSet<Triple<Long, String?, Int>>()
+        val projection = arrayOf(Calls.DATE, Calls.NUMBER, Calls.TYPE)
+        context.contentResolver.query(contentUri, projection, "${Calls.DATE} BETWEEN ? AND ?", arrayOf("$from", "$to"), null)?.use { cursor ->
+            while (cursor.moveToNext()) {
+                keys.add(Triple(cursor.getLongValue(Calls.DATE), cursor.getStringValueOrNull(Calls.NUMBER).orEmpty(), cursor.getIntValue(Calls.TYPE)))
             }
-//        val where = StringBuilder().apply {
-//            append(Calls.NEW)
-//            append(" = 1 AND ")
-//            append(Calls.TYPE)
-//            append(" = ?")
-//        }
-            val where = "${Calls.NEW} = 1 AND ${Calls.TYPE} = ?"
+        }
+        return keys
+    }
 
+    private fun toContentValues(call: RecentCall) = ContentValues().apply {
+        put(Calls.NUMBER, call.phoneNumber)
+        put(Calls.TYPE, call.type)
+        put(Calls.DATE, call.startTS)
+        put(Calls.DURATION, call.duration)
+        put(Calls.PHONE_ACCOUNT_ID, call.phoneAccountId)
+        put(PHONE_ACCOUNT_COMPONENT_NAME, call.phoneAccountComponentName)
+        put(Calls.COUNTRY_ISO, call.countryIso)
+        call.numberPresentation?.let { put(Calls.NUMBER_PRESENTATION, it) }
+        call.features?.let { put(Calls.FEATURES, it) }
+        put(Calls.CACHED_PHOTO_URI, UriUtils.uriToString(UriUtils.nullForNonContactsUri(UriUtils.parseUriOrNull(call.photoUri))))
+        if (isQPlus()) put(Calls.BLOCK_REASON, call.blockReason ?: 0)
+        if (call.name != call.phoneNumber) put(Calls.CACHED_NAME, call.name)
+        // Imported calls are history, not unread
+        put(Calls.NEW, 0)
+        put(Calls.IS_READ, 1)
+    }
+
+    /**
+     * Unread missed calls (NEW=1) per number, straight from the call log so it survives process death.
+     * Blank/unknown numbers share the "" key. Blocking: call off the main thread.
+     */
+    fun getNewMissedCallCounts(): Map<String, Int> {
+        if (!context.hasPermission(PERMISSION_READ_CALL_LOG)) return emptyMap()
+        val counts = HashMap<String, Int>()
+        try {
+            context.contentResolver.query(
+                contentUri, arrayOf(Calls.NUMBER), "${Calls.NEW} = 1 AND ${Calls.TYPE} = ?",
+                arrayOf(Calls.MISSED_TYPE.toString()), null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val key = missedCallKey(cursor.getStringValueOrNull(Calls.NUMBER))
+                    counts[key] = (counts[key] ?: 0) + 1
+                }
+            }
+        } catch (_: SecurityException) {
+        }
+        return counts
+    }
+
+    private fun missedCallKey(number: String?) = if (number.isNullOrBlank() || number == "-1") "" else number
+
+    /**
+     * Marks unread missed calls as read, only those of [number] when given ("" = unknown numbers).
+     * Does nothing when there is nothing unread, so the call-log observers are not woken for no reason.
+     * [callback] runs on the worker thread once the write is done.
+     */
+    //https://android.googlesource.com/platform/packages/services/Telecomm/+/master/src/com/android/server/telecom/ui/MissedCallNotifierImpl.java#189
+    fun markMissedCallsAsRead(number: String? = null, callback: () -> Unit = {}) {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                context.contentResolver.update(
-                    contentUri, values,
-                    where, arrayOf(Calls.MISSED_TYPE.toString())
-                )
+                markMissedCallsAsReadNow(number)
             } catch (_: IllegalArgumentException) {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            callback()
         }
     }
 
-    private fun updateRecentCallsContactInfo(
-        number: String, updatedName: String, callLogName: String?, updatedPhotoUri: String?, callLogPhotoUri: String?
-    ) {
-        if (!context.hasPermission(PERMISSION_WRITE_CALL_LOG)) {
-            return
-        }
-
-        val values = ContentValues()
-        var needsUpdate = false
-
-        if (callLogName != null) {
-            if (!TextUtils.equals(updatedName, callLogName)) {
-                values.put(Calls.CACHED_NAME, updatedName)
-                needsUpdate = true
+    private fun markMissedCallsAsReadNow(number: String?) {
+        if (!context.hasPermission(PERMISSION_WRITE_CALL_LOG)) return
+        var where = "(${Calls.NEW} = 1 OR ${Calls.IS_READ} = 0) AND ${Calls.TYPE} = ?"
+        val args = arrayListOf(Calls.MISSED_TYPE.toString())
+        if (number != null) {
+            if (missedCallKey(number).isEmpty()) {
+                where += " AND (${Calls.NUMBER} IS NULL OR ${Calls.NUMBER} IN ('', '-1'))"
+            } else {
+                where += " AND ${Calls.NUMBER} = ?"
+                args.add(number)
             }
+        }
+        val argArray = args.toTypedArray()
+        val hasUnread = context.contentResolver.query(contentUri, arrayOf(Calls._ID), where, argArray, null)
+            ?.use { it.count > 0 } == true
+        if (!hasUnread) return
+
+        val values = ContentValues().apply {
+            put(Calls.NEW, 0)
+            put(Calls.IS_READ, 1)
+        }
+        context.contentResolver.update(contentUri, values, where, argArray)
+    }
+
+    /**
+     * Returns an update of the call log's cached name/photo for this number, or null when the log already
+     * holds the same values. Writing only on a difference keeps our own writes from re-triggering the
+     * call-log observers more than once.
+     */
+    private fun buildCachedInfoUpdate(
+        number: String,
+        countryIso: String?,
+        name: String,
+        photoUri: String?,
+        callLogName: String?,
+        callLogPhotoUri: String?,
+    ): ContentProviderOperation? {
+        val newName = name.takeIf { it != number }
+        val oldName = callLogName?.takeIf { it.isNotEmpty() && it != "-1" }
+        val newPhoto = UriUtils.nullForNonContactsUri(UriUtils.parseUriOrNull(photoUri))
+        val oldPhoto = UriUtils.parseUriOrNull(callLogPhotoUri)
+        val nameChanged = newName != oldName
+        val photoChanged = !UriUtils.areEqual(newPhoto, oldPhoto)
+        if (!nameChanged && !photoChanged) return null
+
+        val builder = if (countryIso == null) {
+            ContentProviderOperation.newUpdate(contentUri)
+                .withSelection("${Calls.NUMBER} = ? AND ${Calls.COUNTRY_ISO} IS NULL", arrayOf(number))
         } else {
-            values.put(Calls.CACHED_NAME, updatedName)
-            needsUpdate = true
+            ContentProviderOperation.newUpdate(contentUri)
+                .withSelection("${Calls.NUMBER} = ? AND (${Calls.COUNTRY_ISO} IS NULL OR ${Calls.COUNTRY_ISO} = ?)", arrayOf(number, countryIso))
         }
+        if (nameChanged) builder.withValue(Calls.CACHED_NAME, newName)
+        if (photoChanged) builder.withValue(Calls.CACHED_PHOTO_URI, UriUtils.uriToString(newPhoto))
+        return builder.build()
+    }
 
-        val updatedPhotoUriContactsOnly = UriUtils.nullForNonContactsUri(UriUtils.parseUriOrNull(updatedPhotoUri))
-        val currentPhotoUri = UriUtils.parseUriOrNull(callLogPhotoUri)
-        if (!UriUtils.areEqual(updatedPhotoUriContactsOnly, currentPhotoUri)) {
-            values.put(Calls.CACHED_PHOTO_URI, UriUtils.uriToString(updatedPhotoUriContactsOnly))
-            needsUpdate = true
-        }
-
-        if (!needsUpdate) {
-            return
-        }
-
+    private fun applyCachedInfoUpdates(operations: ArrayList<ContentProviderOperation>) {
+        if (operations.isEmpty() || !context.hasPermission(PERMISSION_WRITE_CALL_LOG)) return
         try {
-            context
-                .contentResolver
-                .update(
-                    Calls.CONTENT_URI,
-                    values,
-                    Calls.NUMBER + " = ? AND " + Calls.COUNTRY_ISO + " IS NULL",
-                    arrayOf(number)
-                )
+            context.contentResolver.applyBatch(CallLog.AUTHORITY, operations)
         } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (e: OperationApplicationException) {
+            e.printStackTrace()
+        } catch (e: RemoteException) {
             e.printStackTrace()
         } catch (_: SQLiteFullException) {
         }

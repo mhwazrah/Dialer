@@ -3,17 +3,13 @@ package com.goodwy.dialer.extensions
 import androidx.recyclerview.widget.RecyclerView
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator
 import com.reddit.indicatorfastscroll.FastScrollerView
-import com.goodwy.commons.models.contacts.Contact
+import com.goodwy.dialer.adapters.ContactsAdapter
 
-fun FastScrollerView.setupWithContacts(
-    recyclerView: RecyclerView,
-    contacts: List<Contact>,
-) = setupWithRecyclerView(recyclerView, { position ->
-    val initialLetter = try {
-        contacts[position].getFirstLetter()
-    } catch (_: IndexOutOfBoundsException) {
-        ""
-    }
-
-    FastScrollItemIndicator.Text(initialLetter)
+/**
+ * The index letters follow whatever the [ContactsAdapter] on [recyclerView] holds at the time, so call this once:
+ * the scroller rebuilds itself when the adapter notifies a change or the adapter is swapped.
+ */
+fun FastScrollerView.setupWithContacts(recyclerView: RecyclerView) = setupWithRecyclerView(recyclerView, { position ->
+    val contact = (recyclerView.adapter as? ContactsAdapter)?.contacts?.getOrNull(position)
+    FastScrollItemIndicator.Text(contact?.getFirstLetter() ?: "")
 })

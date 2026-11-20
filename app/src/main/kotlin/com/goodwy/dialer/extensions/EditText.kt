@@ -1,13 +1,23 @@
 package com.goodwy.dialer.extensions
 
+import android.os.SystemClock
 import android.view.KeyEvent
 import android.widget.EditText
 
 fun EditText.addCharacter(char: Char) {
-    dispatchKeyEvent(getKeyEvent(getCharKeyCode(char)))
+    val keyCode = getCharKeyCode(char)
+    if (keyCode == null) {
+        text.insert(selectionStart.coerceAtLeast(0), char.toString())
+        return
+    }
+    dispatchKeyEvent(getKeyEvent(keyCode))
+    dispatchKeyEvent(getKeyEvent(keyCode, KeyEvent.ACTION_UP))
 }
 
-fun EditText.getKeyEvent(keyCode: Int) = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0)
+fun EditText.getKeyEvent(keyCode: Int, action: Int = KeyEvent.ACTION_DOWN): KeyEvent {
+    val now = SystemClock.uptimeMillis()
+    return KeyEvent(now, now, action, keyCode, 0)
+}
 
 private fun getCharKeyCode(char: Char) = when (char) {
     '0' -> KeyEvent.KEYCODE_0
@@ -24,7 +34,8 @@ private fun getCharKeyCode(char: Char) = when (char) {
     ',' -> KeyEvent.KEYCODE_NUMPAD_COMMA
     '+' -> KeyEvent.KEYCODE_PLUS
     ';' -> KeyEvent.KEYCODE_SEMICOLON
-    else -> KeyEvent.KEYCODE_POUND
+    '#' -> KeyEvent.KEYCODE_POUND
+    else -> null
 }
 
 fun EditText.disableKeyboard() {

@@ -6,6 +6,7 @@ import android.content.pm.ShortcutInfo
 import android.content.res.Resources
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
+import androidx.recyclerview.widget.DiffUtil
 import android.net.Uri
 import android.telephony.PhoneNumberUtils
 import android.text.Spannable
@@ -42,6 +43,7 @@ import com.goodwy.commons.views.MyRecyclerView
 import com.goodwy.dialer.BuildConfig
 import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.SimpleActivity
+import com.goodwy.dialer.helpers.PlaceholderDrawableCache
 import com.goodwy.dialer.databinding.ItemContactWithNumberGridSwipeBinding
 import com.goodwy.dialer.databinding.ItemContactWithNumberInfoSwipeBinding
 import com.goodwy.dialer.extensions.*
@@ -52,6 +54,7 @@ import me.thanel.swipeactionview.SwipeDirection
 import me.thanel.swipeactionview.SwipeGestureListener
 import java.util.Collections
 import java.util.Locale
+import java.util.WeakHashMap
 import kotlin.math.abs
 
 class ContactsAdapter(
@@ -71,7 +74,13 @@ class ContactsAdapter(
 ) : MyRecyclerViewAdapter(activity, recyclerView, itemClick),
     ItemTouchHelperContract, MyRecyclerView.MyZoomListener {
 
-    private var textToHighlight = highlightText
+    private var textToHighlight = ""
+    private var normalizedHighlight = ""
+    private var highlightLanguage = ""
+    private var orderChanged = false
+    private val bindings = WeakHashMap<View, ItemViewBinding>()
+    private val placeholderDrawables = PlaceholderDrawableCache(activity)
+    private val letterBackgroundColors by lazy { activity.getLetterBackgroundColors() }
     var fontSize: Float = activity.getTextSize()
     private var touchHelper: ItemTouchHelper? = null
     private var startReorderDragListener: StartReorderDragListener? = null
@@ -79,6 +88,7 @@ class ContactsAdapter(
     var onSpanCountListener: (Int) -> Unit = {}
 
     init {
+        setHighlight(highlightText)
         setupDragListener(true)
 
         if (recyclerView.layoutManager is GridLayoutManager) {
@@ -148,18 +158,17 @@ class ContactsAdapter(
 
     override fun getItemKeyPosition(key: Int) = contacts.indexOfFirst { it.rawId == key }
 
-    @SuppressLint("NotifyDataSetChanged")
-    override fun onActionModeCreated() {
-        notifyDataSetChanged()
-    }
+    // Selection state changes how every row looks. A ranged notify only rebinds attached/cached rows
+    // instead of invalidating the whole list.
+    override fun onActionModeCreated() = rebindRows()
 
-    @SuppressLint("NotifyDataSetChanged")
-    override fun onActionModeDestroyed() {
-        notifyDataSetChanged()
-    }
+    override fun onActionModeDestroyed() = rebindRows()
+
+    private fun rebindRows() = notifyItemRangeChanged(0, itemCount, ROW_STATE_PAYLOAD)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = Binding.getByItemViewType(viewType, activity.config.useSwipeToAction).inflate(layoutInflater, parent, false)
+        bindings[binding.root] = binding
         return createViewHolder(binding.root)
     }
 
@@ -170,15 +179,16 @@ class ContactsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val contact = contacts[position]
         holder.bindView(contact, true, allowLongClick) { itemView, _ ->
-            val viewType = getItemViewType(position)
-            setupView(Binding.getByItemViewType(viewType, activity.config.useSwipeToAction).bind(itemView), contact, holder)
+            val binding = bindings[itemView]
+                ?: Binding.getByItemViewType(getItemViewType(position), activity.config.useSwipeToAction).bind(itemView)
+            setupView(binding, contact, holder)
         }
         bindViewHolder(holder)
     }
 
     override fun getItemCount() = contacts.size
 
-    private fun getItemWithKey(key: Int): Contact? = contacts.firstOrNull { it.id == key }
+    private fun getItemWithKey(key: Int): Contact? = contacts.firstOrNull { it.rawId == key }
 
     private fun getCabBlockContactTitle(callback: (String) -> Unit) {
         val contact = getSelectedItems().firstOrNull() ?: return callback("")
@@ -220,15 +230,17 @@ class ContactsAdapter(
     }
 
     private fun tryUnblocking(contact: Contact) {
-        val contactUnblocked = activity.unblockContact(contact)
-        val resultMsg = if (contactUnblocked) {
-            R.string.unblock_contact_success
-        } else {
-            R.string.unblock_contact_fail
+        ensureBackgroundThread {
+            val contactUnblocked = try {
+                activity.unblockContact(contact)
+            } catch (_: SecurityException) {
+                false
+            }
+            activity.runOnUiThread {
+                activity.toast(if (contactUnblocked) R.string.unblock_contact_success else R.string.unblock_contact_fail)
+                finishActMode()
+            }
         }
-
-        activity.toast(resultMsg)
-        finishActMode()
     }
 
     private fun askConfirmBlock(contact: Contact, callback: (Boolean) -> Unit) {
@@ -236,22 +248,39 @@ class ContactsAdapter(
         val question = String.format(resources.getString(baseString), contact.name)
 
         ConfirmationDialog(activity, question) {
-            val contactBlocked = activity.blockContact(contact)
-            callback(contactBlocked)
+            ensureBackgroundThread {
+                val contactBlocked = try {
+                    activity.blockContact(contact)
+                } catch (_: SecurityException) {
+                    false
+                }
+                activity.runOnUiThread { callback(contactBlocked) }
+            }
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateItems(newItems: List<Contact>, highlightText: String = "") {
-        if (newItems.hashCode() != contacts.hashCode()) {
-            contacts = ArrayList(newItems)
-            textToHighlight = highlightText
-            notifyDataSetChanged()
-            finishActMode()
-        } else if (textToHighlight != highlightText) {
-            textToHighlight = highlightText
-            notifyDataSetChanged()
+        val highlightChanged = textToHighlight != highlightText
+        if (highlightChanged) setHighlight(highlightText)
+        val updated = ArrayList(newItems)
+        if (updated == contacts) {
+            if (highlightChanged) rebindRows()
+            return
         }
+        val diff = DiffUtil.calculateDiff(ContactsDiffCallback(contacts, updated))
+        contacts = updated
+        diff.dispatchUpdatesTo(this)
+        if (highlightChanged) rebindRows()
+        finishActMode()
+    }
+
+    private fun setHighlight(text: String) {
+        textToHighlight = text
+        normalizedHighlight = text.normalizeString()
+        val langPref = activity.config.dialpadSecondaryLanguage ?: ""
+        val langLocale = Locale.getDefault().language
+        val isAutoLang = DialpadT9.getSupportedSecondaryLanguages().contains(langLocale) && langPref == LANGUAGE_SYSTEM
+        highlightLanguage = if (isAutoLang) langLocale else langPref
     }
 
     private fun callContact() {
@@ -294,12 +323,12 @@ class ContactsAdapter(
         }
 
         val recipient = TextUtils.join(";", numbers)
-        activity.launchSendSMSIntentRecommendation(recipient)
+        activity.launchSendSMSIntent(recipient)
     }
 
     private fun viewContactDetails() {
         val contact = getSelectedItems().firstOrNull() ?: return
-        activity.startContactDetailsIntentRecommendation(contact)
+        activity.startContactDetailsIntent(contact)
     }
 
     private fun askConfirmDelete() {
@@ -315,11 +344,16 @@ class ContactsAdapter(
         val question = String.format(resources.getString(baseString), items)
 
         ConfirmationAdvancedDialog(activity, question, cancelOnTouchOutside = false) {
-            if (it) {
-                activity.handlePermission(PERMISSION_WRITE_CONTACTS) {
-                    deleteContacts()
-                }
-            } else selectedKeys.clear()
+            if (it) deleteContactsWithPermission() else selectedKeys.clear()
+        }
+    }
+
+    private fun deleteContactsWithPermission() {
+        activity.handlePermission(PERMISSION_WRITE_CONTACTS) { granted ->
+            if (granted) deleteContacts() else {
+                selectedKeys.clear()
+                activity.toast(com.goodwy.commons.R.string.no_permission)
+            }
         }
     }
 
@@ -330,11 +364,11 @@ class ContactsAdapter(
 
         val contactsToRemove = getSelectedItems()
         val positions = getSelectedItemPositions()
-        contacts.removeAll(contactsToRemove)
         val idsToRemove = contactsToRemove.map { it.rawId }.toMutableList() as ArrayList<Int>
 
         SimpleContactsHelper(activity).deleteContactRawIDs(idsToRemove) {
             activity.runOnUiThread {
+                contacts.removeAll(contactsToRemove)
                 if (contacts.isEmpty()) {
                     refreshItemsListener?.refreshItems()
                     finishActMode()
@@ -347,8 +381,6 @@ class ContactsAdapter(
 
     private fun getSelectedItems() = contacts.filter { selectedKeys.contains(it.rawId) } as ArrayList<Contact>
 
-    private fun getLastItem() = contacts.last()
-
     private fun getSelectedPhoneNumber(): String? {
 //        val numbers = getSelectedItems().firstOrNull()?.phoneNumbers
 //        val primaryNumber = numbers?.firstOrNull { it.isPrimary }
@@ -359,6 +391,7 @@ class ContactsAdapter(
     @SuppressLint("NewApi")
     private fun createShortcut() {
         val contact = contacts.firstOrNull { selectedKeys.contains(it.rawId) } ?: return
+        val number = contact.getPrimaryNumber() ?: return
         val manager = activity.shortcutManager
         if (manager.isRequestPinShortcutSupported) {
             SimpleContactsHelper(activity).getShortcutImage(
@@ -370,11 +403,11 @@ class ContactsAdapter(
                     activity.handlePermission(PERMISSION_CALL_PHONE) { hasPermission ->
                         val action = if (hasPermission) Intent.ACTION_CALL else Intent.ACTION_DIAL
                         val intent = Intent(action).apply {
-                            data = Uri.fromParts("tel", getSelectedPhoneNumber(), null)
+                            data = Uri.fromParts("tel", number, null)
                             putExtra(IS_RIGHT_APP, BuildConfig.RIGHT_APP_KEY)
                         }
 
-                        val shortcut = ShortcutInfo.Builder(activity, contact.hashCode().toString())
+                        val shortcut = ShortcutInfo.Builder(activity, "contact_${contact.rawId}")
                             .setShortLabel(contact.getNameToDisplay())
                             .setIcon(Icon.createWithBitmap(image))
                             .setIntent(intent)
@@ -460,16 +493,10 @@ class ContactsAdapter(
                 text = if (textToHighlight.isEmpty()) {
                     name
                 } else {
-                    val normalizedName = name.normalizeString()
-                    val normalizedSearchText = textToHighlight.normalizeString()
-                    if (normalizedName.contains(normalizedSearchText, true)) {
-                        name.highlightTextPart(normalizedSearchText, properPrimaryColor)
+                    if (name.normalizeString().contains(normalizedHighlight, true)) {
+                        name.highlightTextPart(normalizedHighlight, properPrimaryColor)
                     } else {
-                        val langPref = activity.config.dialpadSecondaryLanguage ?: ""
-                        val langLocale = Locale.getDefault().language
-                        val isAutoLang = DialpadT9.getSupportedSecondaryLanguages().contains(langLocale) && langPref == LANGUAGE_SYSTEM
-                        val lang = if (isAutoLang) langLocale else langPref
-                        name.highlightTextFromNumbers(textToHighlight, properPrimaryColor, lang)
+                        name.highlightTextFromNumbers(textToHighlight, properPrimaryColor, highlightLanguage)
                     }
                 }
             }
@@ -525,11 +552,11 @@ class ContactsAdapter(
                         itemContactImage.setHeightAndWidth(size)
                     }
                     if (contact.isABusinessContact() && contact.photoUri == "") {
-                        val drawable = ResourcesCompat.getDrawable(resources, R.drawable.placeholder_company, activity.theme)
-                        if (baseConfig.useColoredContacts) {
-                            val letterBackgroundColors = activity.getLetterBackgroundColors()
+                        // mutate(): the resource's drawable state is shared, a colour filter must stay per row
+                        val drawable = placeholderDrawables.newDrawable(R.drawable.placeholder_company)
+                        if (baseConfig.useColoredContacts && drawable is LayerDrawable) {
                             val color = letterBackgroundColors[abs(contact.getNameToDisplay().hashCode()) % letterBackgroundColors.size].toInt()
-                            (drawable as LayerDrawable).findDrawableByLayerId(R.id.placeholder_company_background).applyColorFilter(color)
+                            drawable.findDrawableByLayerId(R.id.placeholder_company_background)?.mutate()?.applyColorFilter(color)
                         }
                         itemContactImage.setImageDrawable(drawable)
                     } else {
@@ -540,7 +567,7 @@ class ContactsAdapter(
 
             divider?.apply {
                 setBackgroundColor(textColor)
-                beInvisibleIf(getLastItem() == contact || !activity.config.useDividers)
+                beInvisibleIf(contacts.lastOrNull() === contact || !activity.config.useDividers)
             }
 
             //swipe
@@ -621,7 +648,7 @@ class ContactsAdapter(
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {
-        activity.config.isCustomOrderSelected = true
+        orderChanged = true
 
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
@@ -639,6 +666,10 @@ class ContactsAdapter(
     override fun onRowSelected(myViewHolder: ViewHolder?) {}
 
     override fun onRowClear(myViewHolder: ViewHolder?) {
+        if (orderChanged) {
+            orderChanged = false
+            activity.config.isCustomOrderSelected = true
+        }
         onDragEndListener?.invoke()
     }
 
@@ -812,7 +843,7 @@ class ContactsAdapter(
         override fun getRoot(): View = binding.root
     }
     private fun viewContactInfo(contact: Contact) {
-        activity.startContactDetailsIntentRecommendation(contact)
+        activity.startContactDetailsIntent(contact)
     }
 
     private fun swipeActionImageResource(swipeAction: Int): Int {
@@ -849,15 +880,11 @@ class ContactsAdapter(
 
     private fun swipedDelete(contact: Contact) {
         selectedKeys.add(contact.rawId)
-        if (activity.config.skipDeleteConfirmation) {
-            activity.handlePermission(PERMISSION_WRITE_CONTACTS) {
-                deleteContacts()
-            }
-        } else askConfirmDelete()
+        if (activity.config.skipDeleteConfirmation) deleteContactsWithPermission() else askConfirmDelete()
     }
 
     private fun swipedSMS(contact: Contact) {
-        activity.initiateCall(contact) { activity.launchSendSMSIntentRecommendation(it) }
+        activity.initiateCall(contact) { activity.launchSendSMSIntent(it) }
     }
 
     private fun swipedWhatsApp(contact: Contact) {
@@ -882,4 +909,13 @@ class ContactsAdapter(
             }
         }
     }
+}
+
+private const val ROW_STATE_PAYLOAD = "row_state"
+
+private class ContactsDiffCallback(private val old: List<Contact>, private val new: List<Contact>) : DiffUtil.Callback() {
+    override fun getOldListSize() = old.size
+    override fun getNewListSize() = new.size
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = old[oldItemPosition].rawId == new[newItemPosition].rawId
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = old[oldItemPosition] == new[newItemPosition]
 }

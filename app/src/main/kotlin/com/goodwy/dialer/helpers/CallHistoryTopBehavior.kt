@@ -32,10 +32,10 @@ class CallHistoryTopBehavior(
         val height = if (heightView < 5) pixels(R.dimen.toolbar_height) else heightView.toFloat()
 
         val density = context.resources.displayMetrics.density
-        val screenWidthDp = context.resources.configuration.screenWidthDp * density
+        val screenWidthDp = context.resources.configuration.screenWidthDp
         val factor = if (screenWidthDp < 1200) 0.092 else 0.088
         val screenWidth =
-            ((screenWidthDp - context.resources.getDimension(com.goodwy.commons.R.dimen.activity_padding_left_right)).toDouble() * factor).toFloat()
+            ((screenWidthDp * density - context.resources.getDimension(com.goodwy.commons.R.dimen.activity_padding_left_right)).toDouble() * factor).toFloat()
 
         return listOf(
             RuledView(

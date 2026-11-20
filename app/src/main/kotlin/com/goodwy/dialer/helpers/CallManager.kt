@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.InCallService
@@ -22,8 +23,31 @@ class CallManager {
         private var call: Call? = null
         private val calls = mutableListOf<Call>()
         private val listeners = CopyOnWriteArraySet<CallManagerListener>()
-        var isSpeakerOn: Boolean = false
         private var previousAudioRoute: Int = CallAudioState.ROUTE_WIRED_OR_EARPIECE
+        private val mainHandler = Handler(Looper.getMainLooper())
+        private val stopDtmfTone = Runnable { call?.stopDtmfTone() }
+
+        // One shared callback for every call; unregistered in onCallRemoved/clear so no call keeps it alive.
+        private val callCallback = object : Call.Callback() {
+            override fun onStateChanged(call: Call, state: Int) {
+                updateState()
+            }
+
+            override fun onDetailsChanged(call: Call, details: Call.Details) {
+                updateState()
+            }
+
+            override fun onConferenceableCallsChanged(call: Call, conferenceableCalls: MutableList<Call>) {
+                updateState()
+            }
+        }
+
+        // Speaker and mute are read from the system's CallAudioState, never cached, so a new call can't inherit the last one's.
+        val isSpeakerOn: Boolean
+            get() = getCallAudioState()?.route == CallAudioState.ROUTE_SPEAKER
+
+        val isMicrophoneMuted: Boolean
+            get() = getCallAudioState()?.isMuted == true
 
         fun onCallAdded(call: Call) {
             this.call = call
@@ -31,27 +55,36 @@ class CallManager {
             for (listener in listeners) {
                 listener.onPrimaryCallChanged(call)
             }
-            call.registerCallback(object : Call.Callback() {
-                override fun onStateChanged(call: Call, state: Int) {
-                    updateState()
-                }
-
-                override fun onDetailsChanged(call: Call, details: Call.Details) {
-                    updateState()
-                }
-
-                override fun onConferenceableCallsChanged(call: Call, conferenceableCalls: MutableList<Call>) {
-                    updateState()
-                }
-            })
+            call.registerCallback(callCallback)
         }
 
         fun onCallRemoved(call: Call) {
+            call.unregisterCallback(callCallback)
+            clearCallContact(call)
             calls.remove(call)
             updateState()
         }
 
+        // Called when the service is gone. Listeners stay: they belong to the activities that added them.
+        fun clear(service: InCallService) {
+            if (inCallService !== service) return
+            inCallService = null
+            calls.forEach { it.unregisterCallback(callCallback) }
+            calls.clear()
+            clearCallContacts()
+            call = null
+            previousAudioRoute = CallAudioState.ROUTE_WIRED_OR_EARPIECE
+            mainHandler.removeCallbacks(stopDtmfTone)
+        }
+
+        fun setMuted(muted: Boolean) {
+            inCallService?.setMuted(muted)
+        }
+
         fun onAudioStateChanged(audioState: CallAudioState) {
+            for (listener in listeners) {
+                listener.onMuteChanged(audioState.isMuted)
+            }
             val route = AudioRoute.fromRoute(audioState.route) ?: return
             for (listener in listeners) {
                 listener.onAudioStateChanged(route)
@@ -85,7 +118,7 @@ class CallManager {
                 }
 
                 else -> {
-                    val conference = calls.find { it.isConference() } ?: return NoCall
+                    val conference = calls.find { it.isConference() } ?: return getTwoCallsWithoutConference()
                     val secondCall = if (conference.children.size + 1 != calls.size) {
                         calls.filter { !it.isConference() }
                             .subtract(conference.children.toSet())
@@ -105,6 +138,19 @@ class CallManager {
                     }
                 }
             }
+        }
+
+        // 3+ calls and none is a conference: show the most relevant call plus one other (usually the held one).
+        private fun getTwoCallsWithoutConference(): PhoneState {
+            val primary = calls.find { it.getStateCompat() == Call.STATE_RINGING }
+                ?: calls.find {
+                    val state = it.getStateCompat()
+                    state == Call.STATE_ACTIVE || state == Call.STATE_CONNECTING || state == Call.STATE_DIALING
+                }
+                ?: calls.first()
+            val secondary = calls.find { it != primary && it.getStateCompat() == Call.STATE_HOLDING }
+                ?: calls.first { it != primary }
+            return TwoCalls(primary, secondary)
         }
 
         fun getPhoneSize(): Int {
@@ -147,7 +193,6 @@ class CallManager {
         fun setBluetoothDevice(device: BluetoothDevice) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 inCallService?.requestBluetoothAudio(device)
-                isSpeakerOn = false
                 previousAudioRoute = CallAudioState.ROUTE_BLUETOOTH
                 notifyAudioStateChanged()
             } else {
@@ -161,22 +206,16 @@ class CallManager {
             if (keepCalls) {
                 if (currentAudioState.route == CallAudioState.ROUTE_EARPIECE) {
                     setAudioRoute(CallAudioState.ROUTE_SPEAKER)
-                    isSpeakerOn = true
                 }
             } else {
-                if (!isSpeakerOn) {
-                    // We only remember the current route if it is not dynamic
-                    if (currentAudioState.route != CallAudioState.ROUTE_SPEAKER) {
-                        previousAudioRoute = currentAudioState.route
-                    }
+                if (currentAudioState.route != CallAudioState.ROUTE_SPEAKER) {
                     // Turn on the speaker - save the current route
+                    previousAudioRoute = currentAudioState.route
                     setAudioRoute(CallAudioState.ROUTE_SPEAKER)
-                    isSpeakerOn = true
                 } else {
                     // Turn off the speaker - return to the saved route
                     val targetRoute = getOptimalAudioRoute(previousAudioRoute, currentAudioState)
                     setAudioRoute(targetRoute)
-                    isSpeakerOn = false
                 }
             }
 
@@ -201,21 +240,11 @@ class CallManager {
         }
 
         fun setAudioRoute(newRoute: Int) {
-            inCallService?.setAudioRoute(newRoute)
-
-            when (newRoute) {
-                CallAudioState.ROUTE_SPEAKER -> isSpeakerOn = true
-                else -> {
-                    if (isSpeakerOn) {
-                        isSpeakerOn = false
-                        // Update the previous route if switching from speaker
-                        if (newRoute != CallAudioState.ROUTE_SPEAKER) {
-                            previousAudioRoute = newRoute
-                        }
-                    }
-                }
+            // Remember where to return to when the user leaves the speaker for another route
+            if (newRoute != CallAudioState.ROUTE_SPEAKER && isSpeakerOn) {
+                previousAudioRoute = newRoute
             }
-
+            inCallService?.setAudioRoute(newRoute)
             notifyAudioStateChanged()
         }
 
@@ -227,6 +256,11 @@ class CallManager {
         }
 
         private fun updateState() {
+            // With other live calls, drop disconnected ones first so the state reflects the remaining calls.
+            // A lone disconnected call stays until listeners have seen it: CallActivity ends the call UI on it.
+            if (calls.any { it.getStateCompat() != Call.STATE_DISCONNECTED }) {
+                calls.removeAll { it.getStateCompat() == Call.STATE_DISCONNECTED }
+            }
             val primaryCall = when (val phoneState = getPhoneState()) {
                 is NoCall -> null
                 is SingleCall -> phoneState.call
@@ -315,22 +349,9 @@ class CallManager {
         fun getState() = getPrimaryCall()?.getStateCompat()
 
         fun keypad(char: Char) {
+            mainHandler.removeCallbacks(stopDtmfTone)
             call?.playDtmfTone(char)
-            Handler().postDelayed({
-                call?.stopDtmfTone()
-            }, DIALPAD_TONE_LENGTH_MS)
-        }
-
-        var isMicrophoneMuted: Boolean = false
-            set(value) {
-                field = value
-                notifyMuteChanged(value)
-            }
-
-        private fun notifyMuteChanged(isMuted: Boolean) {
-            for (listener in listeners) {
-                listener.onMuteChanged(isMuted)
-            }
+            mainHandler.postDelayed(stopDtmfTone, DIALPAD_TONE_LENGTH_MS)
         }
 
         fun getCallConnectTime(): Long {

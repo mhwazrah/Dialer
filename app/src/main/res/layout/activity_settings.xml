@@ -1393,18 +1393,6 @@
                     </RelativeLayout>
 
                     <RelativeLayout
-                        android:id="@+id/settings_group_subsequent_calls_holder"
-                        style="@style/SettingsHolderSwitchStyle"
-                        android:visibility="gone">
-
-                        <com.goodwy.commons.views.MyMaterialSwitch
-                            android:id="@+id/settings_group_subsequent_calls"
-                            style="@style/SettingsSwitchStyle"
-                            android:text="@string/group_subsequent_calls"
-                            app:switchPadding="@dimen/bigger_margin" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
                         android:id="@+id/settingsQueryLimitRecentHolder"
                         style="@style/SettingsHolderStyle">
 

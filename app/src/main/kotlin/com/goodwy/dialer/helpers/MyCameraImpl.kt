@@ -12,21 +12,27 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
-class MyCameraImpl private constructor(private val context: Context, private var cameraTorchListener: CameraTorchListener? = null) {
+class MyCameraImpl private constructor(appContext: Context, private var cameraTorchListener: CameraTorchListener? = null) {
+    // The camera and its callbacks outlive any activity, so never hold one
+    private val context: Context = appContext.applicationContext
     var stroboFrequency = 1000L
 
     companion object {
+        @Volatile
         var isFlashlightOn = false
 
         private var u = 200L // The length of one dit (Time unit)
         private val SOS = listOf(u, u, u, u, u, u * 3, u * 3, u, u * 3, u, u * 3, u * 3, u, u, u, u, u, u * 7)
 
-        private var shouldEnableFlashlight = false
-        private var shouldEnableStroboscope = false
-        private var shouldEnableSOS = false
-        private var isStroboSOS = false     // are we sending SOS, or casual stroboscope?
+        @Volatile private var shouldEnableFlashlight = false
+        @Volatile private var shouldEnableStroboscope = false
+        @Volatile private var shouldEnableSOS = false
+        @Volatile private var isStroboSOS = false     // are we sending SOS, or casual stroboscope?
+        private val strobeThreadActive = AtomicBoolean(false)
 
         @SuppressLint("StaticFieldLeak")
         private var cameraFlash: CameraFlash? = null
@@ -59,7 +65,6 @@ class MyCameraImpl private constructor(private val context: Context, private var
         }
 
     init {
-        handleCameraSetup()
         stroboFrequency = 1000L //context.config.stroboscopeFrequency
     }
 
@@ -100,9 +105,13 @@ class MyCameraImpl private constructor(private val context: Context, private var
             stopStroboscope()
             false
         } else {
-            Thread(stroboscope).start()
+            startStrobeThread()
             true
         }
+    }
+
+    private fun startStrobeThread() {
+        Thread(stroboscope).apply { isDaemon = true }.start()
     }
 
     fun stopStroboscope() {
@@ -142,12 +151,14 @@ class MyCameraImpl private constructor(private val context: Context, private var
             stopSOS()
             false
         } else {
-            Thread(stroboscope).start()
+            startStrobeThread()
             true
         }
     }
 
     fun stopSOS() {
+        // Nothing to stop unless SOS was ever started; callers invoke this on every call end
+        if (!isStroboSOS) return
         shouldStroboscopeStop = true
         scope.launch {
             _sosDisabled.emit(Unit)
@@ -255,10 +266,11 @@ class MyCameraImpl private constructor(private val context: Context, private var
 
         isFlashlightOn = false
         shouldStroboscopeStop = true
+        scope.cancel()
     }
 
     private val stroboscope = Runnable {
-        if (isStroboscopeRunning || isSOSRunning) {
+        if (!strobeThreadActive.compareAndSet(false, true)) {
             return@Runnable
         }
 
@@ -273,13 +285,16 @@ class MyCameraImpl private constructor(private val context: Context, private var
         handleCameraSetup()
         while (!shouldStroboscopeStop) {
             try {
-                cameraFlash!!.run {
-                    toggleFlashlight(true)
+                // Stop at the first failure: the torch is unavailable, retrying only repeats the error toast
+                if (!cameraFlash!!.toggleFlashlight(true)) {
+                    shouldStroboscopeStop = true
+                    break
                 }
                 val onDuration = if (isStroboSOS) SOS[sosIndex++ % SOS.size] else stroboFrequency
                 Thread.sleep(onDuration)
-                cameraFlash!!.run {
-                    toggleFlashlight(false)
+                if (!cameraFlash!!.toggleFlashlight(false)) {
+                    shouldStroboscopeStop = true
+                    break
                 }
                 val offDuration = if (isStroboSOS) SOS[sosIndex++ % SOS.size] else stroboFrequency
                 Thread.sleep(offDuration)
@@ -299,6 +314,7 @@ class MyCameraImpl private constructor(private val context: Context, private var
         }
 
         shouldStroboscopeStop = false
+        strobeThreadActive.set(false)
         if (isStroboSOS) {
             isSOSRunning = false
             scope.launch {

@@ -22,12 +22,25 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
 class TimerService : Service() {
+    private companion object {
+        const val CHANNEL_ID = "right_dialer_alarm_timer"
+    }
+
     private val bus = EventBus.getDefault()
-    private var isStopping = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile private var isStopping = false
 
     override fun onCreate() {
         super.onCreate()
+        createNotificationChannel()
         bus.register(this)
+    }
+
+    private fun createNotificationChannel() {
+        NotificationChannel(CHANNEL_ID, getString(R.string.timer), NotificationManager.IMPORTANCE_DEFAULT).apply {
+            setSound(null, null)
+            notificationManager.createNotificationChannel(this)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -42,7 +55,8 @@ class TimerService : Service() {
             notification(
                 title = getString(R.string.app_launcher_name),
                 contentText = getString(R.string.timers_notification_msg),
-                firstRunningTimerId = INVALID_TIMER_ID
+                firstRunningTimerId = INVALID_TIMER_ID,
+                endTime = null
             )
         )
         return START_NOT_STICKY
@@ -53,8 +67,7 @@ class TimerService : Service() {
             val runningTimers = timers.filter { it.state is TimerState.Running }
             if (runningTimers.isNotEmpty()) {
                 val firstTimer = runningTimers.first()
-                val formattedDuration =
-                    (firstTimer.state as TimerState.Running).tick.getFormattedDuration()
+                val endTime = (firstTimer.state as TimerState.Running).endTime
                 val contextText = when {
                     firstTimer.label.isNotEmpty() -> getString(
                         R.string.call_back_person_g,
@@ -68,14 +81,17 @@ class TimerService : Service() {
                     )
                 }
 
-                Handler(Looper.getMainLooper()).post {
+                mainHandler.post {
+                    // The last timer may have finished while this was queued
+                    if (isStopping) return@post
                     try {
                         startForeground(
                             TIMER_RUNNING_NOTIFICATION_ID,
                             notification(
-                                title = formattedDuration,
+                                title = getString(R.string.remind_me),
                                 contentText = contextText,
                                 firstRunningTimerId = firstTimer.id!!,
+                                endTime = endTime,
                                 number = firstTimer.label
                             )
                         )
@@ -84,7 +100,7 @@ class TimerService : Service() {
                     }
                 }
             } else {
-                stopService()
+                mainHandler.post { stopService() }
             }
         }
     }
@@ -101,13 +117,16 @@ class TimerService : Service() {
         }
     }
 
+    // Main thread only
     private fun stopService() {
         isStopping = true
         stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        mainHandler.removeCallbacksAndMessages(null)
         bus.unregister(this)
     }
 
@@ -115,16 +134,9 @@ class TimerService : Service() {
         title: String,
         contentText: String,
         firstRunningTimerId: Int,
+        endTime: Long?,
         number: String = ""
     ): Notification {
-        val channelId = "right_dialer_alarm_timer"
-        val label = getString(R.string.timer)
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        NotificationChannel(channelId, label, importance).apply {
-            setSound(null, null)
-            notificationManager.createNotificationChannel(this)
-        }
-
         val restart = Intent(this, TimerReceiver::class.java).apply {
             action = TIMER_RESTART
             putExtra(TIMER_ID, firstRunningTimerId)
@@ -138,7 +150,7 @@ class TimerService : Service() {
             setOnClickPendingIntent(R.id.timer_repeat, cancelIntent)
         }
 
-        val builder = NotificationCompat.Builder(this, channelId)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
 //            .setContentTitle(title)
 //            .setContentText(contentText)
             .setCategory(Notification.CATEGORY_REMINDER)
@@ -148,7 +160,6 @@ class TimerService : Service() {
             .setSound(null)
             .setOngoing(true)
             .setAutoCancel(true)
-            .setChannelId(channelId)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .addAction(
@@ -162,13 +173,16 @@ class TimerService : Service() {
                 getString(R.string.message),
                 sendSMSPendingIntentUpdateCurrent(number)
             )
-        }
-        if (number != "") {
             builder.addAction(
                 R.drawable.ic_phone_vector,
                 getString(R.string.call_back_g),
                 startCallPendingIntentUpdateCurrent(number)
             )
+        }
+
+        // The system draws the countdown from the stored end time: no per-second updates needed
+        if (endTime != null) {
+            builder.setWhen(endTime).setShowWhen(true).setUsesChronometer(true).setChronometerCountDown(true)
         }
 
         if (firstRunningTimerId != INVALID_TIMER_ID) {

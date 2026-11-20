@@ -18,6 +18,9 @@ class FilterContactSourcesAdapter(
 ) : RecyclerView.Adapter<FilterContactSourcesAdapter.ViewHolder>() {
 
     private val selectedKeys = HashSet<Int>()
+    private val textColor = activity.getProperTextColor()
+    private val primaryColor = activity.getProperPrimaryColor()
+    private val backgroundColor = activity.getProperBackgroundColor()
 
     init {
         contactSources.forEachIndexed { _, contactSource ->
@@ -57,21 +60,22 @@ class FilterContactSourcesAdapter(
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindView(contactSource: ContactSource): View {
-            val isSelected = selectedKeys.contains(contactSource.hashCode())
             ItemFilterContactSourceBinding.bind(itemView).apply {
-                filterContactSourceCheckbox.isChecked = isSelected
-                filterContactSourceCheckbox.setColors(activity.getProperTextColor(), activity.getProperPrimaryColor(), activity.getProperBackgroundColor())
+                filterContactSourceCheckbox.isChecked = selectedKeys.contains(contactSource.hashCode())
+                filterContactSourceCheckbox.setColors(textColor, primaryColor, backgroundColor)
                 val countText = if (contactSource.count >= 0) " (${contactSource.count})" else ""
-                val displayName = "${contactSource.publicName}$countText"
-                filterContactSourceCheckbox.text = displayName
-                filterContactSourceHolder.setOnClickListener { viewClicked(!isSelected, contactSource) }
+                filterContactSourceCheckbox.text = "${contactSource.publicName}$countText"
+                filterContactSourceHolder.setOnClickListener { viewClicked(contactSource) }
 
                 return root
             }
         }
 
-        private fun viewClicked(select: Boolean, contactSource: ContactSource) {
-            toggleItemSelection(select, contactSource, adapterPosition)
+        // Selection is read at click time, so a stale bind can never invert the toggle.
+        private fun viewClicked(contactSource: ContactSource) {
+            val position = bindingAdapterPosition
+            if (position == RecyclerView.NO_POSITION) return
+            toggleItemSelection(!selectedKeys.contains(contactSource.hashCode()), contactSource, position)
         }
     }
 }

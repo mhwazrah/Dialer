@@ -107,7 +107,10 @@ class CallHistoryAdapter(
     private fun askConfirmRemove() {
         ConfirmationDialog(activity, activity.getString(R.string.remove_confirmation)) {
             activity.handlePermission(PERMISSION_WRITE_CALL_LOG) {
-                if (it) removeRecents()
+                if (it) removeRecents() else {
+                    selectedKeys.clear()
+                    activity.toast(com.goodwy.commons.R.string.no_permission)
+                }
             }
         }
     }
@@ -126,10 +129,9 @@ class CallHistoryAdapter(
 
         RecentsHelper(activity).removeRecentCalls(idsToRemove) {
             itemDelete(callsToRemove)
-            val recentCalls = currentList.toMutableList().also { it.removeAll(callsToRemove) }
             activity.runOnUiThread {
                 refreshItemsListener?.refreshItems()
-                submitList(recentCalls)
+                submitList(currentList - callsToRemove.toSet())
                 finishActMode()
 //                (activity as? CallHistoryActivity)?.refreshItems()
             }
@@ -225,7 +227,7 @@ class CallHistoryAdapter(
                     Calls.FEATURES_WIFI -> " (Wi-Fi)"
                     else -> ""
                 }
-                val isBlockedCall = call.blockReason != 0
+                val isBlockedCall = (call.blockReason ?: 0) != 0
                 itemRecentsTypeName.apply {
                     @SuppressLint("SetTextI18n")
                     text = if (isBlockedCall) blockedCallText else type + features

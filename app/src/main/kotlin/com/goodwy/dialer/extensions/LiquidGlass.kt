@@ -1,9 +1,11 @@
 package com.goodwy.dialer.extensions
 
+import com.bumptech.glide.Glide
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.util.LruCache
 import android.view.View
 import android.widget.ImageView
 import androidx.core.graphics.createBitmap
@@ -55,6 +57,8 @@ fun ImageView.loadBrandedContactImage(photoUri: String, name: String) {
         helper.loadContactImage(photoUri, this, name)
         return
     }
+    // Drop any in-flight photo load so it cannot land on top of the letter (views are recycled)
+    Glide.with(context).clear(this)
     setImageBitmap(context.brandedLetterAvatar(name))
 }
 
@@ -63,9 +67,18 @@ fun Context.contactLetterBitmap(name: String): Bitmap =
     if (baseConfig.useColoredContacts) SimpleContactsHelper(this).getContactLetterIcon(name)
     else brandedLetterAvatar(name)
 
+private data class LetterAvatarKey(val letter: String, val color: Int, val size: Int)
+
+// Avatars are tiny and shared by every list row; the cache lives as long as the process.
+private val letterAvatarCache = LruCache<LetterAvatarKey, Bitmap>(64)
+
 private fun Context.brandedLetterAvatar(name: String): Bitmap {
     val size = resources.getDimension(com.goodwy.commons.R.dimen.contact_photo_big_size).toInt()
     val primary = getProperPrimaryColor()
+    val letter = name.getNameLetter()
+    val key = LetterAvatarKey(letter, primary, size)
+    letterAvatarCache.get(key)?.let { return it }
+
     val bitmap = createBitmap(size, size)
     val canvas = Canvas(bitmap)
     val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary }
@@ -76,17 +89,19 @@ private fun Context.brandedLetterAvatar(name: String): Bitmap {
         textAlign = Paint.Align.CENTER
         textSize = size / 2f
     }
-    val letter = name.getNameLetter()
     canvas.drawText(letter, size / 2f, size / 2f - (text.descent() + text.ascent()) / 2, text)
+    letterAvatarCache.put(key, bitmap)
     return bitmap
 }
 
 /** Paints the colour-field backdrop the glass panels refract, matching the theme brightness. */
 fun View.applyLiquidBackdrop() {
-    setBackgroundResource(
-        if (context.isLiquidLightTheme()) R.drawable.bg_liquid_backdrop_light
-        else R.drawable.bg_liquid_backdrop_dark
-    )
+    val resId = if (context.isLiquidLightTheme()) R.drawable.bg_liquid_backdrop_light else R.drawable.bg_liquid_backdrop_dark
+    // Repainted only when the theme changed or something else replaced the background since
+    val applied = getTag(R.id.glass_backdrop) as? Pair<*, *>
+    if (applied != null && applied.first == resId && applied.second === background) return
+    setBackgroundResource(resId)
+    setTag(R.id.glass_backdrop, resId to background)
 }
 
 /**
@@ -97,6 +112,9 @@ fun View.applyLiquidBackdrop() {
 fun View.showSwipeActionsOnlyWhileSwiping(content: View, vararg actions: View) {
     if (getTag(R.id.glass_swipe_listener) != null) return
     // INVISIBLE, not GONE: the swipe view measures its action views for the swipe distance.
+    // SwipeActionView has no callback for a swipe that starts and returns without activating, so the
+    // row is polled. The check reads the views' real visibility (cheap field reads): the adapter may
+    // show the action views again when it rebinds a recycled row, so a remembered state would go stale.
     val listener = ViewTreeObserver.OnPreDrawListener {
         val swiping = content.translationX != 0f
         actions.forEach { if (it.isInvisible == swiping) it.isInvisible = !swiping }
@@ -135,6 +153,11 @@ fun LiquidGlassView.applyLiquidGlass(pressable: Boolean = false) {
         enableChromaticAberration = false
         enableChromaticDispersion = false
     }
+}
+
+/** Loads the CPU-blur native library (needed below Android 13 only) so the first live glass draw does not. */
+fun warmUpNativeGlassBlur() {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) isNativeGlassBlurAvailable
 }
 
 private val isNativeGlassBlurAvailable: Boolean by lazy {

@@ -59,6 +59,7 @@ import com.goodwy.dialer.fragments.RecentsFragment
 import com.goodwy.dialer.helpers.*
 import com.goodwy.dialer.models.AudioRoute
 import com.goodwy.dialer.models.Events
+import io.reactivex.rxjava3.disposables.Disposable
 import com.mikhaellopez.rxanimation.RxAnimation
 import com.mikhaellopez.rxanimation.fadeIn
 import com.mikhaellopez.rxanimation.fadeOut
@@ -67,7 +68,6 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import me.grantland.widget.AutofitHelper
-import java.io.InputStreamReader
 import java.util.Objects
 
 class MainActivity : SimpleActivity() {
@@ -76,41 +76,40 @@ class MainActivity : SimpleActivity() {
     private val binding by viewBinding(ActivityMainBinding::inflate)
 
     private var launchedDialer = false
+    private var fragmentsInitialized = false
+    private var callGlassAnimation: Disposable? = null
     private var isSearchOpen = false
+    private var refreshPendingAfterSearch = false
+    private var storedPermissionsKey: String? = null
     private var mSearchMenuItem: MenuItem? = null
     private var storedShowTabs = 0
-    private var storedFontSize = 0
+    private var storedDisplaySettings = ""
     private var searchQuery = ""
     private var storedStartNameWithSurname = false
     private var storedShowPhoneNumbers = false
     private var storedBackgroundColor = 0
-    var cachedContacts = ArrayList<Contact>()
-    private var cachedFavorites = ArrayList<Contact>()
-    private var storedContactShortcuts = ArrayList<Contact>()
+    // Immutable snapshots, replaced wholesale from background threads and read from others.
+    @Volatile private var cachedFavorites: List<Contact> = emptyList()
+    // What the dynamic shortcuts were last built from (id, name, photo per favourite): compared instead of whole contacts.
+    @Volatile private var storedContactShortcuts: List<String> = emptyList()
     private var isSpeechToTextAvailable = false
 
-    // CallService posts RefreshCallLog as soon as the call is removed from the
-    // Telecom stack, but Android writes the call-log entry asynchronously a
-    // moment later. This observer fires when the call log actually changes, so
-    // the recents tab shows the new entry without the user having to wait.
-    // Writes arrive in bursts (the call-end entry, our own cached-name updates,
-    // mark-missed-as-read), so coalesce them into a single refresh instead of
-    // launching one full reload pipeline per notification.
-    private val callLogRefreshHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private val callLogRefreshRunnable = Runnable {
-        if (!isDestroyed && !isFinishing) {
-            config.needUpdateRecents = true
-            getRecentsFragment()?.refreshItems(needUpdate = true)
-        }
-    }
+    // Last ContactsRepository.version this screen rendered; a different value on resume means contacts or the call log changed.
+    private var seenRepositoryVersion = ContactsRepository.version
 
-    private val callLogObserver = object : android.database.ContentObserver(callLogRefreshHandler) {
-        override fun onChange(selfChange: Boolean) {
-            super.onChange(selfChange)
-            if (isDestroyed || isFinishing) return
-            callLogRefreshHandler.removeCallbacks(callLogRefreshRunnable)
-            callLogRefreshHandler.postDelayed(callLogRefreshRunnable, 400)
-        }
+    // The list-affecting settings the fragments were last refreshed for (see listSettingsKey).
+    private var storedListSettings = ""
+    private var glassSearchLight = false
+    private var glassSearchBackgroundState: Drawable.ConstantState? = null
+    private var mainMenuPaintCleared = false
+    private var appliedListInsets: ListInsets? = null
+    private var appliedColorsKey: List<Int>? = null
+    private var appliedSlideAnimation = -1
+
+    // Fires (debounced) while resumed when contacts or the call log changed, e.g. the call-end entry landing after
+    // CallService's RefreshCallLog: one refresh per burst.
+    private val repositoryListener: () -> Unit = {
+        if (!isDestroyed && !isFinishing) refreshAfterRepositoryChange()
     }
 
     @SuppressLint("MissingSuperCall")
@@ -190,10 +189,17 @@ class MainActivity : SimpleActivity() {
 
         // At the first launch, enable the general blocking if at least one blocking was enabled
         if (config.initCallBlockingSetup) {
-            if (getBlockedNumbers().isNotEmpty() || baseConfig.blockUnknownNumbers || baseConfig.blockHiddenNumbers) {
-                baseConfig.blockingEnabled = true
-            }
             config.initCallBlockingSetup = false
+            ensureBackgroundThread {
+                val hasBlockedNumbers = try {
+                    getBlockedNumbers().isNotEmpty()
+                } catch (_: SecurityException) {
+                    false
+                }
+                if (hasBlockedNumbers || baseConfig.blockUnknownNumbers || baseConfig.blockHiddenNumbers) {
+                    baseConfig.blockingEnabled = true
+                }
+            }
         }
 
         CallManager.addListener(callCallback)
@@ -208,23 +214,18 @@ class MainActivity : SimpleActivity() {
             CallNotificationManager(this).cancelNotification()
         }
 
-        try {
-            contentResolver.registerContentObserver(
-                android.provider.CallLog.Calls.CONTENT_URI,
-                true,
-                callLogObserver
-            )
-        } catch (_: SecurityException) {
-            // Call-log permission not granted yet; nothing to observe.
+        ContactsRepository.registerObservers(this)
+        ContactsRepository.addListener(repositoryListener)
+        // Changed while we were away: the lists are refreshed below (one snapshot load at most)
+        val repositoryChanged = seenRepositoryVersion != ContactsRepository.version
+        if (repositoryChanged) {
+            seenRepositoryVersion = ContactsRepository.version
+            config.needUpdateRecents = true
         }
 
-        if (storedShowTabs != config.showTabs || storedShowPhoneNumbers != config.showPhoneNumbers) {
-            System.exit(0)
-            return
-        }
-
+        val tabsChanged = storedShowTabs != config.showTabs || storedShowPhoneNumbers != config.showPhoneNumbers
         @SuppressLint("UnsafeIntentLaunch")
-        if (config.needRestart || storedBackgroundColor != getProperBackgroundColor()) {
+        if (tabsChanged || config.needRestart || storedBackgroundColor != getProperBackgroundColor()) {
             config.lastUsedViewPagerPage = 0
             finish()
             startActivity(intent)
@@ -253,9 +254,8 @@ class MainActivity : SimpleActivity() {
 
         val configStartNameWithSurname = config.startNameWithSurname
         if (storedStartNameWithSurname != configStartNameWithSurname) {
-            getContactsFragment()?.startNameWithSurnameChanged(configStartNameWithSurname)
-            getFavoritesFragment()?.startNameWithSurnameChanged(configStartNameWithSurname)
-            storedStartNameWithSurname = config.startNameWithSurname
+            config.sorting = if (configStartNameWithSurname) SORT_BY_SURNAME else SORT_BY_FIRST_NAME
+            storedStartNameWithSurname = configStartNameWithSurname
         }
 
         if (binding.viewPager.adapter != null && !config.bottomNavigationBar) {
@@ -280,36 +280,55 @@ class MainActivity : SimpleActivity() {
 
             binding.mainTopTabsHolder.getTabAt(binding.viewPager.currentItem)?.icon?.applyColorFilter(properPrimaryColor)
             binding.mainTopTabsHolder.getTabAt(binding.viewPager.currentItem)?.icon?.alpha = 220 // max 255
-            getAllFragments().forEach {
-                it?.setupColors(properTextColor, properPrimaryColor, getProperAccentColor())
-                binding.mainTopTabsHolder.setTabTextColors(properTextColor, properPrimaryColor)
-            }
+            binding.mainTopTabsHolder.setTabTextColors(properTextColor, properPrimaryColor)
+            setupFragmentColors(properTextColor, properPrimaryColor)
         } else if (binding.viewPager.adapter != null && config.bottomNavigationBar) {
-            getAllFragments().forEach {
-                it?.setupColors(properTextColor, properPrimaryColor, getProperAccentColor())
+            setupFragmentColors(properTextColor, properPrimaryColor)
+        }
+
+        // Nothing is reloaded unless the data or a list-affecting setting changed since the lists were last filled.
+        val listSettings = listSettingsKey()
+        // A permission granted or revoked outside the app (system Settings) while we were away: observe the newly
+        // readable data, reload it, and let each fragment re-pick its placeholder text.
+        val permissionsKey = "${hasPermission(PERMISSION_READ_CONTACTS)}|${hasPermission(PERMISSION_READ_CALL_LOG)}"
+        val permissionsChanged = storedPermissionsKey != null && storedPermissionsKey != permissionsKey
+        storedPermissionsKey = permissionsKey
+        if (permissionsChanged) {
+            ContactsRepository.onPermissionGranted(this)
+            config.needUpdateRecents = true
+            getAllFragments().forEach { it?.setupFragment() }
+        }
+        // The page listeners are normally added from the contacts-permission callback, which never fires when that
+        // dialog is dismissed without an answer; without them, switching tabs leaves a stale title and menu.
+        // (Idempotent: initFragments runs its setup only once.)
+        if (isDefaultDialer()) initFragments()
+        val privateContactsStale = ContactsRepository.invalidateIfHoldsPrivateContacts()
+        val listsOutdated = binding.viewPager.adapter == null || repositoryChanged || privateContactsStale || permissionsChanged ||
+            config.needUpdateRecents || listSettings != storedListSettings
+        if (listsOutdated) {
+            if (binding.mainMenu.isSearchOpen || isSearchOpen) {
+                refreshPendingAfterSearch = true
+            } else {
+                storedListSettings = listSettings
+                refreshItems()
             }
         }
 
-        if (/*!isSearchOpen && */!binding.mainMenu.isSearchOpen) {
-            refreshItems(true)
-        }
-
-        val configFontSize = config.fontSize
-        if (storedFontSize != configFontSize) {
-            getAllFragments().forEach {
-                it?.fontSizeChanged()
-            }
-        }
+        applyDisplaySettings()
 
         invalidateOptionsMenu()
 
         //Screen slide animation
-        val animation = when (config.screenSlideAnimation) {
-            1 -> ZoomOutPageTransformer()
-            2 -> DepthPageTransformer()
-            else -> null
+        val slideAnimation = config.screenSlideAnimation
+        if (slideAnimation != appliedSlideAnimation) {
+            appliedSlideAnimation = slideAnimation
+            val animation = when (slideAnimation) {
+                1 -> ZoomOutPageTransformer()
+                2 -> DepthPageTransformer()
+                else -> null
+            }
+            binding.viewPager.setPageTransformer(true, animation)
         }
-        binding.viewPager.setPageTransformer(true, animation)
         binding.viewPager.setPagingEnabled(!config.useSwipeToAction)
 
         // transparent so the liquid backdrop shows through
@@ -318,18 +337,16 @@ class MainActivity : SimpleActivity() {
         }
         if (getCurrentFragment() is RecentsFragment) clearMissedCalls()
 
+        // The call listener only reports changes: show the return-to-call button if a call is already in progress
+        updateState()
+
         checkShortcuts()
         checkErrorDialog()
-        newAppRecommendation()
     }
 
     override fun onPause() {
         super.onPause()
-        try {
-            contentResolver.unregisterContentObserver(callLogObserver)
-        } catch (_: Exception) {
-        }
-        callLogRefreshHandler.removeCallbacks(callLogRefreshRunnable)
+        ContactsRepository.removeListener(repositoryListener)
         storeStateVariables()
         config.lastUsedViewPagerPage = binding.viewPager.currentItem
     }
@@ -339,7 +356,6 @@ class MainActivity : SimpleActivity() {
             storedShowTabs = showTabs
             storedStartNameWithSurname = startNameWithSurname
             storedShowPhoneNumbers = showPhoneNumbers
-            storedFontSize = fontSize
             needRestart = false
         }
         storedBackgroundColor = getProperBackgroundColor()
@@ -376,7 +392,6 @@ class MainActivity : SimpleActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        refreshItems()
     }
 
     override fun onBackPressedCompat(): Boolean {
@@ -399,6 +414,7 @@ class MainActivity : SimpleActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        callGlassAnimation?.dispose()
         CallManager.removeListener(callCallback)
         EventBus.getDefault().unregister(this)
     }
@@ -441,6 +457,7 @@ class MainActivity : SimpleActivity() {
                     getAllFragments().forEach {
                         it?.onSearchQueryChanged("")
                     }
+                    applyRefreshPendingAfterSearch()
                 }
 
                 onSearchTextChangedListener = { text ->
@@ -490,7 +507,11 @@ class MainActivity : SimpleActivity() {
     }
 
     private fun checkContactPermissions() {
+        val alreadyGranted = hasPermission(PERMISSION_READ_CONTACTS)
         handlePermission(PERMISSION_READ_CONTACTS) {
+            // Only a fresh grant invalidates the data; an existing one just makes sure the observers are on.
+            if (it && !alreadyGranted) ContactsRepository.onPermissionGranted(this)
+            else if (it) ContactsRepository.registerObservers(this)
             initFragments()
         }
     }
@@ -548,6 +569,7 @@ class MainActivity : SimpleActivity() {
 
                 isSearchOpen = false
                 binding.mainDialpadGlass.beVisible()
+                applyRefreshPendingAfterSearch()
                 return true
             }
         })
@@ -609,12 +631,12 @@ class MainActivity : SimpleActivity() {
         ensureBackgroundThread {
             if (isRPlus() && shortcutManager.isRequestPinShortcutSupported) {
                 val starred = cachedFavorites.filter { it.phoneNumbers.isNotEmpty() }.take(3)
-                if (storedContactShortcuts != starred) {
+                val shortcutKeys = starred.map { "${it.id}|${it.getNameToDisplay()}|${it.photoUri}" }
+                if (storedContactShortcuts != shortcutKeys) {
                     val allShortcuts = shortcutManager.dynamicShortcuts.filter { it.id != "launch_dialpad" }.map { it.id }
                     shortcutManager.removeDynamicShortcuts(allShortcuts)
 
-                    storedContactShortcuts.clear()
-                    storedContactShortcuts.addAll(starred)
+                    storedContactShortcuts = shortcutKeys
 
                     starred.reversed().forEach { contact ->
                         val name = contact.getNameToDisplay()
@@ -726,13 +748,16 @@ class MainActivity : SimpleActivity() {
 
     @Suppress("DEPRECATION")
     private fun initFragments() {
+        // Called on every contacts-permission grant; the page listeners must be added only once
+        if (fragmentsInitialized) return
+        fragmentsInitialized = true
         binding.viewPager.offscreenPageLimit = 2
         binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrollStateChanged(state: Int) {}
-
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                if (config.bottomNavigationBar && config.changeColourTopBar) scrollChange()
+            override fun onPageScrollStateChanged(state: Int) {
+                if (state == ViewPager.SCROLL_STATE_IDLE && config.bottomNavigationBar && config.changeColourTopBar) scrollChange()
             }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
             override fun onPageSelected(position: Int) {
                 if (config.bottomNavigationBar) {
@@ -747,39 +772,11 @@ class MainActivity : SimpleActivity() {
                 if (getCurrentFragment() == getRecentsFragment()) {
                     clearMissedCalls()
                 }
+                if (config.bottomNavigationBar && config.changeColourTopBar) scrollChange()
             }
         })
 
-        // selecting the proper tab sometimes glitches, add an extra selector to make sure we have it right
-        if (config.bottomNavigationBar) {
-            binding.mainTabsHolder.onGlobalLayout {
-                Handler().postDelayed({
-                    var wantedTab = getDefaultTab()
 
-                    // open the Recents tab if we got here by clicking a missed call notification
-                    if (intent.action == Intent.ACTION_VIEW && config.showTabs and TAB_CALL_HISTORY > 0) {
-                        wantedTab = binding.mainTabsHolder.tabCount - 2
-                    }
-
-                    binding.mainTabsHolder.getTabAt(wantedTab)?.select()
-                    refreshMenuItems()
-                }, 100L)
-            }
-        } else {
-            binding.mainTopTabsHolder.onGlobalLayout {
-                Handler().postDelayed({
-                    var wantedTab = getDefaultTab()
-
-                    // open the Recents tab if we got here by clicking a missed call notification
-                    if (intent.action == Intent.ACTION_VIEW && config.showTabs and TAB_CALL_HISTORY > 0) {
-                        wantedTab = binding.mainTopTabsHolder.tabCount - 2
-                    }
-
-                    binding.mainTopTabsHolder.getTabAt(wantedTab)?.select()
-                    refreshMenuItems()
-                }, 100L)
-            }
-        }
 
         binding.mainDialpadButton.setOnClickListener {
             launchDialpad()
@@ -832,9 +829,12 @@ class MainActivity : SimpleActivity() {
     private fun styleGlassSearchField() {
         val light = isLiquidLightTheme()
         val holder = binding.mainMenu.binding.topToolbarSearchHolder
+        // Cheap gate for the per-frame call: the glass background's shared state is cached per theme
+        val appliedState = glassSearchBackgroundState
+        if (appliedState != null && glassSearchLight == light && holder.background?.constantState === appliedState) return
         val glassBackground = getDrawable(if (light) R.drawable.bg_glass_search_light else R.drawable.bg_glass_search_dark)
-        if (holder.tag == light && holder.background?.constantState == glassBackground?.constantState) return
-        holder.tag = light
+        glassSearchLight = light
+        glassSearchBackgroundState = glassBackground?.constantState
 
         fun color(light_: Int, dark: Int) = getColor(if (light) light_ else dark)
         val iconColor = color(R.color.glass_search_icon_light, R.color.glass_search_icon_dark)
@@ -853,6 +853,9 @@ class MainActivity : SimpleActivity() {
     }
 
     private fun clearMainMenuPaint() {
+        // Commons' updateColors always paints the menu itself, so a bare menu means nothing was repainted
+        if (mainMenuPaintCleared && binding.mainMenu.background == null) return
+        mainMenuPaintCleared = true
         fun clear(view: View) {
             if (view.background is ColorDrawable) view.background = null
             if (view is ViewGroup) view.children.forEach(::clear)
@@ -887,7 +890,11 @@ class MainActivity : SimpleActivity() {
                 setTopMargin(strip, top)
                 strip.height
             } ?: 0
-        getAllFragments().forEach { fragment ->
+        val fragments = getAllFragments()
+        val insets = ListInsets(top, bottom, filtersHeight, favoritesHeight, fragments.toList())
+        if (insets == appliedListInsets) return
+        appliedListInsets = insets
+        fragments.forEach { fragment ->
             val extraTop = when (fragment) {
                 is RecentsFragment -> filtersHeight
                 is ContactsFragment -> favoritesHeight
@@ -905,6 +912,24 @@ class MainActivity : SimpleActivity() {
                 if (fragment is RecentsFragment) R.id.recents_placeholder else R.id.fragment_placeholder
             )?.let { setTopMargin(it, top + extraTop) }
         }
+    }
+
+    private data class ListInsets(
+        val top: Int,
+        val bottom: Int,
+        val filtersHeight: Int,
+        val favoritesHeight: Int,
+        val fragments: List<MyViewPagerFragment<*>?>
+    )
+
+    // Fragments only need re-colouring when the colours or the fragment set changed
+    private fun setupFragmentColors(textColor: Int, primaryColor: Int) {
+        val accentColor = getProperAccentColor()
+        val fragments = getAllFragments()
+        val key = listOf(textColor, primaryColor, accentColor, getProperBackgroundColor(), fragments.hashCode())
+        if (key == appliedColorsKey) return
+        appliedColorsKey = key
+        fragments.forEach { it?.setupColors(textColor, primaryColor, accentColor) }
     }
 
     private fun setupTopTabs() {
@@ -1071,7 +1096,7 @@ class MainActivity : SimpleActivity() {
         return resources.getString(stringId)
     }
 
-    private fun refreshItems(openLastTab: Boolean = false) {
+    private fun refreshItems() {
         if (isDestroyed || isFinishing) {
             return
         }
@@ -1079,10 +1104,17 @@ class MainActivity : SimpleActivity() {
         binding.apply {
             if (viewPager.adapter == null) {
                 viewPager.adapter = ViewPagerAdapter(this@MainActivity)
-                viewPager.currentItem = if (openLastTab) config.lastUsedViewPagerPage else getDefaultTab()
+                // Select the wanted page and its tab together, before the first layout: no timer needed
+                val wantedTab = getWantedTab()
+                viewPager.setCurrentItem(wantedTab, false)
+                val tabsHolder = if (config.bottomNavigationBar) mainTabsHolder else mainTopTabsHolder
+                tabsHolder.getTabAt(wantedTab)?.select()
                 viewPager.onGlobalLayout {
                     refreshFragments()
-                    updatePageTitle() // fragments exist only after the first layout
+                    // Fragments exist only after the first layout: the menu and title of the initially selected tab
+                    // can only be derived now (the old delayed tab selection used to refresh them).
+                    refreshMenuItems()
+                    updatePageTitle()
                 }
             } else {
                 refreshFragments()
@@ -1097,7 +1129,6 @@ class MainActivity : SimpleActivity() {
     }
 
     fun refreshFragments() {
-        cacheContacts()
         getContactsFragment()?.refreshItems()
         getFavoritesFragment()?.refreshItems()
         getRecentsFragment()?.refreshItems()
@@ -1129,6 +1160,15 @@ class MainActivity : SimpleActivity() {
     private fun getFavoritesFragment(): FavoritesFragment? = findViewById(R.id.favorites_fragment)
 
     private fun getRecentsFragment(): RecentsFragment? = findViewById(R.id.recents_fragment)
+
+    private fun getWantedTab(): Int {
+        // open the Recents tab if we got here by clicking a missed call notification
+        if (intent.action == Intent.ACTION_VIEW && config.showTabs and TAB_CALL_HISTORY > 0) {
+            val tabsHolder = if (config.bottomNavigationBar) binding.mainTabsHolder else binding.mainTopTabsHolder
+            return tabsHolder.tabCount - 2
+        }
+        return getDefaultTab()
+    }
 
     private fun getDefaultTab(): Int {
         val showTabsMask = config.showTabs
@@ -1220,45 +1260,56 @@ class MainActivity : SimpleActivity() {
         }
     }
 
-    fun cacheContacts() {
-        val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-        ContactsHelper(this).getContacts(getAll = true, showOnlyContactsWithNumbers = true) { contacts ->
-            if (SMT_PRIVATE !in config.ignoredContactSources) {
-                val privateContacts = MyContactsContentProvider.getContacts(this, privateCursor)
-                if (privateContacts.isNotEmpty()) {
-                    contacts.addAll(privateContacts)
-                    contacts.sort()
-                }
-            }
-
-            try {
-                cachedContacts.clear()
-                cachedContacts.addAll(contacts)
-            } catch (_: Exception) {
-            }
-        }
-    }
-
     fun cacheFavorites(contacts: List<Contact>) {
-        try {
-            cachedFavorites.clear()
-            cachedFavorites.addAll(contacts)
-        } catch (_: Exception) {
-        }
+        cachedFavorites = ArrayList(contacts)
         createContactShortcuts()
     }
 
     private fun setupSecondaryLanguage() {
-        if (!DialpadT9.Initialized) {
-            val reader = InputStreamReader(resources.openRawResource(R.raw.t9languages))
-            DialpadT9.readFromJson(reader.readText())
-        }
+        DialpadT9.ensureInitialized(this)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun refreshCallLog(event: Events.RefreshCallLog) {
+        // The call-log entry is written a moment after this event: the repository debounces it with the observer's
+        // notification and the listener (or the next resume) does the single refresh.
+        ContactsRepository.markDirty(contactsChanged = false)
+    }
+
+    private fun refreshAfterRepositoryChange() {
+        seenRepositoryVersion = ContactsRepository.version
         config.needUpdateRecents = true
-        getRecentsFragment()?.refreshItems(needUpdate = true)
+        // An open search keeps its filtered contact lists; only the recents re-run their query.
+        if (binding.mainMenu.isSearchOpen || isSearchOpen) {
+            getRecentsFragment()?.refreshItems(needUpdate = true)
+            refreshPendingAfterSearch = true
+        } else {
+            refreshFragments()
+        }
+    }
+
+    // A change that arrived during a search is applied once the search closes.
+    private fun applyRefreshPendingAfterSearch() {
+        applyDisplaySettings()
+        if (!refreshPendingAfterSearch) return
+        refreshPendingAfterSearch = false
+        refreshFragments()
+    }
+
+    // Settings the row adapters are built from (see displaySettingsKey): when one changed in Settings the adapters are
+    // rebuilt; the data, the open tab and the scroll position stay. Deferred while a search is open.
+    private fun applyDisplaySettings() {
+        if (binding.mainMenu.isSearchOpen || isSearchOpen) return
+        val key = displaySettingsKey()
+        if (key == storedDisplaySettings) return
+        val changed = storedDisplaySettings.isNotEmpty()
+        storedDisplaySettings = key
+        if (changed) getAllFragments().forEach { it?.rebuildAdapter() }
+    }
+
+    // Settings that change what the contact lists contain or how they are ordered, without a restart.
+    private fun listSettingsKey(): String = with(config) {
+        "$sorting|$startNameWithSurname|$mergeDuplicateContacts|$showNicknameInsteadNames|$sortingSymbolsFirst|$ignoredContactSources"
     }
 
     private fun closeSearch() {
@@ -1294,9 +1345,11 @@ class MainActivity : SimpleActivity() {
 
     private fun updateState() {
         val phoneState = CallManager.getPhoneState()
+        binding.mainCallButton.isClickable = phoneState !is NoCall
+        callGlassAnimation?.dispose()
         when (phoneState) {
             is SingleCall -> {
-                RxAnimation.together(
+                callGlassAnimation = RxAnimation.together(
                     binding.mainCallGlass.scale(1.1f),
                     binding.mainCallGlass.fadeIn(duration = 260),
                 ).andThen(
@@ -1310,7 +1363,7 @@ class MainActivity : SimpleActivity() {
             is TwoCalls -> { }
 
             else -> {
-                RxAnimation.together(
+                callGlassAnimation = RxAnimation.together(
                     binding.mainCallGlass.scale(0.6f),
                     binding.mainCallGlass.fadeOut(duration = 360),
                 ).subscribe()

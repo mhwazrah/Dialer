@@ -36,9 +36,9 @@ class SpeedDialAdapter(
 
     override fun getIsItemSelectable(position: Int) = speedDialValues[position].isValid()
 
-    override fun getItemSelectionKey(position: Int) = speedDialValues.getOrNull(position)?.hashCode()
+    override fun getItemSelectionKey(position: Int) = speedDialValues.getOrNull(position)?.id
 
-    override fun getItemKeyPosition(key: Int) = speedDialValues.indexOfFirst { it.hashCode() == key }
+    override fun getItemKeyPosition(key: Int) = speedDialValues.indexOfFirst { it.id == key }
 
     override fun onActionModeCreated() {}
 
@@ -59,7 +59,7 @@ class SpeedDialAdapter(
 
     override fun getItemCount() = speedDialValues.size
 
-    private fun getSelectedItems() = speedDialValues.filter { selectedKeys.contains(it.hashCode()) } as ArrayList<SpeedDial>
+    private fun getSelectedItems() = speedDialValues.filter { selectedKeys.contains(it.id) } as ArrayList<SpeedDial>
 
     private fun deleteSpeedDial() {
         val ids = getSelectedItems().map { it.id }.toMutableList() as ArrayList<Int>
@@ -74,7 +74,7 @@ class SpeedDialAdapter(
 
             speedDialLabel.apply {
                 text = displayName
-                isSelected = selectedKeys.contains(speedDial.hashCode())
+                isSelected = selectedKeys.contains(speedDial.id)
                 setTextColor(textColor)
             }
         }

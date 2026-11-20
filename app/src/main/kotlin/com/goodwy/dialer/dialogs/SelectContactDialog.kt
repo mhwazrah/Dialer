@@ -13,7 +13,10 @@ import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.adapters.ContactsAdapter
 import com.goodwy.dialer.databinding.DialogSelectContactBinding
+import com.goodwy.dialer.extensions.firstCodePointOrNull
 import com.goodwy.dialer.extensions.setupWithContacts
+import com.goodwy.dialer.extensions.toSearchQuery
+import com.goodwy.dialer.helpers.ContactsRepository
 
 class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Contact>, val callback: (selectedContact: Contact) -> Unit) {
     private val binding by activity.viewBinding(DialogSelectContactBinding::inflate)
@@ -27,7 +30,8 @@ class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Conta
             letterFastscrollerThumb.textColor = activity.getProperPrimaryColor().getContrastColor()
             letterFastscrollerThumb.thumbColor = activity.getProperPrimaryColor().getColorStateList()
 
-            setupLetterFastScroller(contacts)
+            letterFastscroller.setupWithContacts(selectContactList) // follows the adapter's list from here on
+            updateLetterFastScrollerSize(contacts)
             configureSearchView()
 
             selectContactList.adapter = ContactsAdapter(
@@ -60,13 +64,10 @@ class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Conta
             }
     }
 
-    private fun setupLetterFastScroller(contacts: List<Contact>) {
+    private fun updateLetterFastScrollerSize(contacts: List<Contact>) {
         try {
             //Decrease the font size based on the number of letters in the letter scroller
-            val allNotEmpty = contacts.filter { it.getNameToDisplay().isNotEmpty() }
-            val all = allNotEmpty.map { it.getNameToDisplay().substring(0, 1) }
-            val unique: Set<String> = HashSet(all)
-            val sizeUnique = unique.size
+            val sizeUnique = contacts.mapNotNullTo(HashSet()) { it.getNameToDisplay().firstCodePointOrNull() }.size
             if (isHighScreenSize()) {
                 if (sizeUnique > 48) binding.letterFastscroller.textAppearanceRes = R.style.LetterFastscrollerStyleTooTiny
                 else if (sizeUnique > 37) binding.letterFastscroller.textAppearanceRes = R.style.LetterFastscrollerStyleTiny
@@ -77,8 +78,6 @@ class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Conta
                 else binding.letterFastscroller.textAppearanceRes = R.style.LetterFastscrollerStyleSmall
             }
         } catch (_: Exception) { }
-
-        binding.letterFastscroller.setupWithContacts(binding.selectContactList, contacts)
     }
 
     private fun isHighScreenSize(): Boolean {
@@ -131,29 +130,22 @@ class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Conta
     private fun filterContactListBySearchQuery(query: String) {
         val adapter = binding.selectContactList.adapter as? ContactsAdapter
         var contactsToShow = contacts
-        val fixedText = query.trim().replace("\\s+".toRegex(), " ")
+        val fixedText = query.toSearchQuery()
         val shouldNormalize = fixedText.normalizeString() == fixedText
         if (query.isNotEmpty()) {
-            contactsToShow = contacts.filter {
-                getProperText(it.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
-                    getProperText(it.nickname, shouldNormalize).contains(fixedText, true) ||
-                    (fixedText.toIntOrNull() != null && it.phoneNumbers.any {
-                        fixedText.normalizePhoneNumber().isNotEmpty() && it.normalizedNumber.contains(fixedText.normalizePhoneNumber(), true)
-                    }) ||
-                    it.emails.any { it.value.contains(fixedText, true) } ||
-                    it.addresses.any { getProperText(it.value, shouldNormalize).contains(fixedText, true) } ||
-                    it.IMs.any { it.value.contains(fixedText, true) } ||
-                    getProperText(it.notes, shouldNormalize).contains(fixedText, true) ||
-                    getProperText(it.organization.company, shouldNormalize).contains(fixedText, true) ||
-                    getProperText(it.organization.jobPosition, shouldNormalize).contains(fixedText, true) ||
-                    it.websites.any { it.contains(fixedText, true) }
+            val snapshot = ContactsRepository.snapshot
+            val normalizedNumberQuery = if (fixedText.toIntOrNull() != null) fixedText.normalizePhoneNumber() else ""
+            contactsToShow = contacts.filter { contact ->
+                getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
+                    (normalizedNumberQuery.isNotEmpty() && contact.phoneNumbers.any { it.normalizedNumber.contains(normalizedNumberQuery, true) }) ||
+                    snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
             }
         }
         checkPlaceholderVisibility(contactsToShow)
 
         if (adapter?.contacts != contactsToShow) {
             adapter?.updateItems(contactsToShow)
-            setupLetterFastScroller(contactsToShow)
+            updateLetterFastScrollerSize(contactsToShow)
 
             binding.selectContactList.apply {
                 post {

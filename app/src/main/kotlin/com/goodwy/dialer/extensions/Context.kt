@@ -47,7 +47,13 @@ import com.goodwy.commons.extensions.sendSMSPendingIntent
 import com.goodwy.commons.extensions.setText
 import com.goodwy.commons.extensions.startCallPendingIntent
 import com.goodwy.commons.extensions.telecomManager
+import android.database.Cursor
+import java.util.concurrent.TimeUnit
+import com.goodwy.commons.extensions.baseConfig
+import com.goodwy.commons.helpers.ContactLookupResult
 import com.goodwy.commons.helpers.IS_RIGHT_APP
+import com.goodwy.commons.helpers.SMT_PRIVATE
+import com.goodwy.commons.models.contacts.Contact
 import com.goodwy.commons.helpers.MyContactsContentProvider
 import com.goodwy.commons.helpers.SIGNAL_PACKAGE
 import com.goodwy.commons.helpers.SILENT
@@ -56,8 +62,10 @@ import com.goodwy.commons.helpers.TELEGRAM_PACKAGE
 import com.goodwy.commons.helpers.VIBER_PACKAGE
 import com.goodwy.commons.helpers.WHATSAPP_PACKAGE
 import com.goodwy.commons.models.SimpleContact
+import com.goodwy.commons.extensions.getVisibleContactSources
+import java.util.Locale
 
-val Context.config: Config get() = Config.newInstance(applicationContext)
+val Context.config: Config get() = Config.getInstance(applicationContext)
 
 val Context.audioManager: AudioManager
     get() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -73,7 +81,7 @@ fun Context.getAvailableSIMCardLabels(): List<SIMAccount> {
     val simAccounts = mutableListOf<SIMAccount>()
     try {
         telecomManager.callCapablePhoneAccounts.forEachIndexed { index, account ->
-            val phoneAccount = telecomManager.getPhoneAccount(account)
+            val phoneAccount = telecomManager.getPhoneAccount(account) ?: return@forEachIndexed
             var label = phoneAccount.label.toString()
             var address = phoneAccount.address.toString()
             if (address.startsWith("tel:") && address.substringAfter("tel:").isNotEmpty()) {
@@ -121,9 +129,31 @@ fun Context.clearMissedCalls() {
 
 //        notificationManager.cancelAll()
         updateUnreadCountBadge(0)
+        notificationManager.activeNotifications
+            .filter { it.notification.channelId == MISSED_CALL_CHANNEL_ID }
+            .forEach { notificationManager.cancel(it.id) }
         RecentsHelper(this).markMissedCallsAsRead()
     } catch (_: Exception) {
     }
+}
+
+/** Marks one number's missed calls read ("" = hidden numbers), drops its notification and refreshes badge/group. */
+fun Context.clearMissedCallsOf(numberKey: String, callback: () -> Unit = {}) {
+    notificationManager.cancel(numberKey.hashCode())
+    RecentsHelper(this).markMissedCallsAsRead(numberKey) {
+        try {
+            syncMissedCallsState()
+        } finally {
+            callback()
+        }
+    }
+}
+
+/** Re-derives the launcher badge and the missed-call group from the call log. Blocking: call off the main thread. */
+fun Context.syncMissedCallsState() {
+    val total = RecentsHelper(this).getNewMissedCallCounts().values.sum()
+    updateUnreadCountBadge(total)
+    if (total == 0) notificationManager.cancel(MISSED_CALLS.hashCode())
 }
 
 fun Context.canLaunchAccountsConfiguration(): Boolean {
@@ -196,10 +226,13 @@ fun Context.getPackageDrawable(packageName: String): Drawable {
     )
 }
 
+// Upper bound for the blocking Glide loads below (they run on worker threads)
+private const val GLIDE_BLOCKING_TIMEOUT_SECONDS = 5L
+
 // You need to run it in ensureBackgroundThread {}
 fun Context.getShortcutImageNeedBackground(path: String, placeholderName: String, callback: (image: Bitmap) -> Unit) {
     val placeholder = SimpleContactsHelper(this).getContactLetterIcon(placeholderName).toDrawable(resources)
-    try {
+    val bitmap = try {
         val options = RequestOptions()
             .format(DecodeFormat.PREFER_ARGB_8888)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -207,18 +240,22 @@ fun Context.getShortcutImageNeedBackground(path: String, placeholderName: String
             .centerCrop()
 
         val size = resources.getDimension(R.dimen.shortcut_size).toInt()
-        val bitmap = Glide.with(this).asBitmap()
+        val target = Glide.with(this).asBitmap()
             .load(path)
             //.placeholder(placeholder)
             .apply(options)
             .apply(RequestOptions.circleCropTransform())
             .into(size, size)
-            .get()
-
-        callback(bitmap)
+        try {
+            target.get(GLIDE_BLOCKING_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        } finally {
+            Glide.with(this).clear(target)
+        }
     } catch (_: Exception) {
-        callback(placeholder.bitmap)
+        null
     }
+    // Outside the try: a throwing callback must not be invoked a second time with the placeholder
+    callback(bitmap ?: placeholder.bitmap)
 }
 
 //Timer
@@ -229,7 +266,7 @@ val Context.timerHelper: TimerHelper
     get() = TimerHelper(this)
 
 val Context.callerNotesHelper: CallerNotesHelper
-    get() = CallerNotesHelper(this)
+    get() = CallerNotesHelper.getInstance(applicationContext)
 
 fun Context.getOpenTimerTabIntent(timerId: Int): PendingIntent {
     val intent = getLaunchIntent() ?: Intent(this, SplashActivity::class.java)
@@ -253,14 +290,9 @@ fun Context.getTimerNotification(timer: Timer, pendingIntent: PendingIntent): No
         grantReadUriPermission(soundUri)
     }
 
-    val channelId =
-        timer.channelId ?: "right_dialer_timer_channel_${soundUri}_${System.currentTimeMillis()}"
-    timerHelper.insertOrUpdateTimer(timer.copy(channelId = channelId))
-
-    try {
-        notificationManager.deleteNotificationChannel(channelId)
-    } catch (_: Exception) {
-    }
+    // One channel per (sound, vibrate): channel settings are fixed once created, so a change gets a new id.
+    val channelId = "right_dialer_timer_channel_${soundUri}_${timer.vibrate}"
+    val timerId = timer.id ?: 0
 
     val audioAttributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_ALARM)
@@ -270,26 +302,28 @@ fun Context.getTimerNotification(timer: Timer, pendingIntent: PendingIntent): No
 
     val name = getString(R.string.timer)
     val importance = NotificationManager.IMPORTANCE_HIGH
-    NotificationChannel(channelId, name, importance).apply {
-        setBypassDnd(true)
-        enableLights(true)
-        lightColor = getProperPrimaryColor()
-        setSound(soundUri.toUri(), audioAttributes)
+    if (notificationManager.getNotificationChannel(channelId) == null) {
+        NotificationChannel(channelId, name, importance).apply {
+            setBypassDnd(true)
+            enableLights(true)
+            lightColor = getProperPrimaryColor()
+            setSound(soundUri.toUri(), audioAttributes)
 
-        if (!timer.vibrate) {
-            vibrationPattern = longArrayOf(0L)
+            if (!timer.vibrate) {
+                vibrationPattern = longArrayOf(0L)
+            }
+
+            enableVibration(timer.vibrate)
+            notificationManager.createNotificationChannel(this)
         }
-
-        enableVibration(timer.vibrate)
-        notificationManager.createNotificationChannel(this)
     }
 
     val restart = Intent(this, TimerReceiver::class.java).apply {
 //        action = TIMER_RESTART
-        putExtra(TIMER_ID, timer.id!!)
+        putExtra(TIMER_ID, timerId)
     }
     val cancelIntent = PendingIntent.getBroadcast(
-        this, timer.id!!, restart, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        this, timerId, restart, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     val collapsedView = RemoteViews(this.packageName, R.layout.timer_notification).apply {
         setText(R.id.timer_title, getString(R.string.remind_me))
@@ -312,7 +346,7 @@ fun Context.getTimerNotification(timer: Timer, pendingIntent: PendingIntent): No
         .addAction(
             com.goodwy.commons.R.drawable.ic_cross_vector,
             getString(com.goodwy.commons.R.string.dismiss),
-            getHideTimerPendingIntent(timer.id!!)
+            getHideTimerPendingIntent(timerId)
         )
         .addAction(
             R.drawable.ic_messages,
@@ -395,13 +429,17 @@ fun Context.getNotificationBitmap(photoUri: String): Bitmap? {
         .centerCrop()
 
     return try {
-        Glide.with(this)
+        val target = Glide.with(this)
             .asBitmap()
             .load(photoUri)
             .apply(options)
             .apply(RequestOptions.circleCropTransform())
             .into(size, size)
-            .get()
+        try {
+            target.get(GLIDE_BLOCKING_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        } finally {
+            Glide.with(this).clear(target)
+        }
     } catch (_: Exception) {
         null
     }
@@ -418,18 +456,55 @@ val Context.statusBarHeight: Int
         return statusBarHeight
     }
 
-fun Context.getContactFromAddress(address: String, callback: ((contact: SimpleContact?) -> Unit)) {
-    val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-    SimpleContactsHelper(this).getAvailableContacts(false) {
-        var contact = it.firstOrNull { it.doesHavePhoneNumber(address) }
-        if (contact == null) {
-            val privateContacts = MyContactsContentProvider.getSimpleContacts(this, privateCursor)
-            val privateContact = privateContacts.firstOrNull { it.doesHavePhoneNumber(address) }
-            contact = privateContact
+// Private contacts live in another app's provider: query only from a background thread. `includeIgnored` is for
+// hiding calls of private contacts when that source is disabled (needs the numbers); otherwise a disabled source is not queried.
+private fun Context.privateContactsCursor(favoritesOnly: Boolean, includeIgnored: Boolean): Cursor? {
+    if (!includeIgnored && SMT_PRIVATE in baseConfig.ignoredContactSources) return null
+    return getMyContactsCursor(favoritesOnly = favoritesOnly, withPhoneNumbersOnly = true)
+}
+
+fun Context.loadPrivateContacts(favoritesOnly: Boolean = false, includeIgnored: Boolean = false): ArrayList<Contact> =
+    MyContactsContentProvider.getContacts(this, privateContactsCursor(favoritesOnly, includeIgnored))
+
+// System contacts first; the private-contacts provider is queried (and its cursor opened) only when needed.
+fun Context.lookupContactSync(number: String): ContactLookupResult {
+    val result = SimpleContactsHelper(this).existsSync(number)
+    if (result == ContactLookupResult.Found) return result
+    val privateContacts = MyContactsContentProvider.getSimpleContacts(this, privateContactsCursor(false, false))
+    return if (privateContacts.any { it.doesHavePhoneNumber(number) }) ContactLookupResult.Found else result
+}
+
+/**
+ * The settings the list rows are built from (adapters read them when they are created or bound). A change means the
+ * visible adapters must be rebuilt; the lists' data and the open tab stay as they are.
+ */
+fun Context.displaySettingsKey(): String = with(config) {
+    listOf(
+        fontSize, useDividers, showContactThumbnails, baseConfig.contactThumbnailsSize, ellipsizeMode,
+        baseConfig.useColoredContacts, contactColorList, colorSimIcons, simIconsColors.joinToString(","),
+        formatPhoneNumbers, useRelativeDate, baseConfig.dateFormat, baseConfig.use24HourFormat,
+        useSwipeToAction, swipeToActionWidth, swipeVibration, swipeRipple, swipeLeftAction, swipeRightAction,
+        onFavoriteClick, onRecentClick, onContactClick
+    ).joinToString("|")
+}
+
+/**
+ * The contacts the lists show, from the repository's unfiltered [all]: without the sources hidden in the source
+ * filter, duplicates merged when that setting is on, sorted by the current sort settings.
+ * Queries the contact sources: background thread only.
+ */
+fun Context.listedContacts(all: List<Contact>): ArrayList<Contact> {
+    val visibleSources = getVisibleContactSources().toHashSet()
+    var contacts = all.filter { it.source in visibleSources }
+    if (baseConfig.mergeDuplicateContacts) {
+        contacts = contacts.groupBy { it.getNameToDisplay().lowercase(Locale.getDefault()) }.values.map { duplicates ->
+            val longestFirst = duplicates.sortedByDescending { it.getStringToCompare().length }
+            longestFirst.firstOrNull { it.phoneNumbers.isNotEmpty() } ?: longestFirst.first()
         }
-        if (contact == null) {
-            contact = it.firstOrNull { it.phoneNumbers.map { it.value }.any { it == address } }
-        }
-        callback(contact)
     }
+    Contact.sorting = baseConfig.sorting
+    Contact.startWithSurname = baseConfig.startNameWithSurname
+    Contact.showNicknameInsteadNames = baseConfig.showNicknameInsteadNames
+    Contact.sortingSymbolsFirst = baseConfig.sortingSymbolsFirst
+    return ArrayList(contacts.sorted())
 }

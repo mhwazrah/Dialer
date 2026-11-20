@@ -9,8 +9,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
+import android.telephony.PhoneNumberUtils
 import android.telecom.TelecomManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
@@ -21,139 +20,75 @@ import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.dialer.R
 import com.goodwy.dialer.activities.NotificationActivity
 import com.goodwy.dialer.activities.SplashActivity
-import com.goodwy.dialer.extensions.clearMissedCalls
 import com.goodwy.dialer.extensions.contactLetterBitmap
-import com.goodwy.dialer.extensions.getContactFromAddress
 import com.goodwy.dialer.extensions.getNotificationBitmap
 import com.goodwy.dialer.extensions.updateUnreadCountBadge
 import com.goodwy.dialer.helpers.*
 
 class MissedCallReceiver : BroadcastReceiver() {
 
-    companion object {
-        // We keep track of missed calls by number
-        private val missedCallCounts = mutableMapOf<String, Int>()
+    @SuppressLint("MissingPermission")
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != TelecomManager.ACTION_SHOW_MISSED_CALLS_NOTIFICATION) return
+        val extras = intent.extras ?: return
+        if (extras.getInt(TelecomManager.EXTRA_NOTIFICATION_COUNT) == 0) return
 
-        // Get the current number of missed calls for a number
-//        fun getMissedCallCount(phoneNumber: String): Int {
-//            return missedCallCounts[phoneNumber] ?: 0
-//        }
+        // Null/blank/"-1" means a hidden number: it is never dialed or looked up.
+        val phoneNumber = extras.getString(TelecomManager.EXTRA_NOTIFICATION_PHONE_NUMBER)
+            ?.takeIf { it.isNotBlank() && it != "-1" }
 
-        // Clear the counter for the room
-        fun clearMissedCallCount(phoneNumber: String) {
-            missedCallCounts.remove(phoneNumber)
-        }
-
-        // Clear all counters
-        fun clearAllMissedCallCounts() {
-            missedCallCounts.clear()
+        // The lookup, the call-log count and the round contact icon need a background thread.
+        val pendingResult = goAsync()
+        ensureBackgroundThread {
+            try {
+                showNotification(context, phoneNumber)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
-    override fun onReceive(context: Context, intent: Intent) {
-        val extras = intent.extras ?: return
-        val notificationManager = context.notificationManager
+    private fun showNotification(context: Context, phoneNumber: String?) {
+        createNotificationChannel(context)
 
-        when (intent.action) {
-            TelecomManager.ACTION_SHOW_MISSED_CALLS_NOTIFICATION -> {
-                val notificationCount = extras.getInt(TelecomManager.EXTRA_NOTIFICATION_COUNT)
-                if (notificationCount != 0) {
-                    val phoneNumber = extras.getString(TelecomManager.EXTRA_NOTIFICATION_PHONE_NUMBER)
-                        ?: context.getString(R.string.unknown_caller)
+        val counts = RecentsHelper(context).getNewMissedCallCounts()
+        val key = phoneNumber.orEmpty()
+        // The log row may not be visible yet when telecom posts this broadcast, so never report less than this call.
+        val count = (counts[key] ?: counts.entries.firstOrNull { phoneNumber != null && it.key.isNotEmpty() && PhoneNumberUtils.compare(it.key, phoneNumber) }?.value ?: 0)
+            .coerceAtLeast(1)
+        val total = counts.values.sum().coerceAtLeast(count)
 
-                    // Increase the counter for this number
-                    val currentCount = missedCallCounts[phoneNumber] ?: 0
-                    val newCount = currentCount + 1
-                    missedCallCounts[phoneNumber] = newCount
-
-                    createNotificationChannel(context)
-
-                    val privateCursor = context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-                    try {
-                        //ensureBackgroundThread is needed to generate a round contact icon
-                        context.getContactFromAddress(phoneNumber) { simpleContact ->
-                            val helper = SimpleContactsHelper(context)
-                            val name = helper.getNameFromPhoneNumber(phoneNumber)
-                            val photoUri = helper.getPhotoUriFromPhoneNumber(phoneNumber)
-                            val bitmap = context.getNotificationBitmap(photoUri) ?: if (simpleContact != null) {
-                                if (simpleContact.isABusinessContact()) {
-                                    SimpleContactsHelper(context).getColoredCompanyIcon(name).convertToBitmap()
-                                } else {
-                                    context.contactLetterBitmap(name)
-                                }
-                            } else  {
-                                SimpleContactsHelper(context).getColoredContactIcon(name).convertToBitmap()
-                            }
-
-                            var callerName = name
-                            if (simpleContact != null) {
-                                val specificPhoneNumber = simpleContact.phoneNumbers.firstOrNull { it.normalizedNumber == phoneNumber.normalizePhoneNumber() }
-                                if (specificPhoneNumber != null) {
-                                    val label = context.getPhoneNumberTypeText(specificPhoneNumber.type, specificPhoneNumber.label)
-                                    if (label.isNotEmpty()) {
-                                        callerName += " - $label"
-                                    }
-                                }
-                            }
-
-                            Handler(Looper.getMainLooper()).post {
-                                notificationManager.notify(
-                                    phoneNumber.hashCode(),
-                                    buildNotification(context, callerName, phoneNumber, bitmap, newCount)
-                                )
-                            }
-                        }
-                    } catch (_: Exception) {
-                        //ensureBackgroundThread is needed to generate a round contact icon
-                        ensureBackgroundThread {
-                            val helper = SimpleContactsHelper(context)
-                            val name = helper.getNameFromPhoneNumber(phoneNumber)
-                            val photoUri = helper.getPhotoUriFromPhoneNumber(phoneNumber)
-                            val bitmap = context.getNotificationBitmap(photoUri)
-
-                            Handler(Looper.getMainLooper()).post {
-                                notificationManager.notify(
-                                    phoneNumber.hashCode(),
-                                    buildNotification(context, name, phoneNumber, bitmap, newCount)
-                                )
-                            }
-                        }
-                    }
-                }
+        val contact = phoneNumber?.let {
+            try {
+                ContactsRepository.findByNumber(context, it)
+            } catch (_: Exception) {
+                null
             }
-
-            MISSED_CALL_CANCEL -> {
-                val canceledPhoneNumber = extras.getString("phoneNumber")
-                if (canceledPhoneNumber != null) {
-                    // We reset the meter only for a specific number.
-                    clearMissedCallCount(canceledPhoneNumber)
-                    // We only delete notifications from this number.
-                    context.notificationManager.cancel(canceledPhoneNumber.hashCode())
-
-                    // Updating group notification and checking system omissions
-                    updateUnreadCountAndGroup(context)
-                } else {
-                    // Clear everything (only if phoneNumber is not passed)
-                    clearAllMissedCallCounts()
-                    context.clearMissedCalls()
-                    context.notificationManager.cancel(MISSED_CALLS.hashCode())
-                    context.updateUnreadCountBadge(0)
-                }
-            }
-
-            // You have to launch an activity so that the notification bar automatically disappears
-            //https://stackoverflow.com/questions/18261969/clicking-android-notification-actions-does-not-close-notification-drawer?noredirect=1&lq=1
-//            MISSED_CALL_BACK, MISSED_CALL_MESSAGE -> {
-//                // When answering a call or message, we clear the counter for that number.
-//                val respondedPhoneNumber = extras.getString(CURRENT_PHONE_NUMBER)
-//                respondedPhoneNumber?.let {
-//                    clearMissedCallCount(it)
-//                    context.notificationManager.cancel(it.hashCode())
-//                    updateUnreadCountAndGroup(context)
-//                }
-//            }
         }
+        val name = contact?.getNameToDisplay() ?: phoneNumber ?: context.getString(R.string.unknown_caller)
+        val company = contact?.organization?.company.orEmpty()
+        val bitmap = context.getNotificationBitmap(contact?.photoUri.orEmpty()) ?: when {
+            contact == null -> SimpleContactsHelper(context).getColoredContactIcon(name).convertToBitmap()
+            company.isNotEmpty() && name.contains(company) -> SimpleContactsHelper(context).getColoredCompanyIcon(name).convertToBitmap()
+            else -> context.contactLetterBitmap(name)
+        }
+
+        var callerName = name
+        val specificPhoneNumber = phoneNumber?.let { number ->
+            contact?.phoneNumbers?.firstOrNull { it.normalizedNumber == number.normalizePhoneNumber() }
+        }
+        if (specificPhoneNumber != null) {
+            val label = context.getPhoneNumberTypeText(specificPhoneNumber.type, specificPhoneNumber.label)
+            if (label.isNotEmpty()) {
+                callerName += " - $label"
+            }
+        }
+
+        context.updateUnreadCountBadge(total)
+        context.notificationManager.notify(key.hashCode(), buildNotification(context, callerName, phoneNumber, bitmap, count))
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -161,92 +96,69 @@ class MissedCallReceiver : BroadcastReceiver() {
         val name = context.getString(R.string.missed_call_notifications_g)
         val importance = NotificationManager.IMPORTANCE_HIGH
 
-        val existingChannel = notificationManager.getNotificationChannel("right_dialer_missed_call")
-        if (existingChannel == null) {
-            NotificationChannel("right_dialer_missed_call", name, importance).apply {
-                setBypassDnd(false)
-                setSound(null, null)
-                enableVibration(false)
-                notificationManager.createNotificationChannel(this)
-            }
-        } else {
-            existingChannel.setSound(null, null)
-            existingChannel.enableVibration(false)
-            notificationManager.createNotificationChannel(existingChannel)
+        if (notificationManager.getNotificationChannel(MISSED_CALL_CHANNEL_ID) != null) return
+
+        NotificationChannel(MISSED_CALL_CHANNEL_ID, name, importance).apply {
+            setBypassDnd(false)
+            setSound(null, null)
+            enableVibration(false)
+            notificationManager.createNotificationChannel(this)
         }
     }
 
-    private fun launchIntent(context: Context): PendingIntent {
-        val intent = context.getLaunchIntent() ?: Intent(context, SplashActivity::class.java)
-        return PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_IMMUTABLE
-        )
+    private fun notificationActivityIntent(context: Context, action: String, key: String, flags: Int): PendingIntent {
+        val intent = Intent(context, NotificationActivity::class.java).apply {
+            this.action = action
+            putExtra(CURRENT_PHONE_NUMBER, key)
+            // Opening the app must not wipe a task that is already running (e.g. a live call screen)
+            this.flags = if (action == MISSED_CALL_OPEN) Intent.FLAG_ACTIVITY_NEW_TASK
+            else Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        return PendingIntent.getActivity(context, key.hashCode(), intent, flags)
     }
 
-    private fun buildNotification(context: Context, name: String, phoneNumber: String, bitmap: Bitmap?, count: Int): Notification {
-        val callBack = Intent(context, NotificationActivity::class.java).apply {
-            action = MISSED_CALL_BACK
-            putExtra(CURRENT_PHONE_NUMBER, phoneNumber)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val callBackIntent = PendingIntent.getActivity(
-            context,  phoneNumber.hashCode(),  callBack, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
+    /** [phoneNumber] is null for a hidden number: then there is nobody to call back or message. */
+    private fun buildNotification(context: Context, name: String, phoneNumber: String?, bitmap: Bitmap?, count: Int): Notification {
+        val key = phoneNumber.orEmpty()
+        val cancel = Intent(context, MissedCallCancelReceiver::class.java).putExtra(MissedCallCancelReceiver.EXTRA_NUMBER_KEY, key)
+        val cancelIntent = PendingIntent.getBroadcast(context, key.hashCode(), cancel, PendingIntent.FLAG_IMMUTABLE)
 
-        val smsIntent = Intent(context, NotificationActivity::class.java).apply {
-            action = MISSED_CALL_MESSAGE
-            putExtra(CURRENT_PHONE_NUMBER, phoneNumber)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val messageIntent = PendingIntent.getActivity(
-            context,  phoneNumber.hashCode(),  smsIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
-        )
+        val text = if (count == 1) context.getString(R.string.missed_call_g)
+        else context.resources.getQuantityString(R.plurals.missed_calls, count, count)
 
-        val cancel = Intent(context, MissedCallReceiver::class.java).apply {
-            action = MISSED_CALL_CANCEL
-            putExtra("phoneNumber", phoneNumber)
-        }
-        val cancelIntent = PendingIntent.getBroadcast(
-            context, phoneNumber.hashCode(), cancel, PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val builder =  NotificationCompat.Builder(context, "right_dialer_missed_call").apply {
+        return NotificationCompat.Builder(context, MISSED_CALL_CHANNEL_ID).apply {
             if (count == 1) {
-                setContentTitle(context.getString(R.string.missed_call_g))
+                setContentTitle(text)
                 setContentText(name)
-                setLargeIcon(bitmap)
-                setStyle(getCallStyle(name, phoneNumber, context.getString(R.string.missed_call_g)))
             } else {
                 setContentTitle(name)
-                setContentText(context.resources.getQuantityString(R.plurals.missed_calls, count, count))
-                setLargeIcon(bitmap)
-                setStyle(getCallStyle(name, phoneNumber,
-                    context.resources.getQuantityString(R.plurals.missed_calls, count, count)))
+                setContentText(text)
             }
+            setLargeIcon(bitmap)
+            setStyle(getCallStyle(name, key, text))
             color = context.getProperPrimaryColor()
             setSmallIcon(R.drawable.ic_call_missed_vector)
             setAutoCancel(true)
             setGroup(MISSED_CALLS)
-            setContentIntent(launchIntent(context))
+            // Routed through NotificationActivity so tapping the body marks only this number read
+            setContentIntent(notificationActivityIntent(context, MISSED_CALL_OPEN, key, PendingIntent.FLAG_IMMUTABLE))
             setDeleteIntent(cancelIntent)
             setCategory(Notification.CATEGORY_CALL)
             setSound(null)
 
-            addAction(
-                R.drawable.ic_phone_vector,
-                context.getString(R.string.call_back_g),
-                callBackIntent
-            )
-            addAction(
-                R.drawable.ic_messages,
-                context.getString(R.string.message),
-                messageIntent
-            )
-        }
-
-        val totalMissedCalls = missedCallCounts.values.sum()
-        context.updateUnreadCountBadge(totalMissedCalls)
-
-        return builder.build()
+            if (phoneNumber != null) {
+                addAction(
+                    R.drawable.ic_phone_vector,
+                    context.getString(R.string.call_back_g),
+                    notificationActivityIntent(context, MISSED_CALL_BACK, key, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
+                )
+                addAction(
+                    R.drawable.ic_messages,
+                    context.getString(R.string.message),
+                    notificationActivityIntent(context, MISSED_CALL_MESSAGE, key, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
+                )
+            }
+        }.build()
     }
 
     private fun getCallStyle(
@@ -266,18 +178,6 @@ class MissedCallReceiver : BroadcastReceiver() {
                 caller
             )
             style.addMessage(callMessage)
-        }
-    }
-
-    private fun updateUnreadCountAndGroup(context: Context) {
-        val totalMissedCalls = missedCallCounts.values.sum()
-        context.updateUnreadCountBadge(totalMissedCalls)
-
-        if (totalMissedCalls == 0) {
-            // Clear all notifications and group notifications
-            context.notificationManager.cancel(MISSED_CALLS.hashCode())
-            // Clearing system missed calls
-            context.clearMissedCalls()
         }
     }
 }

@@ -11,7 +11,9 @@ sealed class TimerState {
 
     @Keep
     @kotlinx.serialization.Serializable
-    data class Running(val duration: Long, val tick: Long) : TimerState()
+    data class Running(val duration: Long, val endTime: Long) : TimerState() {
+        fun remaining(now: Long = System.currentTimeMillis()): Long = (endTime - now).coerceAtLeast(0L)
+    }
 
     @Keep
     @kotlinx.serialization.Serializable

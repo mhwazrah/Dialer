@@ -15,21 +15,23 @@ import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
 import com.goodwy.commons.models.contacts.Contact
 import com.goodwy.dialer.R
-import com.goodwy.dialer.activities.MainActivity
 import com.goodwy.dialer.activities.SimpleActivity
 import com.goodwy.dialer.adapters.ContactsAdapter
 import com.goodwy.dialer.databinding.FragmentContactsBinding
 import com.goodwy.dialer.databinding.FragmentLettersLayoutBinding
 import com.goodwy.dialer.databinding.ItemFavoriteStripBinding
 import com.goodwy.dialer.extensions.config
+import com.goodwy.dialer.extensions.listedContacts
 import com.goodwy.dialer.extensions.launchCreateNewContactIntent
-import com.goodwy.dialer.extensions.launchSendSMSIntentRecommendation
 import com.goodwy.dialer.extensions.launchSendWhatsAppIntent
 import com.goodwy.dialer.extensions.loadBrandedContactImage
+import com.goodwy.dialer.extensions.firstCodePointOrNull
 import com.goodwy.dialer.extensions.setupWithContacts
+import com.goodwy.dialer.extensions.toSearchQuery
 import com.goodwy.dialer.extensions.startCallWithConfirmationCheck
-import com.goodwy.dialer.extensions.startContactDetailsIntentRecommendation
+import com.goodwy.dialer.extensions.startContactDetailsIntent
 import com.goodwy.dialer.extensions.startContactEdit
+import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
 import com.goodwy.dialer.helpers.SWIPE_ACTION_EDIT
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
@@ -42,6 +44,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     private lateinit var binding: FragmentLettersLayoutBinding
     private lateinit var contactsBinding: FragmentContactsBinding
     private var allContacts = ArrayList<Contact>()
+    private var letterFastScrollerReady = false
     private val favoritesAdapter = FavoritesStripAdapter()
     private var searchQuery = ""
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -119,28 +122,20 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     }
 
     override fun refreshItems(invalidate: Boolean, needUpdate: Boolean, callback: (() -> Unit)?) {
-        val privateCursor = context?.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-        ContactsHelper(context).getContacts(showOnlyContactsWithNumbers = true) { contacts ->
-            allContacts = contacts
-
-            if (SMT_PRIVATE !in context.baseConfig.ignoredContactSources) {
-                val privateContacts = MyContactsContentProvider.getContacts(context, privateCursor)
-                if (privateContacts.isNotEmpty()) {
-                    allContacts.addAll(privateContacts)
-                    allContacts.sort()
+        ContactsRepository.ensureLoaded(context) { snapshot ->
+            ensureBackgroundThread {
+                val contacts = context.listedContacts(snapshot.contacts)
+                allContacts = contacts
+                activity?.runOnUiThread {
+                    gotContacts(contacts)
+                    callback?.invoke()
                 }
-            }
-            (activity as MainActivity).cacheContacts()
-
-            activity?.runOnUiThread {
-                gotContacts(contacts)
-                callback?.invoke()
             }
         }
     }
 
     private fun gotContacts(contacts: ArrayList<Contact>) {
-        setupLetterFastScroller(contacts)
+        setupLetterFastScroller()
         updateFavoritesStrip()
         if (contacts.isEmpty()) {
             binding.apply {
@@ -178,7 +173,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
                         itemClickAction(context.config.onContactClick, it as Contact)
                     },
                     profileIconClick = {
-                        activity?.startContactDetailsIntentRecommendation(it as Contact)
+                        activity?.startContactDetailsIntent(it as Contact)
                     }
                 ).apply {
                     binding.fragmentList.adapter = this
@@ -193,10 +188,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
             try {
                 //Decrease the font size based on the number of letters in the letter scroller
-                val allNotEmpty = contacts.filter { it.getNameToDisplay().isNotEmpty() }
-                val all = allNotEmpty.map { it.getNameToDisplay().substring(0, 1) }
-                val unique: Set<String> = HashSet(all)
-                val sizeUnique = unique.size
+                val sizeUnique = contacts.mapNotNullTo(HashSet()) { it.getNameToDisplay().firstCodePointOrNull() }.size
                 if (isHighScreenSize()) {
                     if (sizeUnique > 48) binding.letterFastscroller.textAppearanceRes = R.style.LetterFastscrollerStyleTooTiny
                     else if (sizeUnique > 37) binding.letterFastscroller.textAppearanceRes = R.style.LetterFastscrollerStyleTiny
@@ -218,8 +210,11 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         }
     }
 
-    private fun setupLetterFastScroller(contacts: ArrayList<Contact>) {
-        binding.letterFastscroller.setupWithContacts(binding.fragmentList, contacts)
+    // Once is enough: the scroller follows the adapter's list (see setupWithContacts).
+    private fun setupLetterFastScroller() {
+        if (letterFastScrollerReady) return
+        letterFastScrollerReady = true
+        binding.letterFastscroller.setupWithContacts(binding.fragmentList)
     }
 
     /** Re-reads favourites (and their custom order) from the loaded contacts. */
@@ -296,31 +291,31 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         event.recycle()
     }
 
+    override fun rebuildAdapter() {
+        if (binding.fragmentList.adapter == null) return
+        binding.fragmentList.adapter = null
+        gotContacts(allContacts)
+    }
+
     override fun onSearchClosed() {
         searchQuery = ""
         showFavoritesStrip(true)
         binding.fragmentPlaceholder.beVisibleIf(allContacts.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(allContacts)
-        setupLetterFastScroller(allContacts)
     }
 
     override fun onSearchQueryChanged(text: String) {
-        val fixedText = text.trim().replace("\\s+".toRegex(), " ")
+        val fixedText = text.toSearchQuery()
         searchQuery = fixedText
         showFavoritesStrip(fixedText.isEmpty())
         val shouldNormalize = fixedText.normalizeString() == fixedText
+        val snapshot = ContactsRepository.snapshot
+        val isNumberQuery = fixedText.toLongOrNull() != null
         val filtered = allContacts.filter { contact ->
             getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.nickname, shouldNormalize).contains(fixedText, true) ||
-                (fixedText.toLongOrNull() != null && contact.doesContainPhoneNumber(fixedText, true)) ||
-                contact.emails.any { it.value.contains(fixedText, true) } ||
+                (isNumberQuery && contact.doesContainPhoneNumber(fixedText, true)) ||
                 contact.relations.any { it.name.contains(fixedText, true) } ||
-                contact.addresses.any { getProperText(it.value, shouldNormalize).contains(fixedText, true) } ||
-                contact.IMs.any { it.value.contains(fixedText, true) } ||
-                getProperText(contact.notes, shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.organization.company, shouldNormalize).contains(fixedText, true) ||
-                getProperText(contact.organization.jobPosition, shouldNormalize).contains(fixedText, true) ||
-                contact.websites.any { it.contains(fixedText, true) }
+                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
         } as ArrayList
 
         filtered.sortBy {
@@ -330,7 +325,6 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
 
         binding.fragmentPlaceholder.beVisibleIf(filtered.isEmpty())
         (binding.fragmentList.adapter as? ContactsAdapter)?.updateItems(filtered, fixedText)
-        setupLetterFastScroller(filtered)
     }
 
     private fun requestReadContactsPermission() {
@@ -338,11 +332,8 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
             if (it) {
                 binding.fragmentPlaceholder.text = context.getString(R.string.no_contacts_found)
                 binding.fragmentPlaceholder2.text = context.getString(R.string.create_new_contact)
-                ContactsHelper(context).getContacts { contacts ->
-                    activity?.runOnUiThread {
-                        gotContacts(contacts)
-                    }
-                }
+                // Marks the repository dirty; MainActivity's listener then refreshes every list from one load.
+                ContactsRepository.onPermissionGranted(context)
             }
         }
     }
@@ -365,7 +356,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     }
 
     private fun actionSMS(contact: Contact) {
-        activity?.initiateCall(contact) { activity?.launchSendSMSIntentRecommendation(it) }
+        activity?.initiateCall(contact) { activity?.launchSendSMSIntent(it) }
     }
 
     private fun actionWhatsApp(contact: Contact) {
@@ -373,7 +364,7 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
     }
 
     private fun actionOpen(contact: Contact) {
-        activity?.startContactDetailsIntentRecommendation(contact)
+        activity?.startContactDetailsIntent(contact)
     }
 
     private inner class FavoritesStripAdapter : RecyclerView.Adapter<FavoritesStripAdapter.Holder>() {

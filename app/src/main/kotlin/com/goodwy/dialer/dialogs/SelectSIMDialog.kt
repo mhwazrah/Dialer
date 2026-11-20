@@ -61,12 +61,9 @@ class SelectSIMDialog(
             .apply {
                 activity.setupDialogStuff(binding.root, this) { alertDialog ->
                     dialog = alertDialog
+                    alertDialog.setOnDismissListener { onDismiss() }
                 }
             }
-
-        dialog?.setOnDismissListener {
-            onDismiss()
-        }
     }
 
     private fun selectedSIM(handle: PhoneAccountHandle, label: String) {

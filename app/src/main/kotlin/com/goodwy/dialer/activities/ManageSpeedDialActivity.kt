@@ -3,11 +3,11 @@ package com.goodwy.dialer.activities
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
-import com.google.gson.Gson
+import android.telecom.PhoneAccountHandle
+import com.goodwy.dialer.helpers.gson
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.dialogs.RadioGroupDialog
 import com.goodwy.commons.dialogs.RadioGroupIconDialog
-import com.goodwy.commons.extensions.getMyContactsCursor
 import com.goodwy.commons.extensions.getPhoneNumberTypeText
 import com.goodwy.commons.extensions.hideKeyboard
 import com.goodwy.commons.extensions.telecomManager
@@ -15,8 +15,8 @@ import com.goodwy.commons.extensions.toast
 import com.goodwy.commons.extensions.updateTextColors
 import com.goodwy.commons.extensions.viewBinding
 import com.goodwy.commons.helpers.ContactsHelper
-import com.goodwy.commons.helpers.MyContactsContentProvider
 import com.goodwy.commons.helpers.NavigationIcon
+import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.commons.helpers.PERMISSION_READ_PHONE_STATE
 import com.goodwy.commons.models.PhoneNumber
 import com.goodwy.commons.models.RadioItem
@@ -29,6 +29,8 @@ import com.goodwy.dialer.dialogs.SelectContactDialog
 import com.goodwy.dialer.dialogs.SelectSIMDialog
 import com.goodwy.dialer.extensions.areMultipleSIMsAvailable
 import com.goodwy.dialer.extensions.config
+import com.goodwy.dialer.extensions.listedContacts
+import com.goodwy.dialer.helpers.ContactsRepository
 import com.goodwy.dialer.extensions.getAvailableSIMCardLabels
 import com.goodwy.dialer.extensions.getHandleToUse
 import com.goodwy.dialer.interfaces.RemoveSpeedDialListener
@@ -37,8 +39,9 @@ import com.goodwy.dialer.models.SpeedDial
 class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
     private val binding by viewBinding(ActivityManageSpeedDialBinding::inflate)
 
-    private var allContacts = mutableListOf<Contact>()
+    @Volatile private var allContacts: List<Contact> = emptyList()
     private var speedDialValues = mutableListOf<SpeedDial>()
+    private var speedDialAdapter: SpeedDialAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,13 +54,8 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
         speedDialValues = config.getSpeedDialValues()
         updateAdapter()
 
-        ContactsHelper(this).getContacts(showOnlyContactsWithNumbers = true) { contacts ->
-            allContacts.addAll(contacts)
-
-            val privateCursor = getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-            val privateContacts = MyContactsContentProvider.getContacts(this, privateCursor)
-            allContacts.addAll(privateContacts)
-            allContacts.sort()
+        ContactsRepository.ensureLoaded(this) { snapshot ->
+            ensureBackgroundThread { allContacts = listedContacts(snapshot.contacts) }
         }
 
         updateTextColors(binding.manageSpeedDialScrollview)
@@ -74,37 +72,31 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        config.speedDial = Gson().toJson(speedDialValues)
+    override fun onPause() {
+        super.onPause()
+        config.speedDial = gson.toJson(speedDialValues)
     }
 
     @SuppressLint("MissingPermission")
     private fun updateAdapter() {
+        speedDialAdapter?.let {
+            it.notifyDataSetChanged()
+            return
+        }
+
         SpeedDialAdapter(this, speedDialValues, this, binding.speedDialList) { any ->
             val clickedContact = any as SpeedDial
             if (allContacts.isEmpty()) {
                 showAddSpeedDialDialog(clickedContact)
+                return@SpeedDialAdapter
             }
 
-            var readPhoneState = false
-            handlePermission(PERMISSION_READ_PHONE_STATE) { permission ->
-                readPhoneState = permission
-            }
-            val items =  if (readPhoneState) {
-                arrayListOf(
-                    RadioItem(1, getString(R.string.add_number), icon = R.drawable.ic_hashtag),
-                    RadioItem(2, getString(R.string.choose_contact), icon = R.drawable.ic_view_contact_details_vector),
-                    RadioItem(3, getString(R.string.voicemail), icon = R.drawable.ic_voicemail),
-                    RadioItem(0, getString(R.string.delete), icon = R.drawable.ic_delete_outline)
-                )
-            } else {
-                arrayListOf(
-                    RadioItem(1, getString(R.string.add_number), icon = R.drawable.ic_hashtag),
-                    RadioItem(2, getString(R.string.choose_contact), icon = R.drawable.ic_view_contact_details_vector),
-                    RadioItem(0, getString(R.string.delete), icon = R.drawable.ic_delete_outline)
-                )
-            }
+            val items = arrayListOf(
+                RadioItem(1, getString(R.string.add_number), icon = R.drawable.ic_hashtag),
+                RadioItem(2, getString(R.string.choose_contact), icon = R.drawable.ic_view_contact_details_vector),
+                RadioItem(3, getString(R.string.voicemail), icon = R.drawable.ic_voicemail),
+                RadioItem(0, getString(R.string.delete), icon = R.drawable.ic_delete_outline)
+            )
 
             RadioGroupIconDialog(this, items, titleId = R.string.speed_dial) { newValue ->
                 when (newValue) {
@@ -141,37 +133,9 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                             }
                         }}
 
-                    3 -> {
-                        if (areMultipleSIMsAvailable()) {
-                            SelectSIMDialog(this, "") { handle, label ->
-                                val voiceMailNumber = telecomManager.getVoiceMailNumber(handle)
-                                if (voiceMailNumber !=null) {
-                                    speedDialValues.first { it.id == clickedContact.id }.apply {
-                                        displayName = getString(R.string.voicemail) + "($label)"
-                                        number = voiceMailNumber
-                                    }
-                                } else {
-                                    toast(R.string.unknown)
-                                }
-                                updateAdapter()
-                                showHideVoicemailIcon(clickedContact.id, true)
-                            }
-                        } else {
-                            getHandleToUse(intent, "") { handle ->
-                                val voiceMailNumber = telecomManager.getVoiceMailNumber(handle)
-                                if (voiceMailNumber !=null) {
-                                    val label = getAvailableSIMCardLabels().firstOrNull()?.label ?: ""
-                                    speedDialValues.first { it.id == clickedContact.id }.apply {
-                                        displayName = getString(R.string.voicemail) + "($label)"
-                                        number = voiceMailNumber
-                                    }
-                                } else {
-                                    toast(R.string.unknown)
-                                }
-                                updateAdapter()
-                                showHideVoicemailIcon(clickedContact.id, true)
-                            }
-                        }
+                    // READ_PHONE_STATE is only asked for once the user actually picks voicemail
+                    3 -> handlePermission(PERMISSION_READ_PHONE_STATE) { granted ->
+                        if (granted) chooseVoicemail(clickedContact.id)
                     }
 
                     else -> {
@@ -185,6 +149,7 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                 }
             }
         }.apply {
+            speedDialAdapter = this
             binding.speedDialList.adapter = this
         }
     }
@@ -209,9 +174,37 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                 type = null
                 label = null
             }
-            showHideVoicemailIcon(clickedContact.id, true)
+            showHideVoicemailIcon(clickedContact.id, false)
             updateAdapter()
         }
+    }
+
+    private fun chooseVoicemail(speedDialId: Int) {
+        if (areMultipleSIMsAvailable()) {
+            SelectSIMDialog(this, "") { handle, label -> setVoicemail(speedDialId, handle, label.orEmpty()) }
+        } else {
+            getHandleToUse(intent, "") { handle ->
+                if (handle == null) return@getHandleToUse
+                setVoicemail(speedDialId, handle, getAvailableSIMCardLabels().firstOrNull()?.label.orEmpty())
+            }
+        }
+    }
+
+    private fun setVoicemail(speedDialId: Int, handle: PhoneAccountHandle?, label: String) {
+        val voiceMailNumber = try {
+            telecomManager.getVoiceMailNumber(handle)
+        } catch (_: SecurityException) {
+            null
+        }
+        val speedDial = speedDialValues.firstOrNull { it.id == speedDialId }
+        if (voiceMailNumber == null || speedDial == null) {
+            toast(R.string.unknown)
+            return
+        }
+        speedDial.displayName = getString(R.string.voicemail) + "($label)"
+        speedDial.number = voiceMailNumber
+        updateAdapter()
+        showHideVoicemailIcon(speedDialId, true)
     }
 
     private fun showHideVoicemailIcon(id: Int, isVoicemail: Boolean) {

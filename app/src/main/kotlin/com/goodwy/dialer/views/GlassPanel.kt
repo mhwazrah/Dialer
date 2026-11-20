@@ -27,12 +27,21 @@ class GlassPanel @JvmOverloads constructor(
     private val useStaticGlass: Boolean
 
     init {
-        applyLiquidGlass(pressable = isClickable)
         val hasExplicitBackdrop = (attrs?.getAttributeResourceValue(RES_AUTO, "backdropSourceId", 0) ?: 0) != 0
         useStaticGlass = !hasExplicitBackdrop || effectiveApiLevel < 31
         if (useStaticGlass) {
+            // Nothing of the library's pipeline is drawn: switch every effect off instead of configuring it
             enableDynamicBackground = false
+            enableBackdropBlur = false
+            enableChromaticAberration = false
+            enableChromaticDispersion = false
+            enableSensorHighlight = false
+            enableAdaptiveTint = false
+            enablePressEffect = false
+            collectFrameStats = false
             background = staticGlassDrawable()
+        } else {
+            applyLiquidGlass(pressable = isClickable)
         }
     }
 
@@ -62,7 +71,7 @@ class GlassPanel @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow() // resolves app:backdropSourceId
-        if (backdropSource == null) {
+        if (!useStaticGlass && backdropSource == null) {
             backdropSource = rootView.findViewById<View>(android.R.id.content)
         }
     }

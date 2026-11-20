@@ -53,14 +53,17 @@ class ConferenceCallsAdapter(
         val call = data[position]
         holder.bindView(call, allowSingleClick = false, allowLongClick = false) { itemView, _ ->
             ItemConferenceCallBinding.bind(itemView).apply {
+                itemConferenceCallName.tag = call
                 getCallContact(itemView.context, call) { callContact ->
                     root.post {
+                        if (itemConferenceCallName.tag !== call) return@post // the holder was rebound to another call
                         itemConferenceCallName.text = callContact.name.ifEmpty { itemView.context.getString(R.string.unknown_caller) }
                         if (callContact.number == callContact.name || callContact.isABusinessCall || callContact.isVoiceMail) {
                             val drawable = when {
                                 callContact.isVoiceMail -> {
                                     @SuppressLint("UseCompatLoadingForDrawables")
-                                    val drawableVoicemail = resources.getDrawable( R.drawable.placeholder_voicemail, activity.theme)
+                                    // mutate(): the tint below must not leak into the shared drawable state
+                                    val drawableVoicemail = resources.getDrawable(R.drawable.placeholder_voicemail, activity.theme).mutate()
                                     if (baseConfig.useColoredContacts) {
                                         val letterBackgroundColors = activity.getLetterBackgroundColors()
                                         val color = letterBackgroundColors[abs(callContact.name.hashCode()) % letterBackgroundColors.size].toInt()
@@ -86,12 +89,7 @@ class ConferenceCallsAdapter(
                 itemConferenceCallSplit.alpha = if (canSeparate) 1.0f else LOWER_ALPHA
                 itemConferenceCallSplit.setOnClickListener {
                     call.splitFromConference()
-                    data.removeAt(position)
-                    notifyItemRemoved(position)
-                    if (data.size == 1) {
-                        //activity.finish()
-                        activity.onBackPressed()
-                    }
+                    removeCall(call)
                 }
 
                 itemConferenceCallSplit.setOnLongClickListener {
@@ -104,12 +102,7 @@ class ConferenceCallsAdapter(
                 itemConferenceCallEnd.alpha = if (canDisconnect) 1.0f else LOWER_ALPHA
                 itemConferenceCallEnd.setOnClickListener {
                     call.disconnect()
-                    data.removeAt(position)
-                    notifyItemRemoved(position)
-                    if (data.size == 1) {
-                        //activity.finish()
-                        activity.onBackPressed()
-                    }
+                    removeCall(call)
                 }
 
                 itemConferenceCallEnd.setOnLongClickListener {
@@ -121,6 +114,22 @@ class ConferenceCallsAdapter(
             }
         }
         bindViewHolder(holder)
+    }
+
+    // Resolve the row at click time: the position captured at bind time goes stale once other rows are removed.
+    private fun removeCall(call: Call) {
+        val index = data.indexOf(call)
+        if (index == -1) return
+        data.removeAt(index)
+        notifyItemRemoved(index)
+        if (data.size == 1) activity.finish()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateCalls(calls: List<Call>) {
+        data.clear()
+        data.addAll(calls)
+        notifyDataSetChanged()
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
