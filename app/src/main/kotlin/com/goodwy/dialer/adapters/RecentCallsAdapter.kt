@@ -109,6 +109,7 @@ import com.goodwy.dialer.helpers.CURRENT_RECENT_CALL_LIST
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_ALL
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_CONTACTS
 import com.goodwy.dialer.helpers.RecentsHelper
+import com.goodwy.dialer.helpers.highlightFoldedMatch
 import com.goodwy.dialer.helpers.SWIPE_ACTION_BLOCK
 import com.goodwy.dialer.helpers.SWIPE_ACTION_DELETE
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
@@ -781,6 +782,8 @@ class RecentCallsAdapter(
 
             if (textToHighlight.isNotEmpty() && nameToShow.contains(textToHighlight, true)) {
                 nameToShow = SpannableString(nameToShow.toString().highlightTextPart(textToHighlight, properPrimaryColor))
+            } else if (textToHighlight.isNotEmpty()) {
+                nameToShow.toString().highlightFoldedMatch(textToHighlight, properPrimaryColor)?.let { nameToShow = it }
             }
 
             v.name.apply {

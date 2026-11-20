@@ -26,6 +26,7 @@ import com.goodwy.dialer.extensions.startContactDetailsIntent
 import com.goodwy.dialer.extensions.startContactEdit
 import com.google.gson.reflect.TypeToken
 import com.goodwy.dialer.helpers.ContactsRepository
+import com.goodwy.dialer.helpers.foldArabic
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
 import com.goodwy.dialer.helpers.SWIPE_ACTION_EDIT
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
@@ -205,15 +206,16 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
 
     override fun onSearchQueryChanged(text: String) {
         val fixedText = text.toSearchQuery()
-        val shouldNormalize = fixedText.normalizeString() == fixedText
+        val query = fixedText.foldArabic()
+        val shouldNormalize = query.normalizeString() == query
         val snapshot = ContactsRepository.snapshot
         val normalizedNumberQuery = if (fixedText.toLongOrNull() != null) fixedText.normalizePhoneNumber() else ""
         val contacts = allContacts.filter { contact ->
-            getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
+            getProperText(contact.getNameToDisplay(), shouldNormalize).foldArabic().contains(query, true) ||
                 (normalizedNumberQuery.isNotEmpty() && contact.phoneNumbers.any { it.normalizedNumber.contains(normalizedNumberQuery, true) }) ||
-                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
+                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, query, shouldNormalize)
         }.sortedByDescending {
-            it.name.startsWith(fixedText, true)
+            it.name.foldArabic().startsWith(query, true)
         }.toMutableList() as ArrayList<Contact>
 
         binding.fragmentPlaceholder.beVisibleIf(contacts.isEmpty())

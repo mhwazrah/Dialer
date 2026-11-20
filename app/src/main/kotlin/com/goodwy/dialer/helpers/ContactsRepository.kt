@@ -71,7 +71,7 @@ object ContactsRepository {
     }
 
     /**
-     * The accent-stripped ([normalizeString]) text fields the Contacts/Favorites/Select-contact searches match
+     * The accent-stripped ([normalizeString]) and Arabic-folded ([foldArabic]) text fields the Contacts/Favorites/Select-contact searches match
      * against when the query itself has no accents. The display name is left out: it depends on the sort/name
      * display settings, so it is derived per search.
      */
@@ -104,11 +104,11 @@ object ContactsRepository {
 
         companion object {
             fun of(contact: Contact) = ListSearchKeys(
-                nickname = contact.nickname.normalizeString(),
-                addresses = contact.addresses.map { it.value.normalizeString() },
-                notes = contact.notes.normalizeString(),
-                company = contact.organization.company.normalizeString(),
-                jobPosition = contact.organization.jobPosition.normalizeString()
+                nickname = contact.nickname.normalizeString().foldArabic(),
+                addresses = contact.addresses.map { it.value.normalizeString().foldArabic() },
+                notes = contact.notes.normalizeString().foldArabic(),
+                company = contact.organization.company.normalizeString().foldArabic(),
+                jobPosition = contact.organization.jobPosition.normalizeString().foldArabic()
             )
         }
     }

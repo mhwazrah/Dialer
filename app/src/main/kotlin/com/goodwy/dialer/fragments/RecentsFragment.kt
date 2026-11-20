@@ -55,6 +55,7 @@ import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_ALL
 import com.goodwy.dialer.helpers.FILTER_RECENT_CALLS_CONTACTS
 import com.goodwy.dialer.helpers.RECENT_CALL_CACHE_SIZE
 import com.goodwy.dialer.helpers.RecentsHelper
+import com.goodwy.dialer.helpers.foldArabic
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
 import com.goodwy.dialer.helpers.SWIPE_ACTION_OPEN
@@ -371,18 +372,19 @@ class RecentsFragment(
     private fun updateSearchResult() {
         ensureBackgroundThread {
             val fixedText = searchQuery!!.toSearchQuery()
+            val query = fixedText.foldArabic()
             val recentCalls = allRecentCalls
                 .filterIsInstance<RecentCall>()
                 .filter {
-                    it.name.contains(fixedText, true) ||
+                    it.name.foldArabic().contains(query, true) ||
                         it.doesContainPhoneNumber(fixedText) ||
-                        it.nickname.contains(fixedText, true) ||
-                        it.company.contains(fixedText, true) ||
-                        it.jobPosition.contains(fixedText, true)
+                        it.nickname.foldArabic().contains(query, true) ||
+                        it.company.foldArabic().contains(query, true) ||
+                        it.jobPosition.foldArabic().contains(query, true)
                 }
                 .sortedWith(
                     compareByDescending<RecentCall> { it.dayCode }
-                        .thenByDescending { it.name.startsWith(fixedText, true) }
+                        .thenByDescending { it.name.foldArabic().startsWith(query, true) }
                         .thenByDescending { it.startTS }
                 )
 

@@ -17,6 +17,7 @@ import com.goodwy.dialer.extensions.firstCodePointOrNull
 import com.goodwy.dialer.extensions.setupWithContacts
 import com.goodwy.dialer.extensions.toSearchQuery
 import com.goodwy.dialer.helpers.ContactsRepository
+import com.goodwy.dialer.helpers.foldArabic
 
 class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Contact>, val callback: (selectedContact: Contact) -> Unit) {
     private val binding by activity.viewBinding(DialogSelectContactBinding::inflate)
@@ -131,14 +132,15 @@ class SelectContactDialog(val activity: SimpleActivity, val contacts: List<Conta
         val adapter = binding.selectContactList.adapter as? ContactsAdapter
         var contactsToShow = contacts
         val fixedText = query.toSearchQuery()
-        val shouldNormalize = fixedText.normalizeString() == fixedText
+        val searchText = fixedText.foldArabic()
+        val shouldNormalize = searchText.normalizeString() == searchText
         if (query.isNotEmpty()) {
             val snapshot = ContactsRepository.snapshot
             val normalizedNumberQuery = if (fixedText.toIntOrNull() != null) fixedText.normalizePhoneNumber() else ""
             contactsToShow = contacts.filter { contact ->
-                getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
+                getProperText(contact.getNameToDisplay(), shouldNormalize).foldArabic().contains(searchText, true) ||
                     (normalizedNumberQuery.isNotEmpty() && contact.phoneNumbers.any { it.normalizedNumber.contains(normalizedNumberQuery, true) }) ||
-                    snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
+                    snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, searchText, shouldNormalize)
             }
         }
         checkPlaceholderVisibility(contactsToShow)

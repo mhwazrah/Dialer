@@ -497,7 +497,8 @@ class ContactsAdapter(
                     if (name.normalizeString().contains(normalizedHighlight, true)) {
                         name.highlightTextPart(normalizedHighlight, properPrimaryColor)
                     } else {
-                        name.highlightTextFromNumbers(textToHighlight, properPrimaryColor, highlightLanguage)
+                        name.highlightFoldedMatch(textToHighlight, properPrimaryColor)
+                            ?: name.highlightTextFromNumbers(textToHighlight, properPrimaryColor, highlightLanguage)
                     }
                 }
             }

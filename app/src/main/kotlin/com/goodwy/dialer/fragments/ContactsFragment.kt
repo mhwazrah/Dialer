@@ -33,6 +33,7 @@ import com.goodwy.dialer.extensions.startCallWithConfirmationCheck
 import com.goodwy.dialer.extensions.startContactDetailsIntent
 import com.goodwy.dialer.extensions.startContactEdit
 import com.goodwy.dialer.helpers.ContactsRepository
+import com.goodwy.dialer.helpers.foldArabic
 import com.goodwy.dialer.helpers.SWIPE_ACTION_CALL
 import com.goodwy.dialer.helpers.SWIPE_ACTION_EDIT
 import com.goodwy.dialer.helpers.SWIPE_ACTION_MESSAGE
@@ -312,19 +313,20 @@ class ContactsFragment(context: Context, attributeSet: AttributeSet) : MyViewPag
         val fixedText = text.toSearchQuery()
         searchQuery = fixedText
         showFavoritesStrip(fixedText.isEmpty())
-        val shouldNormalize = fixedText.normalizeString() == fixedText
+        val query = fixedText.foldArabic()
+        val shouldNormalize = query.normalizeString() == query
         val snapshot = ContactsRepository.snapshot
         val isNumberQuery = fixedText.toLongOrNull() != null
         val filtered = allContacts.filter { contact ->
-            getProperText(contact.getNameToDisplay(), shouldNormalize).contains(fixedText, true) ||
+            getProperText(contact.getNameToDisplay(), shouldNormalize).foldArabic().contains(query, true) ||
                 (isNumberQuery && contact.doesContainPhoneNumber(fixedText, true)) ||
-                contact.relations.any { it.name.contains(fixedText, true) } ||
-                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, fixedText, shouldNormalize)
+                contact.relations.any { it.name.foldArabic().contains(query, true) } ||
+                snapshot.listSearchKeys(contact).matchesSecondaryFields(contact, query, shouldNormalize)
         } as ArrayList
 
         filtered.sortBy {
             val nameToDisplay = it.getNameToDisplay()
-            !getProperText(nameToDisplay, shouldNormalize).startsWith(fixedText, true) && !nameToDisplay.contains(fixedText, true)
+            !getProperText(nameToDisplay, shouldNormalize).foldArabic().startsWith(query, true) && !nameToDisplay.foldArabic().contains(query, true)
         }
 
         binding.fragmentPlaceholder.beVisibleIf(filtered.isEmpty())
