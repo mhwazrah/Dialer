@@ -537,6 +537,28 @@
                     </RelativeLayout>
 
                     <RelativeLayout
+                        android:id="@+id/settings_flip_to_silence_holder"
+                        style="@style/SettingsHolderSwitchStyle">
+
+                        <com.goodwy.commons.views.MyMaterialSwitch
+                            android:id="@+id/settings_flip_to_silence"
+                            style="@style/SettingsSwitchStyle"
+                            android:text="@string/flip_to_silence"
+                            app:switchPadding="@dimen/bigger_margin"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/settings_announce_caller_name_holder"
+                        style="@style/SettingsHolderSwitchStyle">
+
+                        <com.goodwy.commons.views.MyMaterialSwitch
+                            android:id="@+id/settings_announce_caller_name"
+                            style="@style/SettingsSwitchStyle"
+                            android:text="@string/announce_caller_name"
+                            app:switchPadding="@dimen/bigger_margin"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
                         android:id="@+id/settingsCallVibrationHolder"
                         style="@style/SettingsHolderSwitchStyle">
 

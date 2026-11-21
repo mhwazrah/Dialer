@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Seol WhatsApp</string>
     <string name="dialpad_number_font_size">Clómhéid na n-uimhreacha</string>
     <string name="hang_up">Croch suas</string>
+    <string name="decline_with_message">Diúltaigh le teachtaireacht</string>
+    <string name="flip_to_silence">Iompaigh an fón chun glaonna a chiúnú</string>
+    <string name="announce_caller_name">Abair ainm an ghlaoiteora</string>
 </resources>

@@ -160,6 +160,7 @@ class AppStyleTest {
 
     // The approved decision table (docs/handoff/settings-simplify.md): every removed setting and its one value
     @Test
+    @Suppress("LongMethod") // one assertion per row of the decision table
     fun pinsEveryRemovedSettingToItsApprovedValue() {
         context.applyPinnedSettings()
         val c = context.config

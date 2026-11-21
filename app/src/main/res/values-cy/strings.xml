@@ -5,4 +5,7 @@
     <string name="send_whatsapp">Anfon WhatsApp</string>
     <string name="dialpad_number_font_size">Maint ffont y rhifau</string>
     <string name="hang_up">Rhoi\'r ffôn i lawr</string>
+    <string name="decline_with_message">Gwrthod gyda neges</string>
+    <string name="flip_to_silence">Troi\'r ffôn drosodd i dawelu galwadau</string>
+    <string name="announce_caller_name">Dweud enw\'r galwr wrth ganu</string>
 </resources>

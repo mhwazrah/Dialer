@@ -5,4 +5,7 @@
     <string name="send_whatsapp">WhatsApp ਭੇਜੋ</string>
     <string name="dialpad_number_font_size">ਨੰਬਰ ਫੌਂਟ ਆਕਾਰ</string>
     <string name="hang_up">ਕਾਲ ਖਤਮ ਕਰੋ</string>
+    <string name="decline_with_message">ਸੁਨੇਹੇ ਨਾਲ ਅਸਵੀਕਾਰ ਕਰੋ</string>
+    <string name="flip_to_silence">ਕਾਲ ਚੁੱਪ ਕਰਨ ਲਈ ਫ਼ੋਨ ਪਲਟੋ</string>
+    <string name="announce_caller_name">ਰਿੰਗ ਹੋਣ ਸਮੇਂ ਕਾਲਰ ਦਾ ਨਾਮ ਬੋਲੋ</string>
 </resources>

@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Надіслати WhatsApp</string>
     <string name="dialpad_number_font_size">Розмір шрифту цифр</string>
     <string name="hang_up">Завершити виклик</string>
+    <string name="decline_with_message">Відхилити з повідомленням</string>
+    <string name="flip_to_silence">Переверніть телефон, щоб вимкнути звук виклику</string>
+    <string name="announce_caller_name">Озвучувати ім\'я абонента</string>
 </resources>

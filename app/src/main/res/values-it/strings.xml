@@ -80,4 +80,7 @@
     <string name="send_whatsapp">Invia WhatsApp</string>
     <string name="dialpad_number_font_size">Dimensione carattere dei numeri</string>
     <string name="hang_up">Riaggancia</string>
+    <string name="decline_with_message">Rifiuta con messaggio</string>
+    <string name="flip_to_silence">Capovolgi il telefono per silenziare le chiamate</string>
+    <string name="announce_caller_name">Pronuncia il nome del chiamante</string>
 </resources>

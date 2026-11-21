@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Gửi WhatsApp</string>
     <string name="dialpad_number_font_size">Cỡ chữ của số</string>
     <string name="hang_up">Gác máy</string>
+    <string name="decline_with_message">Từ chối kèm tin nhắn</string>
+    <string name="flip_to_silence">Úp điện thoại xuống để tắt tiếng cuộc gọi</string>
+    <string name="announce_caller_name">Đọc tên người gọi khi đổ chuông</string>
 </resources>

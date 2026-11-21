@@ -1,9 +1,10 @@
 rootProject.name = "Dialer"
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
+        gradlePluginPortal()
 //        maven { setUrl("https://developer.huawei.com/repo/") }
     }
 }

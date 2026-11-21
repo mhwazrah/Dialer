@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Decline with message: a handset with a speech bubble whose cross is cut out (drawn for this app) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19.5,15.6c-1.15,0 -2.27,-0.18 -3.3,-0.52 -0.33,-0.11 -0.69,-0.03 -0.94,0.22l-1.47,1.84c-2.65,-1.26 -5.13,-3.65 -6.45,-6.39l1.82,-1.55c0.25,-0.26 0.33,-0.63 0.22,-0.95 -0.35,-1.04 -0.52,-2.15 -0.52,-3.3 0,-0.5 -0.42,-0.93 -0.93,-0.93H4.7C4.2,4.02 3.6,4.24 3.6,4.95 3.6,13.64 10.83,20.86 19.5,20.86c0.66,0 0.93,-0.59 0.93,-1.1v-3.23c0,-0.5 -0.42,-0.93 -0.93,-0.93z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M17,3 C19.87,3 22.2,4.88 22.2,7.2 C22.2,9.52 19.87,11.4 17,11.4 C16.32,11.4 15.67,11.3 15.07,11.11 L13.2,12.2 L13.75,10.2 C12.47,9.43 11.8,8.37 11.8,7.2 C11.8,4.88 14.13,3 17,3Z M17.00,8.05 L16.01,9.04 L15.16,8.19 L16.15,7.20 L15.16,6.21 L16.01,5.36 L17.00,6.35 L17.99,5.36 L18.84,6.21 L17.85,7.20 L18.84,8.19 L17.99,9.04Z"/>
+</vector>

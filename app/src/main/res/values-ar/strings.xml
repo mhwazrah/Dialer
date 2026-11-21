@@ -82,4 +82,7 @@
     <string name="hang_up">إنهاء المكالمة</string>
     <string name="imei_unavailable">لا يسمح أندرويد لهذا التطبيق بقراءة رقم IMEI. يمكنك العثور عليه في الإعدادات › حول الهاتف.</string>
     <string name="about_phone">حول الهاتف</string>
+    <string name="decline_with_message">رفض برسالة</string>
+    <string name="flip_to_silence">اقلب الهاتف لكتم صوت المكالمات</string>
+    <string name="announce_caller_name">نطق اسم المتصل عند الرنين</string>
 </resources>

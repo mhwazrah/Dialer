@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Envia WhatsApp</string>
     <string name="dialpad_number_font_size">Mida de la lletra dels números</string>
     <string name="hang_up">Penja</string>
+    <string name="decline_with_message">Rebutja amb un missatge</string>
+    <string name="flip_to_silence">Gira el telèfon per silenciar les trucades</string>
+    <string name="announce_caller_name">Digues el nom de qui truca</string>
 </resources>

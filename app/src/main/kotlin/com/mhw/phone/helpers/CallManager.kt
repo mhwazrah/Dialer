@@ -223,21 +223,14 @@ class CallManager {
             notifyAudioStateChanged()
         }
 
-        private fun getOptimalAudioRoute(preferredRoute: Int, audioState: CallAudioState): Int {
-            val supportedRoutes = audioState.supportedRouteMask
-
-            // First, let's try to return to the previous route
-            if (supportedRoutes and preferredRoute != 0) {
-                return preferredRoute
-            }
-
-            // If the previous one is unavailable, use the following priority: Bluetooth -> headset -> speaker
-            return when {
-                supportedRoutes and CallAudioState.ROUTE_BLUETOOTH != 0 -> CallAudioState.ROUTE_BLUETOOTH
-                supportedRoutes and CallAudioState.ROUTE_WIRED_OR_EARPIECE != 0 -> CallAudioState.ROUTE_WIRED_OR_EARPIECE
-                else -> CallAudioState.ROUTE_SPEAKER
-            }
+        /** Where [toggleSpeakerRoute] would switch to now: the speaker, or back from it. Null without a call. */
+        fun speakerToggleTarget(): AudioRoute? {
+            val state = getCallAudioState() ?: return null
+            return speakerToggleTarget(state.route, state.supportedRouteMask, previousAudioRoute)
         }
+
+        private fun getOptimalAudioRoute(preferredRoute: Int, audioState: CallAudioState): Int =
+            optimalAudioRoute(preferredRoute, audioState.supportedRouteMask)
 
         fun setAudioRoute(newRoute: Int) {
             // Remember where to return to when the user leaves the speaker for another route
@@ -364,6 +357,30 @@ class CallManager {
         }
     }
 }
+
+/** The route to leave the speaker for: [preferredRoute] if available, else Bluetooth, then wired/earpiece, then speaker. */
+internal fun optimalAudioRoute(preferredRoute: Int, supportedRoutes: Int): Int = when {
+    supportedRoutes and preferredRoute != 0 -> preferredRoute
+    supportedRoutes and CallAudioState.ROUTE_BLUETOOTH != 0 -> CallAudioState.ROUTE_BLUETOOTH
+    supportedRoutes and CallAudioState.ROUTE_WIRED_OR_EARPIECE != 0 -> CallAudioState.ROUTE_WIRED_OR_EARPIECE
+    else -> CallAudioState.ROUTE_SPEAKER
+}
+
+/**
+ * Where a speaker toggle goes from [route]: the speaker, or back from it to the [optimalAudioRoute]. The combined
+ * "wired or earpiece" route is named by what is actually there: a plugged-in wired headset, else the earpiece.
+ */
+internal fun speakerToggleTarget(route: Int, supportedRoutes: Int, previousRoute: Int): AudioRoute? {
+    if (route != CallAudioState.ROUTE_SPEAKER) return AudioRoute.SPEAKER
+    return when (val target = optimalAudioRoute(previousRoute, supportedRoutes)) {
+        CallAudioState.ROUTE_WIRED_OR_EARPIECE ->
+            if (supportedRoutes and CallAudioState.ROUTE_WIRED_HEADSET != 0) AudioRoute.WIRED_HEADSET else AudioRoute.EARPIECE
+        else -> AudioRoute.fromRoute(target)
+    }
+}
+
+/** Ringing size of the caller's photo: twice [baseSize], but no more than a quarter of [screenHeight] (never below [baseSize]). */
+internal fun ringingAvatarSize(baseSize: Int, screenHeight: Int): Int = minOf(baseSize * 2, maxOf(baseSize, screenHeight / 4))
 
 interface CallManagerListener {
     fun onStateChanged()

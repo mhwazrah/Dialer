@@ -81,4 +81,7 @@
     <string name="send_whatsapp">傳送 WhatsApp</string>
     <string name="dialpad_number_font_size">數字字型大小</string>
     <string name="hang_up">掛斷</string>
+    <string name="decline_with_message">拒接並傳送訊息</string>
+    <string name="flip_to_silence">翻轉手機以將來電靜音</string>
+    <string name="announce_caller_name">來電時播報來電者名稱</string>
 </resources>

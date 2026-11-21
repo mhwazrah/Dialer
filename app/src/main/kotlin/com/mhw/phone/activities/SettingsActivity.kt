@@ -113,6 +113,8 @@ class SettingsActivity : SimpleActivity() {
         setupAlwaysShowFullscreen()
         setupQuickAnswers()
         setupDisableProximitySensor()
+        setupFlipToSilence()
+        setupAnnounceCallerName()
         setupDialpadVibrations()
         setupCallStartEndVibrations()
         setupDialpadBeeps()
@@ -721,6 +723,26 @@ class SettingsActivity : SimpleActivity() {
             settingsDisableProximitySensorHolder.setOnClickListener {
                 settingsDisableProximitySensor.toggle()
                 config.disableProximitySensor = settingsDisableProximitySensor.isChecked
+            }
+        }
+    }
+
+    private fun setupFlipToSilence() {
+        binding.apply {
+            settingsFlipToSilence.isChecked = config.flipToSilence
+            settingsFlipToSilenceHolder.setOnClickListener {
+                settingsFlipToSilence.toggle()
+                config.flipToSilence = settingsFlipToSilence.isChecked
+            }
+        }
+    }
+
+    private fun setupAnnounceCallerName() {
+        binding.apply {
+            settingsAnnounceCallerName.isChecked = config.announceCallerName
+            settingsAnnounceCallerNameHolder.setOnClickListener {
+                settingsAnnounceCallerName.toggle()
+                config.announceCallerName = settingsAnnounceCallerName.isChecked
             }
         }
     }

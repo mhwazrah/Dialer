@@ -47,4 +47,7 @@
     <string name="send_whatsapp">Send WhatsApp</string>
     <string name="dialpad_number_font_size">Skriftstørrelse for tall</string>
     <string name="hang_up">Legg på</string>
+    <string name="decline_with_message">Avvis med melding</string>
+    <string name="flip_to_silence">Snu telefonen for å dempe anrop</string>
+    <string name="announce_caller_name">Si navnet på den som ringer</string>
 </resources>

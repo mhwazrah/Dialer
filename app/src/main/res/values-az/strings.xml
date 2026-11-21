@@ -9,4 +9,7 @@
     <string name="send_whatsapp">WhatsApp göndər</string>
     <string name="dialpad_number_font_size">Rəqəm şrift ölçüsü</string>
     <string name="hang_up">Dəstəyi qoy</string>
+    <string name="decline_with_message">Mesajla rədd et</string>
+    <string name="flip_to_silence">Zəngi səssizləşdirmək üçün telefonu çevirin</string>
+    <string name="announce_caller_name">Zəng zamanı zəng edənin adını səsləndir</string>
 </resources>

@@ -73,4 +73,7 @@
     <string name="send_whatsapp">Pošlji WhatsApp</string>
     <string name="dialpad_number_font_size">Velikost pisave številk</string>
     <string name="hang_up">Odloži</string>
+    <string name="decline_with_message">Zavrni s sporočilom</string>
+    <string name="flip_to_silence">Obrnite telefon, da utišate klic</string>
+    <string name="announce_caller_name">Izgovori ime klicatelja</string>
 </resources>

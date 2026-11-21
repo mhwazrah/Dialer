@@ -81,4 +81,7 @@
     <string name="send_whatsapp">WhatsApp versturen</string>
     <string name="dialpad_number_font_size">Lettergrootte van cijfers</string>
     <string name="hang_up">Ophangen</string>
+    <string name="decline_with_message">Weigeren met bericht</string>
+    <string name="flip_to_silence">Telefoon omdraaien om oproepen te dempen</string>
+    <string name="announce_caller_name">Naam van beller uitspreken</string>
 </resources>

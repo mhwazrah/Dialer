@@ -1,5 +1,6 @@
 package com.mhw.phone.services
 
+import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.telecom.Call
@@ -10,7 +11,9 @@ import com.goodwy.commons.extensions.canUseFullScreenIntent
 import com.goodwy.commons.extensions.hasPermission
 import com.goodwy.commons.helpers.PERMISSION_POST_NOTIFICATIONS
 import com.mhw.phone.activities.CallActivity
+import com.goodwy.commons.extensions.telecomManager
 import com.mhw.phone.extensions.config
+import com.mhw.phone.extensions.getStateCompat
 import com.mhw.phone.extensions.isOutgoing
 import com.mhw.phone.extensions.keyguardManager
 import com.mhw.phone.extensions.powerManager
@@ -23,6 +26,22 @@ class CallService : InCallService() {
     private val callNotificationManager by lazy { CallNotificationManager(this) }
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAudioKey: Pair<Boolean, Int>? = null
+    private val callerNameAnnouncer by lazy { CallerNameAnnouncer(this) }
+    private val flipToSilence by lazy {
+        FlipToSilence(this) {
+            callerNameAnnouncer.stop()
+            silenceRinger()
+        }
+    }
+
+    // TelecomManager.silenceRinger needs MODIFY_PHONE_STATE *or* the default-dialer role, which this app holds
+    // while it receives calls; lint only knows the permission.
+    @SuppressLint("MissingPermission")
+    private fun silenceRinger() {
+        try {
+            telecomManager.silenceRinger()
+        } catch (_: SecurityException) { }
+    }
 
     // A blocked background activity launch is silent, so surface outgoing calls via a full-screen notification if the UI never showed.
     private val fullScreenFallback = Runnable {
@@ -36,6 +55,7 @@ class CallService : InCallService() {
             super.onStateChanged(call, state)
 
             callNotificationManager.setupNotification()
+            updateRingingExtras()
 
             if (state == Call.STATE_DISCONNECTED || state == Call.STATE_DISCONNECTING) {
                 callNotificationManager.cancelNotification()
@@ -52,6 +72,7 @@ class CallService : InCallService() {
         CallManager.inCallService = this
         CallManager.onCallAdded(call)
         call.registerCallback(callListener)
+        updateRingingExtras()
 
         // lowPriority == true  ➜ start the call activity directly + post a quiet notification
         // lowPriority == false ➜ rely on the high-priority full-screen-intent notification
@@ -108,6 +129,7 @@ class CallService : InCallService() {
         callNotificationManager.cancelNotification()
         val wasPrimaryCall = call == CallManager.getPrimaryCall()
         CallManager.onCallRemoved(call)
+        updateRingingExtras()
         // Persist the dirty flag too: the EventBus post only reaches subscribers while the app is
         // open, so without this a call that ends with the app closed leaves the recents cache
         // stale and the next launch renders old entries first.
@@ -151,15 +173,34 @@ class CallService : InCallService() {
 
     override fun onSilenceRinger() {
         super.onSilenceRinger()
+        stopRingingExtras()
 
         try {
             if (baseConfig.flashForAlerts) MyCameraImpl.newInstance(this).stopSOS()
         } catch (_: Exception) { }
     }
 
+    // Flip-to-silence and the caller-name announcement run only while the one and only call rings: never for a
+    // call waiting behind an active one.
+    private fun updateRingingExtras() {
+        val ringing = (CallManager.getPhoneState() as? SingleCall)?.call?.takeIf { it.getStateCompat() == Call.STATE_RINGING }
+        if (ringing == null) {
+            stopRingingExtras()
+            return
+        }
+        if (config.flipToSilence) flipToSilence.start() else flipToSilence.stop()
+        if (config.announceCallerName) callerNameAnnouncer.announce(ringing)
+    }
+
+    private fun stopRingingExtras() {
+        flipToSilence.stop()
+        callerNameAnnouncer.stop()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mainHandler.removeCallbacks(fullScreenFallback)
+        stopRingingExtras()
         callNotificationManager.cancelNotification()
         CallManager.clear(this)
 

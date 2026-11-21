@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Sendi WhatsApp</string>
     <string name="dialpad_number_font_size">Tipargrandeco de ciferoj</string>
     <string name="hang_up">Fini vokon</string>
+    <string name="decline_with_message">Rifuzi per mesaĝo</string>
+    <string name="flip_to_silence">Renversu la telefonon por silentigi vokojn</string>
+    <string name="announce_caller_name">Laŭtlegi la nomon de la vokanto</string>
 </resources>

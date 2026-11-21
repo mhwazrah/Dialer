@@ -59,4 +59,7 @@
     <string name="send_whatsapp">Siųsti WhatsApp</string>
     <string name="dialpad_number_font_size">Skaičių šrifto dydis</string>
     <string name="hang_up">Padėti ragelį</string>
+    <string name="decline_with_message">Atmesti su žinute</string>
+    <string name="flip_to_silence">Apverskite telefoną, kad nutildytumėte skambutį</string>
+    <string name="announce_caller_name">Ištarti skambinančiojo vardą</string>
 </resources>

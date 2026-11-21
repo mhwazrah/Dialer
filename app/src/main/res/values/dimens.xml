@@ -8,6 +8,8 @@
     <dimen name="incoming_call_draggable_background_size">82dp</dimen>
     <dimen name="call_notification_button_size">35dp</dimen>
     <dimen name="caller_avatar_max_size">100dp</dimen>
+    <!-- Labels under the incoming-call side buttons wrap to two lines within this width -->
+    <dimen name="call_button_label_max_width">140dp</dimen>
     <dimen name="caller_avatar_max_size_small">78dp</dimen>
     <dimen name="end_call_button_margin">34dp</dimen>
     <dimen name="dialpad_bottom_padding">114dp</dimen>

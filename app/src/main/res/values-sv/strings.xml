@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Skicka WhatsApp</string>
     <string name="dialpad_number_font_size">Teckenstorlek för siffror</string>
     <string name="hang_up">Lägg på</string>
+    <string name="decline_with_message">Avvisa med meddelande</string>
+    <string name="flip_to_silence">Vänd telefonen för att tysta samtal</string>
+    <string name="announce_caller_name">Säg namnet på den som ringer</string>
 </resources>

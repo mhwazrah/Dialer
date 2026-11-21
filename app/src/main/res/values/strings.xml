@@ -107,4 +107,7 @@
     <string name="imei_title" translatable="false">IMEI</string>
     <string name="imei_unavailable">Android doesn\'t allow this app to read the IMEI. You can find it in Settings › About phone.</string>
     <string name="about_phone">About phone</string>
+    <string name="decline_with_message">Decline with message</string>
+    <string name="flip_to_silence">Flip phone over to silence calls</string>
+    <string name="announce_caller_name">Speak caller\'s name when ringing</string>
 </resources>

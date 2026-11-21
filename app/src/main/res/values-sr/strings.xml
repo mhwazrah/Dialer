@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Пошаљи WhatsApp</string>
     <string name="dialpad_number_font_size">Величина фонта бројева</string>
     <string name="hang_up">Прекини позив</string>
+    <string name="decline_with_message">Одбиј поруком</string>
+    <string name="flip_to_silence">Окрените телефон да утишате позив</string>
+    <string name="announce_caller_name">Изговори име позиваоца</string>
 </resources>

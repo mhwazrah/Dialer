@@ -86,4 +86,7 @@
     <string name="send_whatsapp">WhatsApp भेजें</string>
     <string name="dialpad_number_font_size">संख्या फ़ॉन्ट आकार</string>
     <string name="hang_up">कॉल समाप्त करें</string>
+    <string name="decline_with_message">संदेश के साथ अस्वीकार करें</string>
+    <string name="flip_to_silence">कॉल म्यूट करने के लिए फ़ोन पलटें</string>
+    <string name="announce_caller_name">रिंग होने पर कॉलर का नाम बोलें</string>
 </resources>

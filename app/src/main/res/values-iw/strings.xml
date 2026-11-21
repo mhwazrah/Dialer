@@ -81,4 +81,7 @@
     <string name="send_whatsapp">שליחת WhatsApp</string>
     <string name="dialpad_number_font_size">גודל גופן הספרות</string>
     <string name="hang_up">ניתוק שיחה</string>
+    <string name="decline_with_message">דחייה עם הודעה</string>
+    <string name="flip_to_silence">הפיכת הטלפון להשתקת שיחות</string>
+    <string name="announce_caller_name">הקראת שם המתקשר</string>
 </resources>

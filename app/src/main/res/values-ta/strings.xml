@@ -73,4 +73,7 @@
     <string name="send_whatsapp">WhatsApp அனுப்பு</string>
     <string name="dialpad_number_font_size">எண் எழுத்துரு அளவு</string>
     <string name="hang_up">அழைப்பை முடி</string>
+    <string name="decline_with_message">செய்தியுடன் நிராகரி</string>
+    <string name="flip_to_silence">அழைப்பை முடக்க ஃபோனைக் கவிழ்க்கவும்</string>
+    <string name="announce_caller_name">ஒலிக்கும்போது அழைப்பவரின் பெயரைச் சொல்</string>
 </resources>

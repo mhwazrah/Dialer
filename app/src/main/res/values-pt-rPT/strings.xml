@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Enviar WhatsApp</string>
     <string name="dialpad_number_font_size">Tamanho da letra dos números</string>
     <string name="hang_up">Desligar</string>
+    <string name="decline_with_message">Rejeitar com mensagem</string>
+    <string name="flip_to_silence">Virar o telemóvel para silenciar chamadas</string>
+    <string name="announce_caller_name">Dizer o nome de quem liga</string>
 </resources>

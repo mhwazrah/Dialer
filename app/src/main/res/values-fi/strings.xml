@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Lähetä WhatsApp</string>
     <string name="dialpad_number_font_size">Numeroiden fonttikoko</string>
     <string name="hang_up">Lopeta puhelu</string>
+    <string name="decline_with_message">Hylkää viestillä</string>
+    <string name="flip_to_silence">Käännä puhelin ympäri hiljentääksesi puhelut</string>
+    <string name="announce_caller_name">Sano soittajan nimi</string>
 </resources>

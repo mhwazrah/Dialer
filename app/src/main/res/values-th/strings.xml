@@ -81,4 +81,7 @@
     <string name="send_whatsapp">ส่ง WhatsApp</string>
     <string name="dialpad_number_font_size">ขนาดฟอนต์ตัวเลข</string>
     <string name="hang_up">วางสาย</string>
+    <string name="decline_with_message">ปฏิเสธพร้อมข้อความ</string>
+    <string name="flip_to_silence">คว่ำโทรศัพท์เพื่อปิดเสียงสายเรียกเข้า</string>
+    <string name="announce_caller_name">อ่านชื่อผู้โทรเมื่อมีสายเรียกเข้า</string>
 </resources>

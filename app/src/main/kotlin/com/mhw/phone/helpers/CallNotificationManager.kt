@@ -133,7 +133,6 @@ class CallNotificationManager(private val context: Context) {
                 val callType = context.getString(callTypeId)
 
                 val isMicrophoneMute = CallManager.isMicrophoneMuted
-                val isSpeakerOn = CallManager.getCallAudioRoute() == AudioRoute.SPEAKER
                 val connectTime = CallManager.getCallConnectTime()
                 val showChronometer = callState == Call.STATE_ACTIVE && connectTime > 0
 
@@ -192,11 +191,14 @@ class CallNotificationManager(private val context: Context) {
                         ).build()
                     )
                 } else {
-                    val speakerLabel = context.getString(R.string.audio_route_speaker)
+                    // Like Mute/Unmute, the action names what a tap does: on the speaker it names the route it goes
+                    // back to. Android 12+ shows these actions as text only, so the label is the only visible state.
+                    val speakerTarget = CallManager.speakerToggleTarget() ?: AudioRoute.SPEAKER
+                    val speakerLabel = context.getString(speakerTarget.stringRes)
                     val muteLabel = context.getString(if (isMicrophoneMute) R.string.unmute else R.string.mute)
                     val hangUpLabel = context.getString(R.string.hang_up)
 
-                    val speakerIcon = if (isSpeakerOn) R.drawable.ic_volume_up_vector else R.drawable.ic_volume_down_vector
+                    val speakerIcon = speakerTarget.iconRes
                     builder.addAction(
                         Notification.Action.Builder(
                             Icon.createWithResource(context, speakerIcon),
@@ -427,19 +429,10 @@ class CallNotificationManager(private val context: Context) {
                     // Dynamic microphone and speaker icon for active call
                     if (callState != Call.STATE_RINGING) {
                         // Action speaker
-                        val isSpeakerOn = CallManager.getCallAudioRoute() == AudioRoute.SPEAKER
-                        val speakerIcon = if (isSpeakerOn) {
-                            R.drawable.ic_volume_up_vector
-                        } else {
-                            R.drawable.ic_volume_down_vector
-                        }
-
-                        val speakerLabel = context.getString(R.string.audio_route_speaker)
-    //                    if (isSpeakerOn) {
-    //                    context.getString(R.string.turn_speaker_off)
-    //                } else {
-    //                    context.getString(R.string.turn_speaker_on)
-    //                }
+                        // Same as the standard notification: the action names what a tap does
+                        val speakerTarget = CallManager.speakerToggleTarget() ?: AudioRoute.SPEAKER
+                        val speakerIcon = speakerTarget.iconRes
+                        val speakerLabel = context.getString(speakerTarget.stringRes)
 
                         val speakerCallIntent = Intent(context, CallActionReceiver::class.java)
                         speakerCallIntent.action = SPEAKER_CALL

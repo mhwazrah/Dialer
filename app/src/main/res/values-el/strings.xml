@@ -72,4 +72,7 @@
     <string name="send_whatsapp">Αποστολή WhatsApp</string>
     <string name="dialpad_number_font_size">Μέγεθος γραμματοσειράς αριθμών</string>
     <string name="hang_up">Τερματισμός κλήσης</string>
+    <string name="decline_with_message">Απόρριψη με μήνυμα</string>
+    <string name="flip_to_silence">Αναποδογυρίστε το τηλέφωνο για σίγαση κλήσεων</string>
+    <string name="announce_caller_name">Εκφώνηση ονόματος καλούντος</string>
 </resources>

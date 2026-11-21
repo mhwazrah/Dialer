@@ -122,6 +122,14 @@ class Config private constructor(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(DISABLE_PROXIMITY_SENSOR, false)
         set(disableProximitySensor) = prefs.edit { putBoolean(DISABLE_PROXIMITY_SENSOR, disableProximitySensor) }
 
+    var flipToSilence: Boolean
+        get() = prefs.getBoolean(FLIP_TO_SILENCE, false)
+        set(flipToSilence) = prefs.edit { putBoolean(FLIP_TO_SILENCE, flipToSilence) }
+
+    var announceCallerName: Boolean
+        get() = prefs.getBoolean(ANNOUNCE_CALLER_NAME, false)
+        set(announceCallerName) = prefs.edit { putBoolean(ANNOUNCE_CALLER_NAME, announceCallerName) }
+
     var disableSwipeToAnswer: Boolean
         get() = prefs.getBoolean(DISABLE_SWIPE_TO_ANSWER, true)
         set(disableSwipeToAnswer) = prefs.edit { putBoolean(DISABLE_SWIPE_TO_ANSWER, disableSwipeToAnswer) }

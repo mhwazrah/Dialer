@@ -78,4 +78,7 @@
     <string name="send_whatsapp">Kirim WhatsApp</string>
     <string name="dialpad_number_font_size">Ukuran font angka</string>
     <string name="hang_up">Akhiri panggilan</string>
+    <string name="decline_with_message">Tolak dengan pesan</string>
+    <string name="flip_to_silence">Balikkan ponsel untuk membisukan panggilan</string>
+    <string name="announce_caller_name">Ucapkan nama penelepon</string>
 </resources>

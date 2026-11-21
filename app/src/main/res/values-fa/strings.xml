@@ -73,4 +73,7 @@
     <string name="send_whatsapp">ارسال واتساپ</string>
     <string name="dialpad_number_font_size">اندازه قلم اعداد</string>
     <string name="hang_up">پایان تماس</string>
+    <string name="decline_with_message">رد با پیام</string>
+    <string name="flip_to_silence">برای بی‌صدا کردن تماس، گوشی را برگردانید</string>
+    <string name="announce_caller_name">خواندن نام تماس‌گیرنده هنگام زنگ</string>
 </resources>

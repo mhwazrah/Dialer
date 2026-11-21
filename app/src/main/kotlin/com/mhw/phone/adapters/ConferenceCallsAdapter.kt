@@ -1,5 +1,7 @@
 package com.mhw.phone.adapters
 
+import android.graphics.Color
+import com.mhw.phone.extensions.AlwaysDarkScreen
 import android.annotation.SuppressLint
 import android.graphics.drawable.LayerDrawable
 import android.telecom.Call
@@ -24,6 +26,9 @@ import kotlin.math.abs
 class ConferenceCallsAdapter(
     activity: SimpleActivity, recyclerView: MyRecyclerView, val data: ArrayList<Call>, itemClick: (Any) -> Unit
 ) : MyRecyclerViewAdapter(activity, recyclerView, itemClick) {
+    // The conference screen is always dark, like the call screen
+    private val contentColor by lazy { if (activity is AlwaysDarkScreen) Color.WHITE else textColor }
+
 
     override fun actionItemPressed(id: Int) {}
 
@@ -83,8 +88,8 @@ class ConferenceCallsAdapter(
 
                 val canSeparate = call.hasCapability(Call.Details.CAPABILITY_SEPARATE_FROM_CONFERENCE)
                 val canDisconnect = call.hasCapability(Call.Details.CAPABILITY_DISCONNECT_FROM_CONFERENCE)
-                itemConferenceCallName.setTextColor(textColor)
-                itemConferenceCallSplit.applyColorFilter(textColor)
+                itemConferenceCallName.setTextColor(contentColor)
+                itemConferenceCallSplit.applyColorFilter(contentColor)
                 itemConferenceCallSplit.isEnabled = canSeparate
                 itemConferenceCallSplit.alpha = if (canSeparate) 1.0f else LOWER_ALPHA
                 itemConferenceCallSplit.setOnClickListener {

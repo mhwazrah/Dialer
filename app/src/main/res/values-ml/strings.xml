@@ -60,4 +60,7 @@
     <string name="send_whatsapp">WhatsApp അയയ്ക്കുക</string>
     <string name="dialpad_number_font_size">നമ്പർ ഫോണ്ട് വലുപ്പം</string>
     <string name="hang_up">കോൾ അവസാനിപ്പിക്കുക</string>
+    <string name="decline_with_message">സന്ദേശത്തോടെ നിരസിക്കുക</string>
+    <string name="flip_to_silence">കോൾ നിശബ്ദമാക്കാൻ ഫോൺ മറിച്ചിടുക</string>
+    <string name="announce_caller_name">റിംഗ് ചെയ്യുമ്പോൾ വിളിക്കുന്നയാളുടെ പേര് പറയുക</string>
 </resources>

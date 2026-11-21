@@ -61,4 +61,7 @@
     <string name="send_whatsapp">Адправіць WhatsApp</string>
     <string name="dialpad_number_font_size">Памер шрыфта лічбаў</string>
     <string name="hang_up">Завяршыць выклік</string>
+    <string name="decline_with_message">Адхіліць з паведамленнем</string>
+    <string name="flip_to_silence">Перавярніце тэлефон, каб выключыць гук выкліку</string>
+    <string name="announce_caller_name">Агучваць імя абанента пры выкліку</string>
 </resources>

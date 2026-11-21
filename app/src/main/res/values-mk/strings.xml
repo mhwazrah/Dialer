@@ -5,4 +5,7 @@
     <string name="send_whatsapp">Испрати WhatsApp</string>
     <string name="dialpad_number_font_size">Големина на фонтот на бројки</string>
     <string name="hang_up">Прекини повик</string>
+    <string name="decline_with_message">Одбиј со порака</string>
+    <string name="flip_to_silence">Превртете го телефонот за да го стишите повикот</string>
+    <string name="announce_caller_name">Изговори го името на повикувачот</string>
 </resources>

@@ -81,4 +81,7 @@
     <string name="send_whatsapp">WhatsApp gönder</string>
     <string name="dialpad_number_font_size">Rakam yazı tipi boyutu</string>
     <string name="hang_up">Kapat</string>
+    <string name="decline_with_message">Mesajla reddet</string>
+    <string name="flip_to_silence">Aramaları sessize almak için telefonu ters çevirin</string>
+    <string name="announce_caller_name">Arayanın adını seslendir</string>
 </resources>

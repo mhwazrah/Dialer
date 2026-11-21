@@ -73,4 +73,7 @@
     <string name="send_whatsapp">Trimite WhatsApp</string>
     <string name="dialpad_number_font_size">Dimensiunea fontului cifrelor</string>
     <string name="hang_up">Închide</string>
+    <string name="decline_with_message">Respinge cu mesaj</string>
+    <string name="flip_to_silence">Întoarceți telefonul pentru a opri soneria</string>
+    <string name="announce_caller_name">Rostește numele apelantului</string>
 </resources>

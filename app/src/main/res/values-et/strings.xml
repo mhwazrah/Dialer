@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Saada WhatsApp</string>
     <string name="dialpad_number_font_size">Numbrite fondi suurus</string>
     <string name="hang_up">Lõpeta kõne</string>
+    <string name="decline_with_message">Keeldu sõnumiga</string>
+    <string name="flip_to_silence">Kõne vaigistamiseks pööra telefon ümber</string>
+    <string name="announce_caller_name">Loe helistaja nimi ette</string>
 </resources>

@@ -1392,6 +1392,7 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         val isBusy = call.details.connectTimeMillis == 0L
 
         val state = call.getStateCompat()
+        setRingingAvatarSize(state == Call.STATE_RINGING)
         when (state) {
             Call.STATE_RINGING -> callRinging()
             Call.STATE_ACTIVE -> callStarted()
@@ -1550,6 +1551,9 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun updateCallContactInfo(call: Call?) {
         binding.callDetails.beVisibleIf(call.isHD())
+        // Size the photo before it loads: the image loader decodes at the view's size, so a photo loaded small and
+        // then enlarged for ringing would be blurry
+        setRingingAvatarSize(call.getStateCompat() == Call.STATE_RINGING)
         getCallContact(applicationContext, call) { contact ->
             if (isDestroyed || call != CallManager.getPrimaryCall()) {
                 return@getCallContact
@@ -1619,6 +1623,20 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         binding.ongoingCallHolder.beVisible()
         binding.callEnd.beVisible()
         needHapticFeedback = true
+    }
+
+    // The caller's photo is twice its size while the call rings, and back to the layout's size once it is answered.
+    // On short screens it grows only up to a quarter of the screen height, so the status stays clear of the buttons.
+    private var avatarBaseSize = 0
+
+    private fun setRingingAvatarSize(ringing: Boolean) {
+        val params = binding.callerAvatar.layoutParams ?: return
+        if (avatarBaseSize == 0) avatarBaseSize = params.width
+        val size = if (ringing) ringingAvatarSize(avatarBaseSize, resources.displayMetrics.heightPixels) else avatarBaseSize
+        if (params.width == size) return
+        params.width = size
+        params.height = size
+        binding.callerAvatar.layoutParams = params
     }
 
     private fun callRinging() {

@@ -86,4 +86,7 @@
     <string name="send_whatsapp">WhatsApp 보내기</string>
     <string name="dialpad_number_font_size">숫자 글꼴 크기</string>
     <string name="hang_up">통화 종료</string>
+    <string name="decline_with_message">메시지로 거절</string>
+    <string name="flip_to_silence">휴대전화를 뒤집어 전화 무음</string>
+    <string name="announce_caller_name">전화 올 때 발신자 이름 읽기</string>
 </resources>

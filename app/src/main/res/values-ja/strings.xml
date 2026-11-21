@@ -81,4 +81,7 @@
     <string name="send_whatsapp">WhatsApp を送信</string>
     <string name="dialpad_number_font_size">数字のフォントサイズ</string>
     <string name="hang_up">通話を終了</string>
+    <string name="decline_with_message">メッセージを送って拒否</string>
+    <string name="flip_to_silence">端末を裏返して着信音を消す</string>
+    <string name="announce_caller_name">着信時に発信者名を読み上げる</string>
 </resources>

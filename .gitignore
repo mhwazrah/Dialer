@@ -13,3 +13,4 @@ fastlane/report.xml
 agconnect-services.json
 /build-log.txt
 /dialer-*.apk
+/build-logic/build

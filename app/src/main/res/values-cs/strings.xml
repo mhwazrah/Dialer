@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Odeslat WhatsApp</string>
     <string name="dialpad_number_font_size">Velikost písma číslic</string>
     <string name="hang_up">Zavěsit</string>
+    <string name="decline_with_message">Odmítnout se zprávou</string>
+    <string name="flip_to_silence">Otočením telefonu ztlumíte hovor</string>
+    <string name="announce_caller_name">Vyslovit jméno volajícího při vyzvánění</string>
 </resources>

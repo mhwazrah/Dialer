@@ -14,4 +14,7 @@
     <string name="send_whatsapp">WhatsApp بھیجو</string>
     <string name="dialpad_number_font_size">نمبر فونٹ سائز</string>
     <string name="hang_up">کال ختم کرو</string>
+    <string name="decline_with_message">سنیہے نال رد کرو</string>
+    <string name="flip_to_silence">کال چپ کرن لئی فون پلٹو</string>
+    <string name="announce_caller_name">رنگ ہون ویلے کالر دا ناں بولو</string>
 </resources>

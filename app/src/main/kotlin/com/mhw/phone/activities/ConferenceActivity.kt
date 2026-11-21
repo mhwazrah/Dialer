@@ -3,15 +3,19 @@ package com.mhw.phone.activities
 import android.graphics.Color
 import android.os.Bundle
 import android.telecom.Call
+import androidx.core.view.WindowCompat
+import com.goodwy.commons.extensions.applyColorFilter
 import com.goodwy.commons.extensions.viewBinding
 import com.goodwy.commons.helpers.NavigationIcon
 import com.mhw.phone.adapters.ConferenceCallsAdapter
 import com.mhw.phone.databinding.ActivityConferenceBinding
+import com.mhw.phone.extensions.AlwaysDarkScreen
 import com.mhw.phone.helpers.CallManager
 import com.mhw.phone.helpers.CallManagerListener
 import com.mhw.phone.models.AudioRoute
+import com.mhw.phone.views.CallBackdropDrawable
 
-class ConferenceActivity : SimpleActivity() {
+class ConferenceActivity : SimpleActivity(), AlwaysDarkScreen {
     private val binding by viewBinding(ActivityConferenceBinding::inflate)
     private lateinit var adapter: ConferenceCallsAdapter
 
@@ -41,6 +45,17 @@ class ConferenceActivity : SimpleActivity() {
         setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow)
         binding.conferenceAppbar.setBackgroundColor(Color.TRANSPARENT)
         binding.conferenceToolbar.setBackgroundColor(Color.TRANSPARENT)
+        // Always dark, like the call screen it belongs to: the same navy backdrop and white content
+        binding.root.background = CallBackdropDrawable(this)
+        binding.conferenceToolbar.setTitleTextColor(Color.WHITE)
+        // Commons colours the arrow with a colour filter (a tint would be ignored); mutate so other screens keep theirs
+        binding.conferenceToolbar.navigationIcon = binding.conferenceToolbar.navigationIcon?.mutate()?.apply {
+            applyColorFilter(Color.WHITE)
+        }
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
     }
 
     override fun onDestroy() {

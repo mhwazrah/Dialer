@@ -81,4 +81,7 @@
     <string name="send_whatsapp">Bidali WhatsApp</string>
     <string name="dialpad_number_font_size">Zenbakien letra-tamaina</string>
     <string name="hang_up">Eseki</string>
+    <string name="decline_with_message">Baztertu mezu batekin</string>
+    <string name="flip_to_silence">Irauli telefonoa deiak isilarazteko</string>
+    <string name="announce_caller_name">Esan deitzailearen izena</string>
 </resources>

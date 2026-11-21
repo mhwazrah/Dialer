@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
+    id("mhw.no-fake-version-warning") // build-logic: removes goodwy-commons' "fake version" dialog
     base
 }
 

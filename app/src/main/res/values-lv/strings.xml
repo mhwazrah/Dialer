@@ -19,4 +19,7 @@
     <string name="send_whatsapp">Sūtīt WhatsApp</string>
     <string name="dialpad_number_font_size">Ciparu fonta lielums</string>
     <string name="hang_up">Beigt zvanu</string>
+    <string name="decline_with_message">Noraidīt ar ziņu</string>
+    <string name="flip_to_silence">Apgrieziet tālruni, lai izslēgtu zvana skaņu</string>
+    <string name="announce_caller_name">Izrunāt zvanītāja vārdu</string>
 </resources>
