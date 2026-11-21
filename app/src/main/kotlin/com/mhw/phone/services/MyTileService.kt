@@ -10,6 +10,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import com.goodwy.commons.activities.ManageBlockedNumbersActivity
+import com.mhw.phone.activities.BlockedNumbersActivity
 import com.goodwy.commons.extensions.baseConfig
 import com.goodwy.commons.helpers.isQPlus
 import com.goodwy.commons.helpers.isUpsideDownCakePlus
@@ -73,14 +74,14 @@ class MyTileService : TileService() {
     @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun setDefaultCallerIdApp() {
         try {
-            val intent = Intent(this, ManageBlockedNumbersActivity::class.java)
+            val intent = Intent(this, BlockedNumbersActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             intent.action = ManageBlockedNumbersActivity.SET_DEFAULT_CALLER_ID
             startActivityAndCollapse(intent)
         } catch (_: Exception) {
             if (isUpsideDownCakePlus()) {
                 try {
-                    val intent = Intent(this, ManageBlockedNumbersActivity::class.java)
+                    val intent = Intent(this, BlockedNumbersActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     intent.action = ManageBlockedNumbersActivity.SET_DEFAULT_CALLER_ID
 
@@ -103,7 +104,7 @@ class MyTileService : TileService() {
 
     private fun setDefaultCallerIdAppUnlockAndRun() {
         unlockAndRun {
-            val intent = Intent(this, ManageBlockedNumbersActivity::class.java)
+            val intent = Intent(this, BlockedNumbersActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             intent.action = ManageBlockedNumbersActivity.SET_DEFAULT_CALLER_ID
             startActivity(intent)

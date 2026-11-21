@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App-specific strings: translated to Arabic only (values-ar); other locales fall back to English -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="about_app_name" translatable="false">MHW Phone</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_greeting">Hi, I\'m Mohammed Abowazrh.</string>
+    <string name="about_bio">I\'m a software engineer who builds full-stack products and believes good software should feel simple. I made MHW Phone because the phone app is the one app everyone opens every day — it deserves to be fast, calm and beautiful.</string>
+    <string name="about_philosophy_title">My philosophy</string>
+    <string name="about_philosophy_1">• Fewer settings, better defaults. Every option you don\'t have to think about is one I\'ve already tuned for you. You only choose what truly needs your opinion — your theme, your language, your swipes.</string>
+    <string name="about_philosophy_2">• Fast and focused. No ads, no purchases, no tracking. Just calling, contacts and history, done well.</string>
+    <string name="about_philosophy_3">• Built for everyone. Arabic and English search that understands how people really type names — with or without hamza and tashkeel.</string>
+    <string name="about_philosophy_4">• Simple by design. I follow KISS and YAGNI: nothing is added unless it makes the app better for you today.</string>
+    <string name="about_goal">My goal is simple: to make MHW Phone the best phone app on the market.</string>
+    <string name="about_follow_title">Follow the project</string>
+    <string name="about_github" translatable="false">GitHub</string>
+    <string name="about_x" translatable="false">X</string>
+    <string name="about_linkedin" translatable="false">LinkedIn</string>
+    <string name="about_link_error">No app found to open this link</string>
+
+    <string name="about_github_url" translatable="false">https://github.com/mhwazrah/Dialer</string>
+    <string name="about_x_url" translatable="false">https://x.com/mhwazrh</string>
+    <string name="about_linkedin_url" translatable="false">https://www.linkedin.com/in/mohammed-abowazrh/</string>
+</resources>

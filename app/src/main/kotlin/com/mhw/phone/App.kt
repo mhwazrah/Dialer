@@ -13,6 +13,8 @@ import com.goodwy.commons.extensions.showErrorToast
 import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.mhw.phone.helpers.ContactsRepository
 import com.mhw.phone.helpers.DialpadT9
+import com.mhw.phone.helpers.applyAppTheme
+import com.mhw.phone.helpers.applyPinnedSettings
 import com.mhw.phone.extensions.*
 import com.mhw.phone.models.TimerEvent
 import com.mhw.phone.models.Timer
@@ -38,6 +40,8 @@ class App : RightApp(), DefaultLifecycleObserver {
         ContactsRepository.registerObservers(this)
         EventBus.getDefault().register(this)
         unlockAllFeatures()
+        applyPinnedSettings()
+        applyAppTheme()
     }
 
     // MHW Phone ships every feature unlocked: no purchase flow, no "Project support" prompts.

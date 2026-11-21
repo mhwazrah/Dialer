@@ -2,7 +2,6 @@ package com.mhw.phone.activities
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,17 +9,13 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import com.behaviorule.arturdumchev.library.pixels
 import com.behaviorule.arturdumchev.library.setHeight
-import com.goodwy.commons.dialogs.ColorPickerDialog
 import com.goodwy.commons.dialogs.RadioGroupDialog
-import com.goodwy.commons.dialogs.RadioGroupIconDialog
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
 import com.goodwy.commons.models.RadioItem
@@ -31,10 +26,7 @@ import com.mhw.phone.extensions.*
 import com.mhw.phone.helpers.*
 import com.mhw.phone.models.RecentCall
 import com.mhw.phone.helpers.gson
-import com.mikhaellopez.rxanimation.RxAnimation
-import com.mikhaellopez.rxanimation.shake
 import java.util.*
-import kotlin.math.abs
 
 class SettingsDialpadActivity : SimpleActivity() {
 
@@ -72,9 +64,6 @@ class SettingsDialpadActivity : SimpleActivity() {
         updateDialpadSize()
         updateDialpadNumberFontSize()
         updateDialpadBottomMargin()
-        setupDialpadSize()
-        setupDialpadNumberFontSize()
-        setupDialpadBottomMargin()
 
         if (config.dialpadStyle == DIALPAD_GRID || config.dialpadStyle == DIALPAD_ORIGINAL) updateCallButtonSize()
 
@@ -152,17 +141,10 @@ class SettingsDialpadActivity : SimpleActivity() {
 
     private fun bindSettings() {
         val properTextColor = getProperTextColor()
-        val properBackgroundColor = getProperBackgroundColor()
 
         binding.apply {
-            arrayOf(
-                styleHolder,
-                dialpadSettingsCardHolder,
-                dialpadSizeCardHolder
-            ).forEach {
-                it.setCardBackgroundColor(Color.TRANSPARENT)
-                it.setBackgroundResource(R.drawable.bg_glass_card)
-            }
+            dialpadSettingsCardHolder.setCardBackgroundColor(Color.TRANSPARENT)
+            dialpadSettingsCardHolder.setBackgroundResource(R.drawable.bg_glass_card)
 
             initStyle()
             updateTextColors(dialpadSettingsHolder)
@@ -170,55 +152,16 @@ class SettingsDialpadActivity : SimpleActivity() {
             arrayOf(
                 dialpadClearWrapper.dialpadAsterisk, dialpadClearWrapper.dialpadHashtag,
                 dialpadRoundWrapper.dialpadAsteriskIos, dialpadRoundWrapper.dialpadHashtagIos,
-                toneVolumeMinus, toneVolumePlus,
-                dialpadSizeMinus, dialpadSizePlus,
-                dialpadNumberFontSizeMinus, dialpadNumberFontSizePlus,
-                dialpadBottomMarginMinus, dialpadBottomMarginPlus,
-                buttonSizeMinus, buttonSizePlus,
-                buttonSecondSizeMinus, buttonSecondSizePlus,
                 dialpadClearWrapper.dialpadVoicemail, dialpadRoundWrapper.dialpadVoicemail
             ).forEach {
                 it.applyColorFilter(properTextColor)
             }
 
-            val properPrimaryColor = getProperPrimaryColor()
-            arrayOf(
-                settingsGeneralLabel,
-                settingsDialpadSizeLabel
-            ).forEach {
-                it.setTextColor(properPrimaryColor)
-            }
-
-            val onBackground = properBackgroundColor.getContrastColor()
-            val buttonBackground = onBackground.adjustAlpha(0.2f)
-            arrayOf(
-                toneVolumeButtons, dialpadSizeButtons, dialpadNumberFontSizeButtons, dialpadBottomMarginButtons,
-                buttonSizeButtons, buttonSecondSizeButtons
-            ).forEach {
-                it.background.applyColorFilter(buttonBackground)
-            }
-            arrayOf(
-                toneVolumeDivider, dialpadSizeDivider, dialpadNumberFontSizeDivider, dialpadBottomMarginDivider,
-                buttonSizeDivider, buttonSecondSizeDivider
-            ).forEach {
-                it.background.applyColorFilter(properTextColor)
-            }
+            settingsGeneralLabel.setTextColor(getProperPrimaryColor())
         }
 
-        setupPurchaseThankYou()
-        setupDialpadStyle()
-        setupSimCardColorList()
         setupPrimarySimCard()
-        setupHideDialpadLetters()
-        setupShowVoicemailIcon()
         setupDialpadSecondaryLanguage()
-        setupDialpadSecondaryTypeface()
-        setupDialpadHashtagLongClick()
-        setupClearDialpad()
-        setupDialpadVibrations()
-        setupDialpadBeeps()
-        setupToneVolume()
-        setupButtonSize()
     }
 
 
@@ -687,285 +630,8 @@ class SettingsDialpadActivity : SimpleActivity() {
         binding.dialpadRoundWrapper.dialpadCallButtonIosHolder.background.applyColorFilter(simColor)
     }
 
-    private fun setupDialpadSize() {
-        binding.apply {
-            val progress = config.dialpadSize
-            dialpadSize.progress = progress
-            val textProgress = "$progress %"
-            dialpadSizeValue.text = textProgress
-
-            dialpadSize.min = 50
-
-            dialpadSizeMinus.setOnClickListener {
-                dialpadSize.progress -= 1
-                showDialpad()
-            }
-            dialpadSizeValue.setOnClickListener {
-                dialpadSize.progress = 100
-                showDialpad()
-            }
-            dialpadSizePlus.setOnClickListener {
-                dialpadSize.progress += 1
-                showDialpad()
-            }
-
-            dialpadSize.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                private var dragging = false
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    dragging = true
-                    hideDialpadHandler.removeCallbacks(updateHideDialpadTask)
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beVisible()
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    dragging = false
-                    config.dialpadSize = seekBar.progress
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beGone()
-                }
-
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    updateDialpadSize(progress)
-                    if (!dragging) config.dialpadSize = progress
-                }
-            })
-        }
-    }
-
-    private fun setupDialpadNumberFontSize() {
-        binding.apply {
-            val progress = config.dialpadNumberFontSize
-            dialpadNumberFontSize.progress = progress
-            dialpadNumberFontSizeValue.text = "$progress %"
-            dialpadNumberFontSize.min = 50
-
-            dialpadNumberFontSizeMinus.setOnClickListener { dialpadNumberFontSize.progress -= 1; showDialpad() }
-            dialpadNumberFontSizeValue.setOnClickListener { dialpadNumberFontSize.progress = 100; showDialpad() }
-            dialpadNumberFontSizePlus.setOnClickListener { dialpadNumberFontSize.progress += 1; showDialpad() }
-
-            dialpadNumberFontSize.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                private var dragging = false
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    dragging = true
-                    hideDialpadHandler.removeCallbacks(updateHideDialpadTask)
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beVisible()
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    dragging = false
-                    config.dialpadNumberFontSize = seekBar.progress
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beGone()
-                }
-
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    updateDialpadNumberFontSize(progress)
-                    if (!dragging) config.dialpadNumberFontSize = progress
-                }
-            })
-        }
-    }
-
     private fun updateDialpadNumberFontSize(percent: Int = config.dialpadNumberFontSize) {
-        binding.dialpadNumberFontSizeValue.text = "$percent %"
         applyDialpadNumberFontSize(binding.dialpadClearWrapper, binding.dialpadRectWrapper, binding.dialpadRoundWrapper, percent)
-    }
-
-    private fun setupDialpadBottomMargin() {
-        binding.apply {
-            val progress = config.dialpadBottomMargin
-            dialpadBottomMarginPref.progress = progress
-            val textProgress = "+$progress pixels"
-            dialpadBottomMarginValue.text = textProgress
-
-            dialpadBottomMarginPref.min = 0
-
-            dialpadBottomMarginMinus.setOnClickListener {
-                dialpadBottomMarginPref.progress -= 1
-                showDialpad()
-            }
-            dialpadBottomMarginValue.setOnClickListener {
-                dialpadBottomMarginPref.progress = 0
-                showDialpad()
-            }
-            dialpadBottomMarginPlus.setOnClickListener {
-                dialpadBottomMarginPref.progress += 1
-                showDialpad()
-            }
-
-            dialpadBottomMarginPref.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                private var dragging = false
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    dragging = true
-                    hideDialpadHandler.removeCallbacks(updateHideDialpadTask)
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beVisible()
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    dragging = false
-                    config.dialpadBottomMargin = seekBar.progress
-                    val view = when (config.dialpadStyle) {
-                        DIALPAD_IOS -> dialpadRoundWrapper.root
-                        DIALPAD_CONCEPT -> dialpadRectWrapper.root
-                        else -> dialpadClearWrapper.root
-                    }
-                    view.beGone()
-                }
-
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    updateDialpadBottomMargin(progress)
-                    if (!dragging) config.dialpadBottomMargin = progress
-                }
-            })
-        }
-    }
-
-    private fun setupButtonSize() {
-        binding.apply {
-            val buttonSizeVisible = config.dialpadStyle == DIALPAD_GRID
-                || config.dialpadStyle == DIALPAD_ORIGINAL
-            arrayOf(
-                buttonSizeHolder, buttonSize, buttonSecondSizeHolder, buttonSecondSize
-            ).forEach {
-                it.beVisibleIf(buttonSizeVisible)
-            }
-
-            if (checkPro()) {
-                arrayOf(
-                    buttonSizeHolder, buttonSize, buttonSecondSizeHolder, buttonSecondSize
-                ).forEach {
-                    it.alpha = 1f
-                }
-                buttonSizeLabel.setText(R.string.button_primary)
-                buttonSecondSizeLabel.setText(R.string.button_secondary)
-            } else {
-                arrayOf(
-                    buttonSizeHolder, buttonSize, buttonSecondSizeHolder, buttonSecondSize
-                ).forEach {
-                    it.alpha = 0.4f
-                }
-                val lockText = addLockedLabelIfNeeded(R.string.button_primary)
-                buttonSizeLabel.text = lockText
-                val lockTextSecond = addLockedLabelIfNeeded(R.string.button_secondary)
-                buttonSecondSizeLabel.text = lockTextSecond
-            }
-
-            val progress = config.callButtonPrimarySize
-            buttonSize.progress = progress
-            val textProgress = "$progress %"
-            buttonSizeValue.text = textProgress
-
-            buttonSize.min = 50
-
-            buttonSizeMinus.setOnClickListener {
-                buttonSize.progress -= 1
-                showDialpad()
-            }
-            buttonSizeValue.setOnClickListener {
-                buttonSize.progress = 100
-                showDialpad()
-            }
-            buttonSizePlus.setOnClickListener {
-                buttonSize.progress += 1
-                showDialpad()
-            }
-
-            buttonSize.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                private var dragging = false
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    dragging = true
-                    hideDialpadHandler.removeCallbacks(updateHideDialpadTask)
-                    dialpadClearWrapper.root.beVisible()
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    dragging = false
-                    config.callButtonPrimarySize = seekBar.progress
-                    dialpadClearWrapper.root.beGone()
-                }
-
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    updateCallButtonSize(progress)
-                    if (!dragging) config.callButtonPrimarySize = progress
-                }
-            })
-
-            //second button
-            if (hasMultipleSims) {
-                buttonSecondSizeHolder.beVisible()
-                buttonSecondSize.beVisible()
-                val progressSecond = config.callButtonSecondarySize
-                buttonSecondSize.progress = progressSecond
-                val textProgressSecond = "$progressSecond %"
-                buttonSecondSizeValue.text = textProgressSecond
-
-                buttonSecondSize.min = 50
-
-                buttonSecondSizeMinus.setOnClickListener {
-                    buttonSecondSize.progress -= 1
-                    showDialpad()
-                }
-                buttonSecondSizeValue.setOnClickListener {
-                    buttonSecondSize.progress = 100
-                    showDialpad()
-                }
-                buttonSecondSizePlus.setOnClickListener {
-                    buttonSecondSize.progress += 1
-                    showDialpad()
-                }
-
-                buttonSecondSize.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                    private var dragging = false
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar) {
-                        dragging = true
-                        hideDialpadHandler.removeCallbacks(updateHideDialpadTask)
-                        dialpadClearWrapper.root.beVisible()
-                    }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar) {
-                        dragging = false
-                        config.callButtonSecondarySize = seekBar.progress
-                        dialpadClearWrapper.root.beGone()
-                    }
-
-                    override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                        updateCallButtonSize(progress, false)
-                        if (!dragging) config.callButtonSecondarySize = progress
-                    }
-                })
-            } else {
-                buttonSecondSizeHolder.beGone()
-                buttonSecondSize.beGone()
-            }
-        }
     }
 
     private fun updateDialpadSize(percent: Int = config.dialpadSize) {
@@ -980,9 +646,6 @@ class SettingsDialpadActivity : SimpleActivity() {
             else -> pixels(R.dimen.dialpad_pill_grid_height)
         }
         view.setHeight((dimens * (percent / 100f)).toInt())
-
-        val textPercent = "$percent %"
-        binding.dialpadSizeValue.text = textPercent
     }
 
     private fun updateDialpadBottomMargin(margin: Int = config.dialpadBottomMargin) {
@@ -995,19 +658,6 @@ class SettingsDialpadActivity : SimpleActivity() {
             if (config.dialpadStyle == DIALPAD_IOS) pixels(R.dimen.dialpad_margin_bottom_ios)
             else pixels(R.dimen.zero)
         marginView.setHeight((start + margin).toInt())
-
-        val textPercent = "+$margin pixels"
-        binding.dialpadBottomMarginValue.text = textPercent
-    }
-
-    private fun updateCallButtonSize(percent: Int, buttonOne: Boolean = true) {
-        val view = if (buttonOne) binding.dialpadClearWrapper.dialpadCallButton else binding.dialpadClearWrapper.dialpadCallTwoButton
-        val dimens = if (buttonOne) pixels(R.dimen.dialpad_phone_button_size) else pixels(R.dimen.dialpad_button_size_small)
-        view.setHeightAndWidth((dimens * (percent / 100f)).toInt())
-        view.setPadding((dimens * 0.1765 * (percent / 100f)).toInt())
-        val textPercent = "$percent %"
-        if (buttonOne) binding.buttonSizeValue.text = textPercent
-        else  binding.buttonSecondSizeValue.text = textPercent
     }
 
     private fun updateCallButtonSize() {
@@ -1046,202 +696,6 @@ class SettingsDialpadActivity : SimpleActivity() {
         view.beGone()
     }
 
-    private fun setupDialpadStyle() {
-        val pro = checkPro()
-        val iOS = addLockedLabelIfNeeded(R.string.ios_g, pro)
-        binding.settingsDialpadStyle.text = getDialpadStyleText()
-        binding.settingsDialpadStyleHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(DIALPAD_ORIGINAL, getString(R.string.clean_theme_g)),
-                RadioItem(DIALPAD_GRID, getString(R.string.grid)),
-                RadioItem(DIALPAD_IOS, iOS),
-                RadioItem(DIALPAD_CONCEPT, getString(R.string.concept_theme_g))
-            )
-
-            RadioGroupDialog(
-                this@SettingsDialpadActivity,
-                items,
-                config.dialpadStyle,
-                R.string.theme,
-                defaultItemId = DIALPAD_ORIGINAL
-            ) {
-                if (it as Int == DIALPAD_IOS) {
-                    if (pro) {
-                        binding.dialpadClearWrapper.root.beGone()
-                        binding.dialpadRectWrapper.root.beGone()
-                        config.dialpadStyle = it
-                        binding.settingsDialpadStyle.text = getDialpadStyleText()
-                        initStyle()
-                        updateDialpadSize()
-                        updateDialpadBottomMargin()
-                        showDialpad()
-                    } else {
-                        shakePurchase()
-
-                        RxAnimation.from(binding.styleHolder)
-                            .shake(shakeTranslation = 2f)
-                            .subscribe()
-
-                        showSnackbar(binding.root)
-                    }
-                } else if (it == DIALPAD_CONCEPT) {
-                    binding.dialpadRoundWrapper.root.beGone()
-                    binding.dialpadClearWrapper.root.beGone()
-                    config.dialpadStyle = it
-                    binding.settingsDialpadStyle.text = getDialpadStyleText()
-                    initStyle()
-                    updateDialpadSize()
-                    updateDialpadBottomMargin()
-                    showDialpad()
-                } else {
-                    binding.dialpadRoundWrapper.root.beGone()
-                    binding.dialpadRectWrapper.root.beGone()
-                    config.dialpadStyle = it
-                    binding.settingsDialpadStyle.text = getDialpadStyleText()
-                    initStyle()
-                    updateDialpadSize()
-                    updateDialpadBottomMargin()
-                    updateCallButtonSize()
-                    showDialpad()
-                }
-
-                val areMultipleSIMsAvailable = hasMultipleSims
-                val buttonSizeVisible = config.dialpadStyle == DIALPAD_GRID || config.dialpadStyle == DIALPAD_ORIGINAL
-                arrayOf(
-                    binding.buttonSizeHolder, binding.buttonSize
-                ).forEach {
-                    it.beVisibleIf(buttonSizeVisible)
-                }
-                arrayOf(
-                binding.buttonSecondSizeHolder, binding.buttonSecondSize
-                ).forEach {
-                it.beVisibleIf(buttonSizeVisible && areMultipleSIMsAvailable)
-            }
-            }
-        }
-    }
-
-    private fun getDialpadStyleText() = getString(
-        when (config.dialpadStyle) {
-            DIALPAD_GRID -> R.string.grid
-            DIALPAD_IOS -> R.string.ios_g
-            DIALPAD_CONCEPT -> R.string.concept_theme_g
-            else -> R.string.clean_theme_g
-        }
-    )
-
-    private fun setupSimCardColorList() {
-        binding.apply {
-            initSimCardColor()
-
-            val pro = checkPro()
-            val simList = getAvailableSIMCardLabels()
-            if (simList.isNotEmpty()) {
-                if (simList.size == 1) {
-                    val sim1 = simList[0].label
-                    settingsSimCardColor1Label.text = if (pro) sim1 else sim1 + " (${getString(R.string.feature_locked)})"
-                } else {
-                    val sim1 = simList[0].label
-                    val sim2 = simList[1].label
-                    settingsSimCardColor1Label.text = if (pro) sim1 else sim1 + " (${getString(R.string.feature_locked)})"
-                    settingsSimCardColor2Label.text = if (pro) sim2 else sim2 + " (${getString(R.string.feature_locked)})"
-                }
-            }
-
-            if (pro) {
-                settingsSimCardColor1Holder.setOnClickListener {
-                    ColorPickerDialog(
-                        this@SettingsDialpadActivity,
-                        config.simIconsColors[1],
-                        addDefaultColorButton = true,
-                        colorDefault = resources.getColor(R.color.ic_dialer, theme),
-                        title = resources.getString(R.string.color_sim_card_icons)
-                    ) { wasPositivePressed, color, wasDefaultPressed ->
-                        if (wasPositivePressed || wasDefaultPressed) {
-                            if (hasColorChanged(config.simIconsColors[1], color)) {
-                                addSimCardColor(1, color)
-                                initSimCardColor()
-                                initStyle()
-                                showDialpad()
-                            }
-                        }
-                    }
-                }
-                settingsSimCardColor2Holder.setOnClickListener {
-                    ColorPickerDialog(
-                        this@SettingsDialpadActivity,
-                        config.simIconsColors[2],
-                        addDefaultColorButton = true,
-                        colorDefault = resources.getColor(R.color.color_primary, theme),
-                        title = resources.getString(R.string.color_sim_card_icons)
-                    ) { wasPositivePressed, color, wasDefaultPressed ->
-                        if (wasPositivePressed || wasDefaultPressed) {
-                            if (hasColorChanged(config.simIconsColors[2], color)) {
-                                addSimCardColor(2, color)
-                                initSimCardColor()
-                                initStyle()
-                                showDialpad()
-                            }
-                        }
-                    }
-                }
-            } else {
-                arrayOf(
-                    settingsSimCardColor1Holder,
-                    settingsSimCardColor2Holder
-                ).forEach {
-                    it.setOnClickListener { view ->
-                        shakePurchase()
-
-                        RxAnimation.from(view)
-                            .shake(shakeTranslation = 2f)
-                            .subscribe()
-
-                        showSnackbar(binding.root)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun initSimCardColor() {
-        binding.apply {
-            val pro = checkPro()
-            arrayOf(
-                settingsSimCardColor1Holder,
-                settingsSimCardColor2Holder
-            ).forEach {
-                it.alpha = if (pro) 1f else 0.4f
-            }
-            val areMultipleSIMsAvailable = hasMultipleSims
-            settingsSimCardColor2Holder.beVisibleIf(areMultipleSIMsAvailable)
-            if (areMultipleSIMsAvailable) settingsSimCardColor1Icon.setImageResource(R.drawable.ic_phone_one_vector)
-            settingsSimCardColor1Icon.background.setTint(config.simIconsColors[1])
-            settingsSimCardColor2Icon.background.setTint(config.simIconsColors[2])
-            settingsSimCardColor1Icon.setColorFilter(config.simIconsColors[1].getContrastColor())
-            settingsSimCardColor2Icon.setColorFilter(config.simIconsColors[2].getContrastColor())
-        }
-    }
-
-    private fun addSimCardColor(index: Int, color: Int) {
-        val recentColors = config.simIconsColors
-
-        recentColors.removeAt(index)
-        recentColors.add(index, color)
-
-        val needUpdate = baseConfig.simIconsColors != recentColors
-        baseConfig.simIconsColors = recentColors
-
-        if (needUpdate) {
-            // The cached rows carry the old SIM colour; drop them and let the next load rebuild.
-            config.recentCallsCache = ""
-            config.needUpdateRecents = true
-            config.needRestart = true
-        }
-    }
-
-    private fun hasColorChanged(old: Int, new: Int) = abs(old - new) > 1
-
     private fun setupPrimarySimCard() {
         val simList = getAvailableSIMCardLabels()
         if (simList.size > 1) {
@@ -1263,34 +717,6 @@ class SettingsDialpadActivity : SimpleActivity() {
         } else binding.settingsPrimarySimCardHolder.beGone()
     }
 
-    private fun setupHideDialpadLetters() {
-        binding.apply {
-            settingsHideDialpadLetters.isChecked = config.hideDialpadLetters
-            settingsHideDialpadLettersHolder.setOnClickListener {
-                settingsHideDialpadLetters.toggle()
-                config.hideDialpadLetters = settingsHideDialpadLetters.isChecked
-                binding.settingsDialpadSecondaryLanguageHolder.beGoneIf(config.hideDialpadLetters)
-                binding.settingsDialpadSecondaryTypefaceHolder.beGoneIf(config.hideDialpadLetters)
-                settingsShowVoicemailIconHolder.beVisibleIf(!config.hideDialpadLetters)
-                initStyle()
-                showDialpad()
-            }
-        }
-    }
-
-    private fun setupShowVoicemailIcon() {
-        binding.apply {
-            settingsShowVoicemailIconHolder.beVisibleIf(!config.hideDialpadLetters)
-            settingsShowVoicemailIcon.isChecked = config.showVoicemailIcon
-            settingsShowVoicemailIconHolder.setOnClickListener {
-                settingsShowVoicemailIcon.toggle()
-                config.showVoicemailIcon = settingsShowVoicemailIcon.isChecked
-                initStyle()
-                showDialpad()
-            }
-        }
-    }
-
     private fun getLanguageName(lang: String?): String? {
         return when (lang) {
             LANGUAGE_NONE -> getString(R.string.none)
@@ -1304,7 +730,6 @@ class SettingsDialpadActivity : SimpleActivity() {
     }
 
     private fun setupDialpadSecondaryLanguage() {
-        binding.settingsDialpadSecondaryLanguageHolder.beGoneIf(config.hideDialpadLetters)
         binding.settingsDialpadSecondaryLanguage.text = getLanguageName(config.dialpadSecondaryLanguage)
         binding.settingsDialpadSecondaryLanguageHolder.setOnClickListener {
             val items: ArrayList<RadioItem> = arrayListOf(
@@ -1342,104 +767,6 @@ class SettingsDialpadActivity : SimpleActivity() {
         }
     }
 
-    private fun getTypefaceName(typeface: Int): String {
-        return when (typeface) {
-            Typeface.BOLD -> getString(R.string.typeface_bold)
-            Typeface.ITALIC -> getString(R.string.typeface_italic)
-            Typeface.BOLD_ITALIC -> getString(R.string.typeface_bold_italic)
-            else -> getString(R.string.typeface_normal)
-        }
-    }
-
-    private fun setupDialpadSecondaryTypeface() {
-        binding.settingsDialpadSecondaryTypefaceHolder.beGoneIf(config.hideDialpadLetters)
-        binding.settingsDialpadSecondaryTypeface.text = getTypefaceName(config.dialpadSecondaryTypeface)
-        binding.settingsDialpadSecondaryTypefaceHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(Typeface.NORMAL, getString(R.string.typeface_normal)),
-                RadioItem(Typeface.BOLD, getString(R.string.typeface_bold), icon = R.drawable.ic_bold),
-                RadioItem(Typeface.ITALIC, getString(R.string.typeface_italic), icon = R.drawable.ic_italic),
-                RadioItem(Typeface.BOLD_ITALIC, getString(R.string.typeface_bold_italic), icon = R.drawable.ic_bold_italic),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsDialpadActivity,
-                items,
-                config.dialpadSecondaryTypeface,
-                R.string.typeface,
-                defaultItemId = Typeface.NORMAL
-            ) {
-                config.dialpadSecondaryTypeface = it as Int
-                binding.settingsDialpadSecondaryTypeface.text = getTypefaceName(config.dialpadSecondaryTypeface)
-                initStyle()
-                showDialpad()
-            }
-        }
-    }
-
-    private fun getHashtagLongClickName(hashtagLongClick: Int): String {
-        return when (hashtagLongClick) {
-            DIALPAD_LONG_CLICK_SETTINGS -> getString(R.string.settings)
-            DIALPAD_LONG_CLICK_SETTINGS_DIALPAD -> getString(R.string.dialpad_preferences)
-            else -> "; (wait)"
-        }
-    }
-
-    private fun setupDialpadHashtagLongClick() {
-        binding.settingsDialpadHashtagLongClickLabel.text = getString(R.string.long_click_g, " #")
-        binding.settingsDialpadHashtagLongClick.text = getHashtagLongClickName(config.dialpadHashtagLongClick)
-        binding.settingsDialpadHashtagLongClickHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(DIALPAD_LONG_CLICK_WAIT, "; (wait)"),
-                RadioItem(DIALPAD_LONG_CLICK_SETTINGS, getString(R.string.settings)),
-                RadioItem(DIALPAD_LONG_CLICK_SETTINGS_DIALPAD, getString(R.string.dialpad_preferences)),
-            )
-
-            RadioGroupDialog(
-                this@SettingsDialpadActivity,
-                items,
-                config.dialpadHashtagLongClick,
-                defaultItemId = DIALPAD_LONG_CLICK_WAIT
-            ) {
-                config.dialpadHashtagLongClick = it as Int
-                binding.settingsDialpadHashtagLongClick.text = getHashtagLongClickName(config.dialpadHashtagLongClick)
-            }
-        }
-    }
-
-    private fun setupClearDialpad() {
-        binding.apply {
-            settingsClearDialpad.isChecked = config.dialpadClearWhenStartCall
-            settingsClearDialpadHolder.setOnClickListener {
-                settingsClearDialpad.toggle()
-                config.dialpadClearWhenStartCall = settingsClearDialpad.isChecked
-            }
-        }
-    }
-
-    private fun setupDialpadVibrations() {
-        binding.apply {
-            settingsDialpadVibration.isChecked = config.dialpadVibration
-            settingsDialpadVibrationHolder.setOnClickListener {
-                settingsDialpadVibration.toggle()
-                config.dialpadVibration = settingsDialpadVibration.isChecked
-            }
-        }
-    }
-
-    private fun setupDialpadBeeps() {
-        updateWrapperToneVolume()
-        binding.apply {
-            settingsDialpadBeeps.isChecked = config.dialpadBeeps
-            settingsDialpadBeepsHolder.setOnClickListener {
-                settingsDialpadBeeps.toggle()
-                config.dialpadBeeps = settingsDialpadBeeps.isChecked
-                toneVolumeWrapper.beVisibleIf(config.dialpadBeeps)
-                updateWrapperToneVolume()
-            }
-        }
-    }
-
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         try {
             super.onRestoreInstanceState(savedInstanceState)
@@ -1447,77 +774,6 @@ class SettingsDialpadActivity : SimpleActivity() {
             // Ignored error restoring ProgressBar state when changing system theme
             Log.w("ProgressBarFix", "Ignoring ProgressBar state restoration error")
         }
-    }
-
-    private fun updateWrapperToneVolume() {
-        val wrapperColor = if (config.dialpadBeeps) getColoredMaterialStatusBarColor() else getSurfaceColor()
-        binding.settingsDialpadBeepsWrapper.background.applyColorFilter(wrapperColor)
-    }
-
-    private fun setupToneVolume() {
-        binding.apply {
-            toneVolumeWrapper.beVisibleIf(config.dialpadBeeps)
-
-            val progress = config.toneVolume
-            toneVolumeSeekBar.progress = progress
-            val textProgress = "$progress %"
-            toneVolumeValue.text = textProgress
-
-            toneVolumeSeekBar.min = 1
-
-            toneVolumeMinus.setOnClickListener {
-                toneVolumeSeekBar.progress -= 1
-            }
-            toneVolumeValue.setOnClickListener {
-                toneVolumeSeekBar.progress = 80
-            }
-            toneVolumePlus.setOnClickListener {
-                toneVolumeSeekBar.progress += 1
-            }
-
-            toneVolumeSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                private var dragging = false
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    dragging = true
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    dragging = false
-                    config.toneVolume = seekBar.progress
-                }
-
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    val textPercent = "$progress %"
-                    binding.toneVolumeValue.text = textPercent
-                    if (!dragging) config.toneVolume = progress
-                }
-            })
-        }
-    }
-
-    private fun setupPurchaseThankYou() {
-        updatePro()
-        binding.dialpadPurchaseThankYouHolder.onClick = { launchPurchase() }
-    }
-
-    private fun updatePro(isPro: Boolean = checkPro()) {
-        binding.apply {
-            dialpadPurchaseThankYouHolder.beGoneIf(checkPro(false))
-
-            arrayOf(
-                settingsSimCardColor1Holder,
-                settingsSimCardColor2Holder
-            ).forEach {
-                it.alpha = if (isPro) 1f else 0.4f
-            }
-        }
-    }
-
-    private fun shakePurchase() {
-        RxAnimation.from(binding.dialpadPurchaseThankYouHolder)
-            .shake()
-            .subscribe()
     }
 
     private fun checkPro(collection: Boolean = resources.getBoolean(R.bool.show_collection)) =

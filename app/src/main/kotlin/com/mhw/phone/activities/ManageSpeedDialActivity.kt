@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.telecom.PhoneAccountHandle
 import com.mhw.phone.helpers.gson
-import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.dialogs.RadioGroupDialog
 import com.goodwy.commons.dialogs.RadioGroupIconDialog
 import com.goodwy.commons.extensions.getPhoneNumberTypeText
@@ -118,7 +117,6 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                                         label = selectedNumber.label
                                     }
                                     updateAdapter()
-                                    showHideVoicemailIcon(clickedContact.id, false)
                                 }
                             } else {
                                 speedDialValues.first { it.id == clickedContact.id }.apply {
@@ -129,7 +127,6 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                                     label = selectedNumber.label
                                 }
                                 updateAdapter()
-                                showHideVoicemailIcon(clickedContact.id, false)
                             }
                         }}
 
@@ -144,7 +141,6 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                             number = ""
                         }
                         updateAdapter()
-                        showHideVoicemailIcon(clickedContact.id, false)
                     }
                 }
             }
@@ -174,7 +170,6 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
                 type = null
                 label = null
             }
-            showHideVoicemailIcon(clickedContact.id, false)
             updateAdapter()
         }
     }
@@ -204,31 +199,5 @@ class ManageSpeedDialActivity : SimpleActivity(), RemoveSpeedDialListener {
         speedDial.displayName = getString(R.string.voicemail) + "($label)"
         speedDial.number = voiceMailNumber
         updateAdapter()
-        showHideVoicemailIcon(speedDialId, true)
-    }
-
-    private fun showHideVoicemailIcon(id: Int, isVoicemail: Boolean) {
-        if (id == 1) {
-            if (isVoicemail) {
-                if (!config.showVoicemailIcon) {
-                    showHideVoicemailIconDialog()
-                }
-            } else {
-                if (config.showVoicemailIcon) {
-                    showHideVoicemailIconDialog()
-                }
-            }
-        }
-    }
-
-    private fun showHideVoicemailIconDialog() {
-        ConfirmationAdvancedDialog(
-            this,
-            messageId = R.string.show_voicemail_icon,
-            positive = com.goodwy.commons.R.string.yes,
-            negative = com.goodwy.commons.R.string.no
-        ) {
-            config.showVoicemailIcon = it
-        }
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_version">الإصدار %1$s</string>
+    <string name="about_greeting">مرحباً، أنا محمد أبو وزرة.</string>
+    <string name="about_bio">أنا مهندس برمجيات أبني منتجات متكاملة، وأؤمن بأن البرنامج الجيد يجب أن يبدو بسيطاً. صنعت MHW Phone لأن تطبيق الهاتف هو التطبيق الوحيد الذي يفتحه الجميع كل يوم، وهو يستحق أن يكون سريعاً وهادئاً وجميلاً.</string>
+    <string name="about_philosophy_title">فلسفتي</string>
+    <string name="about_philosophy_1">• إعدادات أقل وقيم افتراضية أفضل. كل خيار لا تحتاج إلى التفكير فيه هو خيار ضبطته لك مسبقاً. أنت تختار فقط ما يحتاج فعلاً إلى رأيك: المظهر واللغة وحركات السحب.</string>
+    <string name="about_philosophy_2">• سريع ومركّز. بلا إعلانات ولا مشتريات ولا تتبّع. اتصالات وجهات اتصال وسجل فقط، بإتقان.</string>
+    <string name="about_philosophy_3">• مصمّم للجميع. بحث بالعربية والإنجليزية يفهم الطريقة التي يكتب بها الناس الأسماء فعلاً، سواء بالهمزة والتشكيل أو بدونهما.</string>
+    <string name="about_philosophy_4">• بسيط بالتصميم. ألتزم بمبدأي KISS وYAGNI: لا تُضاف أي ميزة إلا إذا جعلت التطبيق أفضل لك اليوم.</string>
+    <string name="about_goal">هدفي بسيط: أن يصبح MHW Phone أفضل تطبيق هاتف في السوق.</string>
+    <string name="about_follow_title">تابع المشروع</string>
+    <string name="about_link_error">لا يوجد تطبيق لفتح هذا الرابط</string>
+</resources>

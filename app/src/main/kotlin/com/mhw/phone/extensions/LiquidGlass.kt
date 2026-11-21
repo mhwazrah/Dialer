@@ -2,6 +2,7 @@ package com.mhw.phone.extensions
 
 import com.bumptech.glide.Glide
 import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -33,9 +34,18 @@ import com.mhw.phone.R
 // Single source of truth for the app's Liquid Glass look: every screen paints the same
 // backdrop and every glass panel is configured here, so the style can be tuned in one place.
 
-/** Whether the user's theme is light, judged from the theme's background colour. */
-fun Context.isLiquidLightTheme(): Boolean =
-    ColorUtils.calculateLuminance(getProperBackgroundColor()) > 0.5
+/** A screen that is always dark (the call screen), whatever the app theme. */
+interface AlwaysDarkScreen
+
+/** Whether the user's theme is light, judged from the theme's background colour; false on an [AlwaysDarkScreen]. */
+fun Context.isLiquidLightTheme(): Boolean {
+    var context: Context? = this
+    while (context is ContextWrapper) {
+        if (context is AlwaysDarkScreen) return false
+        context = context.baseContext
+    }
+    return ColorUtils.calculateLuminance(getProperBackgroundColor()) > 0.5
+}
 
 // RULE — glass look, never see-through: any surface that floats over other content (bars, tab
 // bar, dialpad keypad, sheets) gets an opaque frosted base. Glass shows as tint, sheen, rim and

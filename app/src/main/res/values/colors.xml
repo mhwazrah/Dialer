@@ -11,6 +11,9 @@
     <color name="default_primary_color">#FF001E3C</color>
     <!-- Brand primary on dark themes (navy is invisible on the dark backdrop) -->
     <color name="brand_primary_dark_theme">#FF7FB2E5</color>
+    <!-- Brand accent pair: teal on light themes, lighter teal on dark ones -->
+    <color name="brand_accent">#FF00897B</color>
+    <color name="brand_accent_dark_theme">#FF4DB6AC</color>
     <!-- Liquid Glass search field (inset pill inside the glass top bar) -->
     <color name="glass_search_fill_light">#0F001E3C</color>
     <color name="glass_search_rim_light">#1A001E3C</color>

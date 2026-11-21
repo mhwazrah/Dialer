@@ -50,3 +50,6 @@
 -keep class com.huawei.hianalytics.**{*;}
 -keep class com.huawei.updatesdk.**{*;}
 -keep class com.huawei.hms.**{*;}
+
+# Inflated by class name from res/drawable/dialog_bg.xml (the dialog background), never referenced from code
+-keep class com.mhw.phone.views.GlassDialogDrawable { <init>(); }

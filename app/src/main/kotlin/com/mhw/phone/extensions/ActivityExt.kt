@@ -9,25 +9,18 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.telephony.PhoneNumberUtils
 import android.util.TypedValue
-import android.view.View
 import com.goodwy.commons.extensions.getContactPublicUri
 import com.goodwy.commons.extensions.isPackageInstalled
 import com.goodwy.commons.extensions.launchActivityIntent
-import com.goodwy.commons.extensions.showSupportSnackbar
 import com.goodwy.commons.extensions.toast
 import com.goodwy.commons.helpers.CONTACT_ID
 import com.goodwy.commons.helpers.FIRST_CONTACT_ID
 import com.goodwy.commons.helpers.IS_PRIVATE
-import com.goodwy.commons.helpers.LICENSE_AUTOFITTEXTVIEW
-import com.goodwy.commons.helpers.LICENSE_EVENT_BUS
-import com.goodwy.commons.helpers.LICENSE_GLIDE
-import com.goodwy.commons.helpers.LICENSE_INDICATOR_FAST_SCROLL
 import com.goodwy.commons.helpers.SimpleContactsHelper
 import com.goodwy.commons.helpers.ensureBackgroundThread
-import com.goodwy.commons.models.FAQItem
 import com.goodwy.commons.models.contacts.Contact
-import com.mhw.phone.BuildConfig
 import com.mhw.phone.R
+import com.mhw.phone.activities.AboutActivity
 import com.mhw.phone.activities.SimpleActivity
 import com.mhw.phone.databinding.DialpadGridBinding
 import com.mhw.phone.databinding.DialpadRectangleBinding
@@ -126,81 +119,8 @@ fun Activity.startContactEdit(contact: Contact) {
     }
 }
 
-fun SimpleActivity.launchPurchase() {
-    val productIdX1 = BuildConfig.PRODUCT_ID_X1
-    val productIdX2 = BuildConfig.PRODUCT_ID_X2
-    val productIdX3 = BuildConfig.PRODUCT_ID_X3
-    val subscriptionIdX1 = BuildConfig.SUBSCRIPTION_ID_X1
-    val subscriptionIdX2 = BuildConfig.SUBSCRIPTION_ID_X2
-    val subscriptionIdX3 = BuildConfig.SUBSCRIPTION_ID_X3
-    val subscriptionYearIdX1 = BuildConfig.SUBSCRIPTION_YEAR_ID_X1
-    val subscriptionYearIdX2 = BuildConfig.SUBSCRIPTION_YEAR_ID_X2
-    val subscriptionYearIdX3 = BuildConfig.SUBSCRIPTION_YEAR_ID_X3
-
-    startPurchaseActivity(
-        R.string.app_name,
-        productIdList = arrayListOf(productIdX1, productIdX2, productIdX3),
-        productIdListRu = arrayListOf(productIdX1, productIdX2, productIdX3),
-        subscriptionIdList = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-        subscriptionIdListRu = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-        subscriptionYearIdList = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-        subscriptionYearIdListRu = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-    )
-}
-
 fun SimpleActivity.launchAbout() {
-    val licenses = LICENSE_GLIDE or LICENSE_INDICATOR_FAST_SCROLL or LICENSE_AUTOFITTEXTVIEW or LICENSE_EVENT_BUS
-
-    val faqItems = arrayListOf(
-        FAQItem(R.string.faq_1_title, R.string.faq_1_text),
-        FAQItem(R.string.faq_2_title, R.string.faq_2_text),
-        FAQItem(R.string.faq_3_title, R.string.faq_3_text_g),
-        FAQItem(R.string.faq_1_title_dialer_g, R.string.faq_1_text_dialer_g),
-        FAQItem(R.string.faq_2_title_dialer_g, R.string.faq_2_text_dialer_g),
-        FAQItem(R.string.faq_2_title_commons, R.string.faq_2_text_commons_g),
-        FAQItem(R.string.faq_6_title_commons, R.string.faq_6_text_commons_g),
-        FAQItem(R.string.faq_7_title_commons, R.string.faq_7_text_commons),
-        FAQItem(R.string.faq_9_title_commons, R.string.faq_9_text_commons)
-    )
-
-    val productIdX1 = BuildConfig.PRODUCT_ID_X1
-    val productIdX2 = BuildConfig.PRODUCT_ID_X2
-    val productIdX3 = BuildConfig.PRODUCT_ID_X3
-    val subscriptionIdX1 = BuildConfig.SUBSCRIPTION_ID_X1
-    val subscriptionIdX2 = BuildConfig.SUBSCRIPTION_ID_X2
-    val subscriptionIdX3 = BuildConfig.SUBSCRIPTION_ID_X3
-    val subscriptionYearIdX1 = BuildConfig.SUBSCRIPTION_YEAR_ID_X1
-    val subscriptionYearIdX2 = BuildConfig.SUBSCRIPTION_YEAR_ID_X2
-    val subscriptionYearIdX3 = BuildConfig.SUBSCRIPTION_YEAR_ID_X3
-
-    val flavorName = BuildConfig.FLAVOR
-    val storeDisplayName = when (flavorName) {
-        "gplay" -> "Google Play"
-        "foss" -> "FOSS"
-        "rustore" -> "RuStore"
-        else -> "Huawei"
-    }
-    val versionName = BuildConfig.VERSION_NAME
-    val fullVersionText = "$versionName ($storeDisplayName)"
-
-    startAboutActivity(
-        appNameId = R.string.app_name,
-        licenseMask = licenses,
-        versionName = fullVersionText,
-        flavorName = BuildConfig.FLAVOR,
-        faqItems = faqItems,
-        showFAQBeforeMail = true,
-        productIdList = arrayListOf(productIdX1, productIdX2, productIdX3),
-        productIdListRu = arrayListOf(productIdX1, productIdX2, productIdX3),
-        subscriptionIdList = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-        subscriptionIdListRu = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-        subscriptionYearIdList = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-        subscriptionYearIdListRu = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-    )
-}
-
-fun SimpleActivity.showSnackbar(view: View) {
-    showSupportSnackbar(view) { launchPurchase() }
+    startActivity(Intent(this, AboutActivity::class.java))
 }
 
 fun Activity.launchSendWhatsAppIntent(phoneNumber: String) {

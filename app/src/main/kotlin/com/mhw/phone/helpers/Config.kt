@@ -102,6 +102,10 @@ class Config private constructor(context: Context) : BaseConfig(context) {
         return formatted ?: PhoneNumberUtils.normalizeNumber(decoded)
     }
 
+    var appTheme: Int
+        get() = prefs.getInt(APP_THEME, APP_THEME_SYSTEM)
+        set(appTheme) = prefs.edit { putInt(APP_THEME, appTheme) }
+
     var showTabs: Int
         get() = prefs.getInt(SHOW_TABS, ALL_TABS_MASK)
         set(showTabs) = prefs.edit { putInt(SHOW_TABS, showTabs) }

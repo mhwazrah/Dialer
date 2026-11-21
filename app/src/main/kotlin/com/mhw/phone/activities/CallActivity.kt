@@ -26,9 +26,11 @@ import android.util.Property
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.allViews
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
@@ -40,6 +42,7 @@ import com.mhw.phone.databinding.ActivityCallBinding
 import com.mhw.phone.dialogs.ChangeTextDialog
 import com.mhw.phone.extensions.*
 import com.mhw.phone.helpers.*
+import com.mhw.phone.views.CallBackdropDrawable
 import com.mhw.phone.models.*
 import com.mikhaellopez.rxanimation.*
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -58,7 +61,7 @@ import com.mikhaellopez.rxanimation.height
 import com.mikhaellopez.rxanimation.width
 
 
-class CallActivity : SimpleActivity() {
+class CallActivity : SimpleActivity(), AlwaysDarkScreen {
     companion object {
         // Audio-route ints (CallAudioState.ROUTE_*) max out below 16; offset Bluetooth
         // per-device menu ids well above that so they can't collide.
@@ -80,9 +83,8 @@ class CallActivity : SimpleActivity() {
             private set
     }
 
-    override val usesLiquidBackdrop = false
-
     private val binding by viewBinding(ActivityCallBinding::inflate)
+    private var callBackdrop: CallBackdropDrawable? = null
 
     private val isMicrophoneOff: Boolean get() = CallManager.isMicrophoneMuted
     private var appliedMicrophoneOff: Boolean? = null
@@ -129,13 +131,28 @@ class CallActivity : SimpleActivity() {
         initButtons()
 
         CallManager.addListener(callCallback)
-        updateTextColors(binding.callHolder)
 
         if (config.backgroundCallScreen == TRANSPARENT_BACKGROUND) checkPermission()
 
         val configBackgroundCallScreen = config.backgroundCallScreen
-        if (configBackgroundCallScreen != THEME_BACKGROUND ) {
-            window.setSystemBarsAppearance(Color.BLACK)
+        // The call screen is always dark: light bar icons and white content on every background
+        window.setSystemBarsAppearance(Color.BLACK)
+        binding.apply {
+            callHolder.allViews.filterIsInstance<TextView>().forEach { it.setTextColor(Color.WHITE) }
+            holdStatusLabel.setTextColor(getColor(R.color.red_missed)) // semantic red, as in the layout
+
+            arrayOf(
+                callToggleMicrophone, callToggleSpeaker, callDialpad, /*dialpadClose,*/ callSimImage, callDetails,
+                callToggleHold, callAddContact, callAdd, callSwap, callMerge, callInfo, addCallerNote, imageView,
+                dialpadInclude.dialpadAsterisk, dialpadInclude.dialpadHashtag, callMessage, callRemind
+            ).forEach {
+                it.applyColorFilter(Color.WHITE)
+            }
+
+            callSimId.setTextColor(Color.WHITE.getContrastColor())
+        }
+
+        if (configBackgroundCallScreen != THEME_BACKGROUND) {
 
             if (configBackgroundCallScreen == BLACK_BACKGROUND) {
                 binding.callHolder.setBackgroundColor(Color.BLACK)
@@ -156,53 +173,20 @@ class CallActivity : SimpleActivity() {
                     }
                 }
             }
-
-            binding.apply {
-                arrayOf(
-                    callerNameLabel, callerDescription, callerNumber, callerNotes, callStatusLabel, callDeclineLabel, callAcceptLabel,
-                    dialpadInclude.dialpad1, dialpadInclude.dialpad2, dialpadInclude.dialpad3, dialpadInclude.dialpad4,
-                    dialpadInclude.dialpad5, dialpadInclude.dialpad6, dialpadInclude.dialpad7, dialpadInclude.dialpad8,
-                    dialpadInclude.dialpad9, dialpadInclude.dialpad0, dialpadInclude.dialpadPlus, dialpadInput,
-                    dialpadInclude.dialpad2Letters, dialpadInclude.dialpad3Letters, dialpadInclude.dialpad4Letters,
-                    dialpadInclude.dialpad5Letters, dialpadInclude.dialpad6Letters, dialpadInclude.dialpad7Letters,
-                    dialpadInclude.dialpad8Letters, dialpadInclude.dialpad9Letters,
-                    onHoldCallerName, onHoldLabel, callMessageLabel, callRemindLabel,
-                    callToggleMicrophoneLabel, callDialpadLabel, callToggleSpeakerLabel, callAddLabel,
-                    callSwapLabel, callMergeLabel, callToggleLabel, callAddContactLabel,
-                    dialpadClose, callEndLabel, callAcceptAndDecline
-                ).forEach {
-                    it.setTextColor(Color.WHITE)
-                }
-
-                arrayOf(
-                    callToggleMicrophone, callToggleSpeaker, callDialpad, /*dialpadClose,*/ callSimImage, callDetails,
-                    callToggleHold, callAddContact, callAdd, callSwap, callMerge, callInfo, addCallerNote, imageView,
-                    dialpadInclude.dialpadAsterisk, dialpadInclude.dialpadHashtag
-                ).forEach {
-                    it.applyColorFilter(Color.WHITE)
-                }
-
-                callSimId.setTextColor(Color.WHITE.getContrastColor())
-            }
         } else {
             //THEME_BACKGROUND
-            val backgroundColor = getProperBackgroundColor()
-            binding.callHolder.setBackgroundColor(backgroundColor)
-            window.setSystemBarsAppearance(backgroundColor)
-
-            val properTextColor = getProperTextColor()
-            binding.apply {
-                arrayOf(
-                    callToggleMicrophone, callToggleSpeaker, callDialpad, /*dialpadClose,*/ callSimImage, callDetails,
-                    callToggleHold, callAddContact, callAdd, callSwap, callMerge, callInfo, addCallerNote, imageView,
-                    dialpadInclude.dialpadAsterisk, dialpadInclude.dialpadHashtag, callMessage, callRemind
-                ).forEach {
-                    it.applyColorFilter(properTextColor)
-                }
-
-                callSimId.setTextColor(properTextColor.getContrastColor())
-                dialpadInput.disableKeyboard()
+            // The glass panels refract callHolder, so it carries the shared backdrop itself
+            binding.callHolder.background = CallBackdropDrawable(this).also { callBackdrop = it }
+            // Rings pulse out of the avatar and stay above the caller's name. Measured on call_holder's layout pass
+            // (all children placed); the avatar and name may sit in nested holders (layout-small)
+            binding.callHolder.addOnLayoutChangeListener { holder, _, _, _, _, _, _, _, _ ->
+                val avatar = Rect().also { binding.callerAvatar.getDrawingRect(it) }
+                val name = Rect().also { binding.callerNameLabel.getDrawingRect(it) }
+                (holder as ViewGroup).offsetDescendantRectToMyCoords(binding.callerAvatar, avatar)
+                holder.offsetDescendantRectToMyCoords(binding.callerNameLabel, name)
+                callBackdrop?.setRings(avatar.exactCenterX(), avatar.exactCenterY(), avatar.width() / 2f, name.top.toFloat())
             }
+            binding.dialpadInput.disableKeyboard()
         }
         updateCallContactInfo(CallManager.getPrimaryCall())
 
@@ -341,6 +325,17 @@ class CallActivity : SimpleActivity() {
         isActivityVisible = false
     }
 
+    // The backdrop animation runs only while the screen is visible and the call is ringing
+    override fun onStart() {
+        super.onStart()
+        if (binding.incomingCallHolder.isVisible()) callBackdrop?.startRinging()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        callBackdrop?.stopRinging()
+    }
+
     @Suppress("DEPRECATION")
     @SuppressLint("MissingSuperCall", "Wakelock")
     override fun onDestroy() {
@@ -348,6 +343,7 @@ class CallActivity : SimpleActivity() {
         CallManager.removeListener(callCallback)
         callDurationHandler.removeCallbacksAndMessages(null)
         cancelArrowAnimations()
+        callBackdrop?.stopRinging()
         animationDisposables.dispose()
         disableProximitySensor()
 
@@ -550,20 +546,13 @@ class CallActivity : SimpleActivity() {
         val configBackgroundCallScreen = config.backgroundCallScreen
         if (config.answerStyle == ANSWER_SLIDER_OUTLINE) {
             callDraggableBackground.background = AppCompatResources.getDrawable(this@CallActivity, R.drawable.call_draggable_background_stroke)
-            val colorBg = if (configBackgroundCallScreen == THEME_BACKGROUND) getProperTextColor() else Color.WHITE
-            callDraggableBackgroundIcon.background.mutate().setTint(colorBg)
+            callDraggableBackgroundIcon.background.mutate().setTint(Color.WHITE)
         } else {
             callDraggableBackground.background.alpha = 51 // 20%
         }
-        val colorBg =
-            if (configBackgroundCallScreen == TRANSPARENT_BACKGROUND
-                || configBackgroundCallScreen == BLUR_AVATAR
-                || configBackgroundCallScreen == AVATAR
-                || configBackgroundCallScreen == BLACK_BACKGROUND
-                ) Color.WHITE else getProperTextColor()
         callDraggableBackgroundIcon.drawable.mutate().setTint(getColor(R.color.green_call))
-        callDraggableBackgroundIcon.background.mutate().setTint(colorBg)
-        callDraggableBackground.background.mutate().setTint(colorBg)
+        callDraggableBackgroundIcon.background.mutate().setTint(Color.WHITE)
+        callDraggableBackground.background.mutate().setTint(Color.WHITE)
 
         var lock = false
         callDraggable.setOnTouchListener { _, event ->
@@ -731,14 +720,8 @@ class CallActivity : SimpleActivity() {
         }
 
         val configBackgroundCallScreen = config.backgroundCallScreen
-        val colorBg =
-            if (configBackgroundCallScreen == TRANSPARENT_BACKGROUND
-                || configBackgroundCallScreen == BLUR_AVATAR
-                || configBackgroundCallScreen == AVATAR
-                || configBackgroundCallScreen == BLACK_BACKGROUND
-            ) Color.WHITE else getProperTextColor()
         callDraggableVertical.drawable.mutate().setTint(getColor(R.color.green_call))
-        callDraggableVertical.background.mutate().setTint(colorBg)
+        callDraggableVertical.background.mutate().setTint(Color.WHITE)
         //callDraggableVertical.background.alpha = 51 // 20%
 
         var lock = false
@@ -906,7 +889,7 @@ class CallActivity : SimpleActivity() {
             audioRoutePopupMenu?.show()
 
             val selected = items.firstOrNull { it.selected } ?: items.first()
-            val primaryColor = getProperPrimaryColor()
+            val primaryColor = getProperPrimaryColor() // popups follow the app theme (getPopupMenuTheme), not the dark call screen
             val textColor = getProperTextColor()
             // icon and text coloring
             audioRoutePopupMenu?.menu?.apply {
@@ -1451,7 +1434,7 @@ class CallActivity : SimpleActivity() {
         binding.callNetworkType.apply {
             setImageResource(if (isWifi) R.drawable.ic_wifi_calling_vector else R.drawable.ic_cellular_vector)
             contentDescription = getString(if (isWifi) R.string.wifi_calling else R.string.mobile_network_call)
-            applyColorFilter(if (config.backgroundCallScreen == THEME_BACKGROUND) getProperTextColor() else Color.WHITE)
+            applyColorFilter(Color.WHITE)
         }
     }
 
@@ -1631,6 +1614,7 @@ class CallActivity : SimpleActivity() {
     private fun initOutgoingCallUI() {
         enableProximitySensor()
         binding.incomingCallHolder.beGone()
+        callBackdrop?.stopRinging()
         cancelArrowAnimations()
         binding.ongoingCallHolder.beVisible()
         binding.callEnd.beVisible()
@@ -1639,6 +1623,7 @@ class CallActivity : SimpleActivity() {
 
     private fun callRinging() {
         binding.incomingCallHolder.beVisible()
+        callBackdrop?.startRinging()
         if (arrowAnimators.isEmpty()) arrowStarters.forEach { it() }
         // Hide the in-call controls so a 2nd (waiting) call fully takes over with the
         // incoming UI; for a first incoming call the ongoing holder is already hidden.
@@ -1648,6 +1633,7 @@ class CallActivity : SimpleActivity() {
     private fun callStarted() {
         enableProximitySensor()
         binding.incomingCallHolder.beGone()
+        callBackdrop?.stopRinging()
         cancelArrowAnimations()
         binding.ongoingCallHolder.beVisible()
         binding.callEnd.beVisible()
@@ -1817,13 +1803,9 @@ class CallActivity : SimpleActivity() {
     }
 
     private fun toggleButtonColor(view: ImageView, enabled: Boolean) {
-        val configBackgroundCallScreen = config.backgroundCallScreen
-        if (configBackgroundCallScreen == TRANSPARENT_BACKGROUND || configBackgroundCallScreen == BLUR_AVATAR || configBackgroundCallScreen == AVATAR) {
-            val color = if (enabled) Color.WHITE else Color.GRAY
-            view.background.applyColorFilter(color)
-            val colorIcon = if (enabled) Color.BLACK else Color.WHITE
-            view.applyColorFilter(colorIcon)
-        }
+        // The call screen is always dark: "on" is a white button with a black icon
+        view.background.applyColorFilter(if (enabled) Color.WHITE else Color.GRAY)
+        view.applyColorFilter(if (enabled) Color.BLACK else Color.WHITE)
         view.background.alpha = if (enabled) 255 else 60
     }
 

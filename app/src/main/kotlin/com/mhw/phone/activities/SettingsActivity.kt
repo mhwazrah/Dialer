@@ -2,15 +2,11 @@ package com.mhw.phone.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import androidx.activity.result.contract.ActivityResultContracts
-import com.behaviorule.arturdumchev.library.pixels
-import com.goodwy.commons.activities.ManageBlockedNumbersActivity
 import com.goodwy.commons.dialogs.*
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.*
@@ -19,23 +15,18 @@ import com.mhw.phone.BuildConfig
 import com.mhw.phone.R
 import com.mhw.phone.databinding.ActivitySettingsBinding
 import com.mhw.phone.dialogs.ChangeTextDialog
-import com.mhw.phone.dialogs.ExportCallHistoryDialog
-import com.mhw.phone.dialogs.ManageVisibleTabsDialog
 import com.mhw.phone.extensions.*
-import com.mhw.phone.helpers.RecentsHelper
-import com.mhw.phone.models.RecentCall
 import com.mhw.phone.helpers.*
-import com.mhw.phone.helpers.gson
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
+import org.json.JSONException
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
 
 class SettingsActivity : SimpleActivity() {
     companion object {
-        private const val CALL_HISTORY_FILE_TYPE = "application/json"
-        private val IMPORT_CALL_HISTORY_FILE_TYPES = buildList {
+        private const val SETTINGS_FILE_TYPE = "application/json"
+        private const val SETTINGS_FILE_NAME = "mhw-phone-settings.json"
+        private val IMPORT_SETTINGS_FILE_TYPES = buildList {
             add("application/json")
             if (!isQPlus()) {
                 // Workaround for https://github.com/FossifyOrg/Messages/issues/88
@@ -49,28 +40,16 @@ class SettingsActivity : SimpleActivity() {
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
                 toast(R.string.importing)
-                importCallHistory(uri)
+                importSettings(uri)
             }
         }
 
-    private val saveDocument = registerForActivityResult(ActivityResultContracts.CreateDocument(CALL_HISTORY_FILE_TYPE)) { uri ->
+    private val saveDocument = registerForActivityResult(ActivityResultContracts.CreateDocument(SETTINGS_FILE_TYPE)) { uri ->
         if (uri != null) {
             toast(R.string.exporting)
-            RecentsHelper(this).getRecentCalls(queryLimit = QUERY_LIMIT_MAX_VALUE) { recents ->
-                exportCallHistory(recents, uri)
-            }
+            exportSettings(uri)
         }
     }
-
-    private val productIdX1 = BuildConfig.PRODUCT_ID_X1
-    private val productIdX2 = BuildConfig.PRODUCT_ID_X2
-    private val productIdX3 = BuildConfig.PRODUCT_ID_X3
-    private val subscriptionIdX1 = BuildConfig.SUBSCRIPTION_ID_X1
-    private val subscriptionIdX2 = BuildConfig.SUBSCRIPTION_ID_X2
-    private val subscriptionIdX3 = BuildConfig.SUBSCRIPTION_ID_X3
-    private val subscriptionYearIdX1 = BuildConfig.SUBSCRIPTION_YEAR_ID_X1
-    private val subscriptionYearIdX2 = BuildConfig.SUBSCRIPTION_YEAR_ID_X2
-    private val subscriptionYearIdX3 = BuildConfig.SUBSCRIPTION_YEAR_ID_X3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         useOverflowIcon = false
@@ -106,100 +85,45 @@ class SettingsActivity : SimpleActivity() {
             boundStateKey = stateKey
             bindSettings()
         } else {
-            setupPurchaseThankYou()
             setupManageBlockedNumbers()
         }
     }
 
     private fun bindSettings() {
         updatePro()
-        setupPurchaseThankYou()
 
-        setupCustomizeColors()
-        setupDialPadOpen()
-        setupOverflowIcon()
-        setupFloatingButtonStyle()
-        setupUseColoredContacts()
-        setupContactsColorList()
+        setupTheme()
         setupColorSimIcons()
         setupSimCardColorList()
 
         setupManageBlockedNumbers()
-        setupUseSpeechToText()
         setupChangeDateTimeFormat()
-        setupFormatPhoneNumbers()
-        setupFontSize()
-        setupUseEnglish()
         setupLanguage()
 
         setupDefaultTab()
-        setupManageShownTabs()
-        setupNavigationBarStyle()
-        setupUseIconTabs()
-        setupScreenSlideAnimation()
-        setupOpenSearch()
-        setupEndSearch()
 
-        setupOnFavoriteClick()
-        setupOnRecentClick()
-        setupOnContactClick()
-        setupUseSwipeToAction()
-        setupSwipeWidth()
-        setupSwipeVibration()
-        setupSwipeRipple()
         setupSwipeRightAction()
         setupSwipeLeftAction()
-        setupDeleteConfirmation()
 
         setupManageSpeedDial()
-        setupDialpadStyle()
-        setupShowRecentCallsOnDialpad()
-        setupSearchContactsInDialpad()
+        setupDialpadPreferences()
 
         setupFlashForAlerts()
 
-        setupBackgroundCallScreen()
-        setupTransparentCallScreen()
-        setupAnswerStyle()
-        setupCallButtonStyle()
         setupAlwaysShowFullscreen()
-        setupKeepCallsInPopUp()
-        setupTurnOnSpeakerInPopup()
-        setupBackPressedEndCall()
         setupQuickAnswers()
-        setupCallerDescription()
-        setupSimDialogStyle()
-        setupHideDialpadLetters()
-        setupDialpadNumbers()
         setupDisableProximitySensor()
         setupDialpadVibrations()
         setupCallStartEndVibrations()
         setupDialpadBeeps()
-        setupDisableSwipeToAnswer()
         setupShowCallConfirmation()
         setupCallUsingSameSim()
-        setupCallBlockButton()
 
-        setupBlockCallFromAnotherApp()
-
-        setupShowSearchBar()
-
-        setupGroupCalls()
-        setupQueryLimitRecent()
-        setupShowDividers()
-        setupShowContactThumbnails()
-        setupContactThumbnailsSize()
-        setupEllipsizeMode()
-        setupShowPhoneNumbers()
         setupStartNameWithSurname()
-        setupShowNicknameInsteadNames()
-        setupUseRelativeDate()
-        setupChangeColourTopBar()
 
-        setupCallsExport()
-        setupCallsImport()
+        setupSettingsExport()
+        setupSettingsImport()
 
-        setupTipJar()
         setupAbout()
 
         updateTextColors(binding.settingsHolder)
@@ -215,8 +139,6 @@ class SettingsActivity : SimpleActivity() {
                 settingsDialpadLabel,
                 settingsCallsLabel,
                 settingsNotificationsLabel,
-                settingsSecurityLabel,
-                settingsTopAppBarLabel,
                 settingsListViewLabel,
                 settingsBackupsLabel,
                 settingsOtherLabel).forEach {
@@ -231,8 +153,6 @@ class SettingsActivity : SimpleActivity() {
                 settingsDialpadHolder,
                 settingsCallsHolder,
                 settingsNotificationsHolder,
-                settingsSecurityHolder,
-                settingsTopAppBarHolder,
                 settingsListViewHolder,
                 settingsBackupsHolder,
                 settingsOtherHolder
@@ -242,15 +162,12 @@ class SettingsActivity : SimpleActivity() {
             }
 
             arrayOf(
-                settingsCustomizeColorsChevron,
-                settingsManageShownTabsChevron,
                 settingsExportCallsChevron,
                 settingsImportCallsChevron,
                 settingsManageBlockedNumbersChevron,
                 settingsManageSpeedDialChevron,
-                settingsTipJarChevron,
-                settingsAboutChevron,
-                settingsDialpadStyleChevron
+                settingsDialpadStyleChevron,
+                settingsAboutChevron
             ).forEach {
                 it.applyColorFilter(properTextColor)
             }
@@ -259,9 +176,6 @@ class SettingsActivity : SimpleActivity() {
 
     private fun updatePro(isPro: Boolean = checkPro()) {
         binding.apply {
-            settingsPurchaseThankYouHolder.beGoneIf(isPro)
-            settingsTipJarHolder.beVisibleIf(isPro)
-
             val stringId =
                 if (isRTLLayout) com.goodwy.strings.R.string.swipe_right_action
                 else com.goodwy.strings.R.string.swipe_left_action
@@ -275,6 +189,43 @@ class SettingsActivity : SimpleActivity() {
                 it.alpha = if (isPro) 1f else 0.4f
             }
         }
+    }
+
+    private fun setupTheme() = binding.apply {
+        settingsTheme.text = getThemeText()
+        settingsThemeHolder.setOnClickListener {
+            val items = arrayListOf(
+                RadioItem(APP_THEME_SYSTEM, getString(R.string.settings_theme_system)),
+                RadioItem(APP_THEME_LIGHT, getString(R.string.settings_theme_light)),
+                RadioItem(APP_THEME_DARK, getString(R.string.settings_theme_dark))
+            )
+
+            RadioGroupDialog(
+                this@SettingsActivity,
+                items,
+                config.appTheme,
+                R.string.settings_theme,
+                defaultItemId = APP_THEME_SYSTEM
+            ) {
+                config.appTheme = it as Int
+                applyThemeChange()
+            }
+        }
+    }
+
+    private fun getThemeText() = getString(
+        when (config.appTheme) {
+            APP_THEME_LIGHT -> R.string.settings_theme_light
+            APP_THEME_DARK -> R.string.settings_theme_dark
+            else -> R.string.settings_theme_system
+        }
+    )
+
+    // Other screens pick the new colours up through needRestart (MainActivity / DialpadActivity recreate on resume)
+    private fun applyThemeChange() {
+        applyAppTheme()
+        config.needRestart = true
+        recreate()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -297,40 +248,6 @@ class SettingsActivity : SimpleActivity() {
                     true
                 }
                 else -> false
-            }
-        }
-    }
-
-    private fun setupPurchaseThankYou() = binding.apply {
-        settingsPurchaseThankYouHolder.beGoneIf(checkPro(false))
-        settingsPurchaseThankYouHolder.onClick = { launchPurchase() }
-    }
-
-    private fun setupCustomizeColors() {
-        binding.settingsCustomizeColorsHolder.setOnClickListener {
-            startCustomizationActivity(
-                showAccentColor = true,
-                isCollection = isOrWasThankYouInstalled(false) || isCollection(),
-                productIdList = arrayListOf(productIdX1, productIdX2, productIdX3),
-                productIdListRu = arrayListOf(productIdX1, productIdX2, productIdX3),
-                subscriptionIdList = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-                subscriptionIdListRu = arrayListOf(subscriptionIdX1, subscriptionIdX2, subscriptionIdX3),
-                subscriptionYearIdList = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-                subscriptionYearIdListRu = arrayListOf(subscriptionYearIdX1, subscriptionYearIdX2, subscriptionYearIdX3),
-                showAppIconColor = true
-            )
-        }
-    }
-
-    private fun setupUseEnglish() {
-        binding.apply {
-            settingsUseEnglishHolder.beVisibleIf((config.wasUseEnglishToggled || Locale.getDefault().language != "en") && !isTiramisuPlus())
-            settingsUseEnglish.isChecked = config.useEnglish
-            settingsUseEnglishHolder.setOnClickListener {
-                settingsUseEnglish.toggle()
-                config.useEnglish = settingsUseEnglish.isChecked
-                config.needRestart = true
-                recreate()
             }
         }
     }
@@ -383,18 +300,15 @@ class SettingsActivity : SimpleActivity() {
         }
 
         settingsManageBlockedNumbersHolder.setOnClickListener {
-            Intent(this@SettingsActivity, ManageBlockedNumbersActivity::class.java).apply {
+            Intent(this@SettingsActivity, BlockedNumbersActivity::class.java).apply {
                 startActivity(this)
             }
         }
     }
 
-    private fun setupUseSpeechToText() = binding.apply {
-        settingsUseSpeechToText.isChecked = config.useSpeechToText
-        settingsUseSpeechToTextHolder.setOnClickListener {
-            settingsUseSpeechToText.toggle()
-            config.useSpeechToText = settingsUseSpeechToText.isChecked
-            config.needRestart = true
+    private fun setupDialpadPreferences() {
+        binding.settingsDialpadStyleHolder.setOnClickListener {
+            startActivity(Intent(this, SettingsDialpadActivity::class.java))
         }
     }
 
@@ -419,28 +333,6 @@ class SettingsActivity : SimpleActivity() {
         val cal = Calendar.getInstance(Locale.ENGLISH).timeInMillis
         val formatDate = cal.formatDate(this@SettingsActivity)
         binding.settingsChangeDateTimeFormat.text = formatDate
-    }
-
-    private fun setupFontSize() = binding.apply {
-        settingsFontSize.text = getFontSizeText()
-        settingsFontSizeHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(FONT_SIZE_SMALL, getString(R.string.small)),
-                RadioItem(FONT_SIZE_MEDIUM, getString(R.string.medium)),
-                RadioItem(FONT_SIZE_LARGE, getString(R.string.large)),
-                RadioItem(FONT_SIZE_EXTRA_LARGE, getString(R.string.extra_large)))
-
-            RadioGroupDialog(
-                this@SettingsActivity,
-                items,
-                config.fontSize,
-                R.string.font_size,
-                defaultItemId = FONT_SIZE_MEDIUM
-            ) {
-                config.fontSize = it as Int
-                settingsFontSize.text = getFontSizeText()
-            }
-        }
     }
 
     private fun setupDefaultTab() {
@@ -474,500 +366,12 @@ class SettingsActivity : SimpleActivity() {
         }
     )
 
-    private fun setupNavigationBarStyle() {
-        binding.settingsNavigationBarStyleLabel.text = formatWithDeprecatedBadge(R.string.tab_navigation)
-        binding.settingsNavigationBarStyle.text = getNavigationBarStyleText()
-        binding.settingsNavigationBarStyleHolder.setOnClickListener {
-            val top = formatWithDeprecatedBadge(R.string.top).toString()
-            val items = arrayListOf(
-                RadioItem(0, top, icon = R.drawable.ic_tab_top),
-                RadioItem(1, getString(R.string.bottom), icon = R.drawable.ic_tab_bottom),
-            )
-
-            val checkedItemId = if (config.bottomNavigationBar) 1 else 0
-            RadioGroupIconDialog(this@SettingsActivity, items, checkedItemId, R.string.tab_navigation) {
-                config.bottomNavigationBar = it == 1
-                config.needRestart = true
-                binding.settingsNavigationBarStyle.text = getNavigationBarStyleText()
-
-                binding.settingsChangeColourTopBarHolder.beVisibleIf(config.bottomNavigationBar)
-                binding.settingsTopAppBarLabel.beVisibleIf(config.bottomNavigationBar)
-                binding.settingsTopAppBarHolder.beVisibleIf(config.bottomNavigationBar)
-                binding.settingsUseIconTabsHolder.beVisibleIf(!config.bottomNavigationBar)
-            }
-        }
-    }
-
-    private fun setupShowSearchBar() = binding.apply {
-        binding.settingsTopAppBarLabel.beVisibleIf(config.bottomNavigationBar)
-        binding.settingsTopAppBarHolder.beVisibleIf(config.bottomNavigationBar)
-
-        settingsShowSearchBar.isChecked = config.showSearchBar
-        settingsShowSearchBarHolder.setOnClickListener {
-            settingsShowSearchBar.toggle()
-            config.showSearchBar = settingsShowSearchBar.isChecked
-            config.needRestart = true
-        }
-    }
-
-    private fun setupChangeColourTopBar() {
-        binding.apply {
-            settingsChangeColourTopBarHolder.beVisibleIf(config.bottomNavigationBar)
-            settingsChangeColourTopBar.isChecked = config.changeColourTopBar
-            settingsChangeColourTopBarHolder.setOnClickListener {
-                settingsChangeColourTopBar.toggle()
-                config.changeColourTopBar = settingsChangeColourTopBar.isChecked
-                config.needRestart = true
-            }
-        }
-    }
-
-    private fun setupUseIconTabs() {
-        binding.apply {
-            // The bottom bar always shows icons and labels, so the option only matters for top tabs
-            settingsUseIconTabsHolder.beVisibleIf(!config.bottomNavigationBar)
-            settingsUseIconTabs.isChecked = config.useIconTabs
-            settingsUseIconTabsHolder.setOnClickListener {
-                settingsUseIconTabs.toggle()
-                config.useIconTabs = settingsUseIconTabs.isChecked
-                config.needRestart = true
-            }
-        }
-    }
-
-    private fun setupManageShownTabs() {
-        binding.settingsManageShownTabsHolder.setOnClickListener {
-            ManageVisibleTabsDialog(this)
-        }
-    }
-
-    private fun setupScreenSlideAnimation() {
-        binding.settingsScreenSlideAnimation.text = getScreenSlideAnimationText()
-        binding.settingsScreenSlideAnimationHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(0, getString(R.string.no), icon = com.goodwy.commons.R.drawable.ic_view_array),
-                RadioItem(1, getString(R.string.screen_slide_animation_zoomout), icon = R.drawable.ic_view_carousel),
-                RadioItem(2, getString(R.string.screen_slide_animation_depth), icon = R.drawable.ic_playing_cards),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.screenSlideAnimation,
-                R.string.screen_slide_animation,
-                defaultItemId = 1
-            ) {
-                config.screenSlideAnimation = it as Int
-                binding.settingsScreenSlideAnimation.text = getScreenSlideAnimationText()
-            }
-        }
-    }
-
-    private fun setupDialPadOpen() {
-        binding.apply {
-            settingsOpenDialpadAtLaunch.isChecked = config.openDialPadAtLaunch
-            settingsOpenDialpadAtLaunchHolder.setOnClickListener {
-                settingsOpenDialpadAtLaunch.toggle()
-                config.openDialPadAtLaunch = settingsOpenDialpadAtLaunch.isChecked
-            }
-        }
-    }
-
-    private fun setupShowDividers() = binding.apply {
-        settingsShowDividers.isChecked = config.useDividers
-        settingsShowDividersHolder.setOnClickListener {
-            settingsShowDividers.toggle()
-            config.useDividers = settingsShowDividers.isChecked
-        }
-    }
-
-    private fun setupShowContactThumbnails() {
-        binding.apply {
-            settingsShowContactThumbnails.isChecked = config.showContactThumbnails
-            settingsShowContactThumbnailsHolder.setOnClickListener {
-                settingsShowContactThumbnails.toggle()
-                config.showContactThumbnails = settingsShowContactThumbnails.isChecked
-                settingsContactThumbnailsSizeHolder.beVisibleIf(config.showContactThumbnails)
-            }
-        }
-    }
-
-    private fun setupContactThumbnailsSize() = binding.apply {
-        val pro = checkPro()
-        settingsContactThumbnailsSizeHolder.beVisibleIf(config.showContactThumbnails)
-        settingsContactThumbnailsSizeHolder.alpha = if (pro) 1f else 0.4f
-        settingsContactThumbnailsSizeLabel.text = addLockedLabelIfNeeded(R.string.contact_thumbnails_size, pro)
-        settingsContactThumbnailsSize.text = getContactThumbnailsSizeText()
-        settingsContactThumbnailsSizeHolder.setOnClickListener {
-            if (pro) {
-                val items = arrayListOf(
-                    RadioItem(CONTACT_THUMBNAILS_SIZE_SMALL, getString(R.string.small), CONTACT_THUMBNAILS_SIZE_SMALL),
-                    RadioItem(CONTACT_THUMBNAILS_SIZE_MEDIUM, getString(R.string.medium), CONTACT_THUMBNAILS_SIZE_MEDIUM),
-                    RadioItem(CONTACT_THUMBNAILS_SIZE_LARGE, getString(R.string.large), CONTACT_THUMBNAILS_SIZE_LARGE),
-                    RadioItem(CONTACT_THUMBNAILS_SIZE_EXTRA_LARGE, getString(R.string.extra_large), CONTACT_THUMBNAILS_SIZE_EXTRA_LARGE)
-                )
-
-                RadioGroupDialog(
-                    this@SettingsActivity,
-                    items,
-                    config.contactThumbnailsSize,
-                    R.string.contact_thumbnails_size,
-                    defaultItemId = CONTACT_THUMBNAILS_SIZE_MEDIUM
-                ) {
-                    config.contactThumbnailsSize = it as Int
-                    settingsContactThumbnailsSize.text = getContactThumbnailsSizeText()
-                }
-            }
-        }
-    }
-
-    private fun getContactThumbnailsSizeText() = getString(
-        when (baseConfig.contactThumbnailsSize) {
-            CONTACT_THUMBNAILS_SIZE_SMALL -> com.goodwy.commons.R.string.small
-            CONTACT_THUMBNAILS_SIZE_MEDIUM -> com.goodwy.commons.R.string.medium
-            CONTACT_THUMBNAILS_SIZE_LARGE -> com.goodwy.commons.R.string.large
-            else -> com.goodwy.commons.R.string.extra_large
-        }
-    )
-
-    private fun setupEllipsizeMode() = binding.apply {
-        settingsEllipsizeMode.text = getEllipsizeModeText()
-        settingsEllipsizeModeHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(ELLIPSIZE_MODE_END, getString(com.goodwy.strings.R.string.cut_off)),
-                RadioItem(ELLIPSIZE_MODE_MARQUEE, getString(com.goodwy.strings.R.string.auto_scroll)),
-            )
-
-            RadioGroupDialog(
-                this@SettingsActivity,
-                items,
-                config.ellipsizeMode,
-                com.goodwy.strings.R.string.long_text_behavior,
-                defaultItemId = ELLIPSIZE_MODE_END
-            ) {
-                config.ellipsizeMode = it as Int
-                settingsEllipsizeMode.text = getEllipsizeModeText()
-            }
-        }
-    }
-
-    private fun getEllipsizeModeText() = getString(
-        when (baseConfig.ellipsizeMode) {
-            ELLIPSIZE_MODE_END -> com.goodwy.strings.R.string.cut_off
-            else -> com.goodwy.strings.R.string.auto_scroll
-        }
-    )
-
-    private fun setupShowPhoneNumbers() {
-        binding.apply {
-            settingsShowPhoneNumbers.isChecked = config.showPhoneNumbers
-            settingsShowPhoneNumbersHolder.setOnClickListener {
-                settingsShowPhoneNumbers.toggle()
-                config.showPhoneNumbers = settingsShowPhoneNumbers.isChecked
-            }
-        }
-    }
-
-    private fun setupUseColoredContacts() = binding.apply {
-        settingsColoredContacts.isChecked = config.useColoredContacts
-        settingsColoredContactsHolder.setOnClickListener {
-            settingsColoredContacts.toggle()
-            config.useColoredContacts = settingsColoredContacts.isChecked
-            settingsContactColorListHolder.beVisibleIf(config.useColoredContacts)
-        }
-    }
-
-    private fun setupContactsColorList() = binding.apply {
-        settingsContactColorListHolder.beVisibleIf(config.useColoredContacts)
-        settingsContactColorListIcon.setImageResource(getContactsColorListIcon(config.contactColorList))
-        settingsContactColorListHolder.setOnClickListener {
-            val items = arrayListOf(
-                com.goodwy.commons.R.drawable.ic_color_list,
-                com.goodwy.commons.R.drawable.ic_color_list_android,
-                com.goodwy.commons.R.drawable.ic_color_list_ios,
-                com.goodwy.commons.R.drawable.ic_color_list_arc
-            )
-
-            IconListDialog(
-                activity = this@SettingsActivity,
-                items = items,
-                checkedItemId = config.contactColorList,
-                defaultItemId = LBC_ANDROID,
-                titleId = com.goodwy.strings.R.string.contact_color_list
-            ) { wasPositivePressed, newValue ->
-                if (wasPositivePressed) {
-                    if (config.contactColorList != newValue) {
-                        config.contactColorList = newValue
-                        settingsContactColorListIcon.setImageResource(getContactsColorListIcon(config.contactColorList))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setupBackgroundCallScreen() {
-        val pro = checkPro()
-        val black = if (pro) getString(R.string.black) else getString(R.string.black_locked)
-        binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-        binding.settingsBackgroundCallScreenHolder.setOnClickListener {
-            val items = if (isTiramisuPlus()) {
-                arrayListOf(
-                    RadioItem(THEME_BACKGROUND, getString(R.string.theme), icon = R.drawable.ic_theme),
-                    RadioItem(BLUR_AVATAR, getString(R.string.blurry_contact_photo), icon = R.drawable.ic_contact_blur),
-                    RadioItem(AVATAR, getString(R.string.contact_photo), icon = R.drawable.ic_contact_photo),
-                    RadioItem(BLACK_BACKGROUND, black, icon = R.drawable.ic_theme_black)
-                )
-            } else {
-                arrayListOf(
-                    RadioItem(THEME_BACKGROUND, getString(R.string.theme), icon = R.drawable.ic_theme),
-                    RadioItem(BLUR_AVATAR, getString(R.string.blurry_contact_photo), icon = R.drawable.ic_contact_blur),
-                    RadioItem(AVATAR, getString(R.string.contact_photo), icon = R.drawable.ic_contact_photo),
-                    RadioItem(TRANSPARENT_BACKGROUND, getString(R.string.blurry_wallpaper), icon = R.drawable.ic_wallpaper),
-                    RadioItem(BLACK_BACKGROUND, black, icon = R.drawable.ic_theme_black)
-                )
-            }
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.backgroundCallScreen,
-                R.string.call_screen_background,
-                defaultItemId = BLUR_AVATAR
-            ) {
-                if (it as Int == TRANSPARENT_BACKGROUND) {
-                    if (hasPermission(PERMISSION_READ_STORAGE)) {
-                        config.backgroundCallScreen = it
-                        binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-                    } else {
-                        handlePermission(PERMISSION_READ_STORAGE) { permission ->
-                            if (permission) {
-                                config.backgroundCallScreen = it
-                                binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-                            } else {
-                                toast(R.string.no_storage_permissions)
-                            }
-                        }
-                    }
-                } else if (it == BLACK_BACKGROUND) {
-                    if (pro) {
-                        config.backgroundCallScreen = it
-                        binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-                    }
-                } else {
-                    config.backgroundCallScreen = it
-                    binding.settingsBackgroundCallScreen.text = getBackgroundCallScreenText()
-                }
-            }
-        }
-    }
-
-    private fun getBackgroundCallScreenText() = getString(
-        when (config.backgroundCallScreen) {
-            BLUR_AVATAR -> R.string.blurry_contact_photo
-            AVATAR -> R.string.contact_photo
-            TRANSPARENT_BACKGROUND -> R.string.blurry_wallpaper
-            BLACK_BACKGROUND -> R.string.black
-            else -> R.string.theme
-        }
-    )
-
-    private fun setupTransparentCallScreen() {
-        binding.apply {
-            if (isTiramisuPlus()) settingsTransparentCallScreenHolder.beGone()
-            else {
-                if (hasPermission(PERMISSION_READ_STORAGE)) {
-                    settingsTransparentCallScreen.isChecked = config.transparentCallScreen
-                } else settingsTransparentCallScreen.isChecked = false
-                settingsTransparentCallScreenHolder.setOnClickListener {
-                    if (hasPermission(PERMISSION_READ_STORAGE)) {
-                        settingsTransparentCallScreen.toggle()
-                        config.transparentCallScreen = settingsTransparentCallScreen.isChecked
-                    } else {
-                        handlePermission(PERMISSION_READ_STORAGE) {
-                            if (it) {
-                                settingsTransparentCallScreen.toggle()
-                                config.transparentCallScreen = settingsTransparentCallScreen.isChecked
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setupAnswerStyle() {
-        binding.settingsAnswerStyle.text = getAnswerStyleText()
-        binding.settingsAnswerStyleHolder.setOnClickListener {
-            launchAnswerStyleDialog()
-        }
-    }
-
-    private fun launchAnswerStyleDialog() {
-        val pro = checkPro()
-        val sliderOutline = addLockedLabelIfNeeded(R.string.answer_slider_outline, pro)
-        val sliderVertical = addLockedLabelIfNeeded(R.string.answer_slider_vertical, pro)
-        val items = arrayListOf(
-            RadioItem(ANSWER_BUTTON, getString(R.string.buttons), icon = R.drawable.ic_answer_buttons),
-            RadioItem(ANSWER_SLIDER, getString(R.string.answer_slider), icon = R.drawable.ic_slider),
-            RadioItem(ANSWER_SLIDER_OUTLINE, sliderOutline, icon = R.drawable.ic_slider_outline),
-            RadioItem(ANSWER_SLIDER_VERTICAL, sliderVertical, icon = R.drawable.ic_slider_vertical),
-        )
-
-        RadioGroupIconDialog(
-            this@SettingsActivity,
-            items,
-            config.answerStyle,
-            R.string.answer_style,
-            defaultItemId = ANSWER_BUTTON
-        ) {
-            if (it as Int == ANSWER_SLIDER_OUTLINE || it == ANSWER_SLIDER_VERTICAL) {
-                if (pro) {
-                    config.answerStyle = it
-                    binding.settingsAnswerStyle.text = getAnswerStyleText()
-                }
-            } else {
-                config.answerStyle = it
-                binding.settingsAnswerStyle.text = getAnswerStyleText()
-            }
-
-        }
-    }
-
-    private fun getAnswerStyleText() = getString(
-        when (config.answerStyle) {
-            ANSWER_SLIDER -> R.string.answer_slider
-            ANSWER_SLIDER_OUTLINE -> R.string.answer_slider_outline
-            ANSWER_SLIDER_VERTICAL -> R.string.answer_slider_vertical
-            else -> R.string.buttons
-        }
-    )
-
-    private fun setupCallButtonStyle() {
-        val isSmallScreen =
-            resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK == Configuration.SCREENLAYOUT_SIZE_SMALL
-        binding.settingsCallButtonStyleHolder.beVisibleIf(!isSmallScreen)
-        binding.settingsCallButtonStyle.text = getCallButtonStyleText()
-        binding.settingsCallButtonStyleHolder.setOnClickListener {
-            launchCallButtonStyleDialog()
-        }
-    }
-
-    private fun launchCallButtonStyleDialog() {
-        val pro = checkPro()
-        val iOS17Text = addLockedLabelIfNeeded(R.string.bottom, pro)
-        val items = arrayListOf(
-            RadioItem(IOS16, getString(R.string.top), icon = R.drawable.ic_call_button_top),
-            RadioItem(IOS17, iOS17Text, icon = R.drawable.ic_call_button_bottom),
-        )
-
-        RadioGroupIconDialog(this@SettingsActivity, items, config.callButtonStyle, R.string.call_button_style) {
-            if (it as Int == IOS17) {
-                if (pro) {
-                    config.callButtonStyle = it
-                    binding.settingsCallButtonStyle.text = getCallButtonStyleText()
-                }
-            } else {
-                config.callButtonStyle = it
-                binding.settingsCallButtonStyle.text = getCallButtonStyleText()
-            }
-
-        }
-    }
-
-    private fun getCallButtonStyleText() = getString(
-        when (config.callButtonStyle) {
-            IOS16 -> R.string.top
-            else -> R.string.bottom
-        }
-    )
-
-    private fun setupCallerDescription() {
-        binding.settingsShowCallerDescription.text = getCallerDescriptionText()
-        binding.settingsShowCallerDescriptionHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(SHOW_CALLER_NOTHING, getString(R.string.nothing)),
-                RadioItem(SHOW_CALLER_COMPANY, getString(R.string.company)),
-                RadioItem(SHOW_CALLER_NICKNAME, getString(R.string.nickname)))
-
-            RadioGroupDialog(
-                this@SettingsActivity,
-                items,
-                config.showCallerDescription,
-                R.string.show_caller_description_g,
-                defaultItemId = SHOW_CALLER_COMPANY
-            ) {
-                config.showCallerDescription = it as Int
-                binding.settingsShowCallerDescription.text = getCallerDescriptionText()
-            }
-        }
-    }
-
-    private fun getCallerDescriptionText() = getString(
-        when (config.showCallerDescription) {
-            SHOW_CALLER_COMPANY -> R.string.company
-            SHOW_CALLER_NICKNAME -> R.string.nickname
-            else -> R.string.nothing
-        }
-    )
-
     private fun setupAlwaysShowFullscreen() {
         binding.apply {
             settingsAlwaysShowFullscreen.isChecked = config.showIncomingCallsFullScreen
             settingsAlwaysShowFullscreenHolder.setOnClickListener {
                 settingsAlwaysShowFullscreen.toggle()
                 config.showIncomingCallsFullScreen = settingsAlwaysShowFullscreen.isChecked
-                settingsKeepCallsInPopUpWrapper.beVisibleIf(!config.showIncomingCallsFullScreen)
-                settingsKeepCallsInPopUpHolder.beVisibleIf(!config.showIncomingCallsFullScreen)
-                settingsTurnOnSpeakerInPopupHolder.beVisibleIf(!config.showIncomingCallsFullScreen && config.keepCallsInPopUp)
-            }
-        }
-    }
-
-    private fun updateWrapperKeepCallsInPopUp() {
-        val wrapperColor = if (config.keepCallsInPopUp) getColoredMaterialStatusBarColor() else getSurfaceColor()
-        binding.settingsKeepCallsInPopUpWrapper.background.applyColorFilter(wrapperColor)
-    }
-
-    private fun setupKeepCallsInPopUp() {
-        updateWrapperKeepCallsInPopUp()
-        binding.apply {
-            settingsKeepCallsInPopUpWrapper.beVisibleIf(!config.showIncomingCallsFullScreen)
-            settingsKeepCallsInPopUpHolder.beVisibleIf(!config.showIncomingCallsFullScreen)
-            settingsKeepCallsInPopUp.isChecked = config.keepCallsInPopUp
-            settingsKeepCallsInPopUpHolder.setOnClickListener {
-                settingsKeepCallsInPopUp.toggle()
-                config.keepCallsInPopUp = settingsKeepCallsInPopUp.isChecked
-                updateWrapperKeepCallsInPopUp()
-                settingsTurnOnSpeakerInPopupHolder.beVisibleIf(!config.showIncomingCallsFullScreen && config.keepCallsInPopUp)
-            }
-            settingsKeepCallsInPopUpFaq.imageTintList = ColorStateList.valueOf(getProperTextColor())
-            settingsKeepCallsInPopUpFaq.setOnClickListener {
-                ConfirmationDialog(this@SettingsActivity, messageId = R.string.keep_calls_in_popup_summary, positive = com.goodwy.commons.R.string.ok, negative = 0) {}
-            }
-        }
-    }
-
-    private fun setupTurnOnSpeakerInPopup() {
-        binding.apply {
-            settingsTurnOnSpeakerInPopupHolder.beVisibleIf(!config.showIncomingCallsFullScreen && config.keepCallsInPopUp)
-            settingsTurnOnSpeakerInPopup.isChecked = config.turnOnSpeakerInPopup
-            settingsTurnOnSpeakerInPopupHolder.setOnClickListener {
-                settingsTurnOnSpeakerInPopup.toggle()
-                config.turnOnSpeakerInPopup = settingsTurnOnSpeakerInPopup.isChecked
-            }
-            settingsTurnOnSpeakerInPopupFaq.imageTintList = ColorStateList.valueOf(getProperTextColor())
-            settingsTurnOnSpeakerInPopupFaq.setOnClickListener {
-                ConfirmationDialog(this@SettingsActivity, messageId = R.string.turn_on_speaker_in_popup_summary, positive = com.goodwy.commons.R.string.ok, negative = 0) {}
-            }
-        }
-    }
-
-    private fun setupBackPressedEndCall() {
-        binding.apply {
-            settingsBackPressedEndCall.isChecked = config.backPressedEndCall
-            settingsBackPressedEndCallHolder.setOnClickListener {
-                settingsBackPressedEndCall.toggle()
-                config.backPressedEndCall = settingsBackPressedEndCall.isChecked
             }
         }
     }
@@ -1039,69 +443,6 @@ class SettingsActivity : SimpleActivity() {
         config.quickAnswers = quickAnswers
     }
 
-    private fun setupCallsExport() {
-        binding.settingsExportCallsHolder.setOnClickListener {
-            ExportCallHistoryDialog(this) { filename ->
-                saveDocument.launch("$filename.json")
-            }
-        }
-    }
-
-    private fun setupCallsImport() {
-        binding.settingsImportCallsHolder.setOnClickListener {
-            getContent.launch(IMPORT_CALL_HISTORY_FILE_TYPES.toTypedArray())
-        }
-    }
-
-    private fun importCallHistory(uri: Uri) {
-        ensureBackgroundThread {
-            try {
-                val jsonString = contentResolver.openInputStream(uri)!!.use { inputStream ->
-                    inputStream.bufferedReader().readText()
-                }
-
-                val objects = Json.decodeFromString<List<RecentCall>>(jsonString)
-
-                if (objects.isEmpty()) {
-                    toast(R.string.no_entries_for_importing)
-                    return@ensureBackgroundThread
-                }
-
-                // permission handling must run on the UI thread
-                runOnUiThread {
-                    RecentsHelper(this).restoreRecentCalls(this, objects) { inserted ->
-                        toast(if (inserted > 0) R.string.importing_successful else R.string.no_entries_for_importing)
-                    }
-                }
-            } catch (_: SerializationException) {
-                toast(R.string.invalid_file_format)
-            } catch (_: IllegalArgumentException) {
-                toast(R.string.invalid_file_format)
-            } catch (e: Exception) {
-                showErrorToast(e)
-            }
-        }
-    }
-
-    private fun exportCallHistory(recents: List<RecentCall>, uri: Uri) {
-        if (recents.isEmpty()) {
-            toast(R.string.no_entries_for_exporting)
-            return
-        }
-        ensureBackgroundThread {
-            try {
-                val jsonString = Json.encodeToString(recents)
-                // "wt" truncates, so a shorter export over an existing file leaves no stale tail
-                contentResolver.openOutputStream(uri, "wt")!!.use {
-                    it.write(jsonString.toByteArray())
-                }
-                toast(R.string.exporting_successful)
-            } catch (e: Exception) {
-                showErrorToast(e)
-            }
-        }
-    }
-
     private fun setupFlashForAlerts() {
         binding.apply {
             settingsFlashForAlerts.isChecked = config.flashForAlerts
@@ -1111,122 +452,6 @@ class SettingsActivity : SimpleActivity() {
             }
         }
     }
-
-    private fun setupHideDialpadLetters() {
-        binding.apply {
-            settingsHideDialpadLetters.isChecked = config.hideDialpadLetters
-            settingsHideDialpadLettersHolder.setOnClickListener {
-                settingsHideDialpadLetters.toggle()
-                config.hideDialpadLetters = settingsHideDialpadLetters.isChecked
-            }
-        }
-    }
-
-    private fun setupDialpadNumbers() {
-        binding.apply {
-            settingsHideDialpadNumbers.isChecked = config.hideDialpadNumbers
-            settingsHideDialpadNumbersHolder.setOnClickListener {
-                settingsHideDialpadNumbers.toggle()
-                config.hideDialpadNumbers = settingsHideDialpadNumbers.isChecked
-            }
-        }
-    }
-
-    private fun setupGroupCalls() {
-        binding.settingsGroupCalls.text = getGroupCallsText()
-        binding.settingsGroupCallsHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(GROUP_CALLS_NO, getString(R.string.no)),
-                RadioItem(GROUP_CALLS_SUBSEQUENT, getString(R.string.group_subsequent_calls)),
-                RadioItem(GROUP_CALLS_ALL, getString(R.string.group_all_calls))
-            )
-
-            RadioGroupDialog(
-                this@SettingsActivity,
-                items,
-                getGroupCallsCheckedItemId(),
-                R.string.group_calls,
-                defaultItemId = GROUP_CALLS_SUBSEQUENT
-            ) {
-                when(it) {
-                    GROUP_CALLS_SUBSEQUENT -> {
-                        config.groupSubsequentCalls = true
-                        config.groupAllCalls = false
-                    }
-                    GROUP_CALLS_ALL -> {
-                        config.groupSubsequentCalls = false
-                        config.groupAllCalls = true
-                    }
-                    else -> {
-                        config.groupSubsequentCalls = false
-                        config.groupAllCalls = false
-                    }
-                }
-                binding.settingsGroupCalls.text = getGroupCallsText()
-            }
-        }
-    }
-
-    private fun getGroupCallsText() = getString(
-        when {
-            config.groupSubsequentCalls -> R.string.group_subsequent_calls
-            config.groupAllCalls -> R.string.group_all_calls
-            else -> com.goodwy.commons.R.string.no
-        }
-    )
-
-    private fun getGroupCallsCheckedItemId(): Int {
-        return when {
-            config.groupSubsequentCalls -> GROUP_CALLS_SUBSEQUENT
-            config.groupAllCalls -> GROUP_CALLS_ALL
-            else -> GROUP_CALLS_NO
-        }
-    }
-
-
-//    private fun setupGroupCallsByDate() {
-//        binding.apply {
-//            settingsGroupCallsByDate.isChecked = config.groupCallsByDate
-//            settingsGroupCallsByDateHolder.setOnClickListener {
-//                settingsGroupCallsByDate.toggle()
-//                config.groupCallsByDate = settingsGroupCallsByDate.isChecked
-//            }
-//        }
-//    }
-
-    private fun setupQueryLimitRecent() {
-        binding.settingsQueryLimitRecent.text = getQueryLimitRecentText()
-        binding.settingsQueryLimitRecentHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(QUERY_LIMIT_TINY_VALUE, QUERY_LIMIT_TINY_VALUE.toString()),
-                RadioItem(QUERY_LIMIT_SMALL_VALUE, QUERY_LIMIT_SMALL_VALUE.toString()),
-                RadioItem(QUERY_LIMIT_MEDIUM_VALUE, QUERY_LIMIT_MEDIUM_VALUE.toString()),
-                RadioItem(QUERY_LIMIT_NORMAL_VALUE, QUERY_LIMIT_NORMAL_VALUE.toString()),
-                RadioItem(QUERY_LIMIT_BIG_VALUE, QUERY_LIMIT_BIG_VALUE.toString()),
-                RadioItem(QUERY_LIMIT_MAX_VALUE, "MAX"))
-
-            RadioGroupDialog(
-                this@SettingsActivity,
-                items,
-                config.queryLimitRecent,
-                R.string.number_of_recent_calls_displays,
-                defaultItemId = QUERY_LIMIT_MEDIUM_VALUE
-            ) {
-                config.queryLimitRecent = it as Int
-                binding.settingsQueryLimitRecent.text = getQueryLimitRecentText()
-            }
-        }
-
-        binding.settingsQueryLimitRecentFaq.imageTintList = ColorStateList.valueOf(getProperTextColor())
-        binding.settingsQueryLimitRecentFaq.setOnClickListener {
-            ConfirmationDialog(this@SettingsActivity, messageId = R.string.number_of_recent_calls_displays_summary, positive = com.goodwy.commons.R.string.ok, negative = 0) {}
-        }
-    }
-
-    private fun getQueryLimitRecentText(): String {
-        return if (config.queryLimitRecent == QUERY_LIMIT_MAX_VALUE) "MAX" else config.queryLimitRecent.toString()
-    }
-
     private fun setupStartNameWithSurname() {
         binding.apply {
             settingsStartNameWithSurname.isChecked = config.startNameWithSurname
@@ -1234,24 +459,6 @@ class SettingsActivity : SimpleActivity() {
                 settingsStartNameWithSurname.toggle()
                 config.startNameWithSurname = settingsStartNameWithSurname.isChecked
             }
-        }
-    }
-
-    private fun setupShowNicknameInsteadNames() {
-        binding.apply {
-            settingsShowNicknameInsteadNames.isChecked = config.showNicknameInsteadNames
-            settingsShowNicknameInsteadNamesHolder.setOnClickListener {
-                settingsShowNicknameInsteadNames.toggle()
-                config.showNicknameInsteadNames = settingsShowNicknameInsteadNames.isChecked
-            }
-        }
-    }
-
-    private fun setupFormatPhoneNumbers() {
-        binding.settingsFormatPhoneNumbers.isChecked = config.formatPhoneNumbers
-        binding.settingsFormatPhoneNumbersHolder.setOnClickListener {
-            binding.settingsFormatPhoneNumbers.toggle()
-            config.formatPhoneNumbers = binding.settingsFormatPhoneNumbers.isChecked
         }
     }
 
@@ -1272,104 +479,6 @@ class SettingsActivity : SimpleActivity() {
             settingsCallFromSameSimHolder.setOnClickListener {
                 settingsCallFromSameSim.toggle()
                 config.callUsingSameSim = settingsCallFromSameSim.isChecked
-            }
-        }
-    }
-
-    private fun setupCallBlockButton() {
-        binding.apply {
-            settingsCallBlockButton.isChecked = config.callBlockButton
-            settingsCallBlockButtonHolder.setOnClickListener {
-                settingsCallBlockButton.toggle()
-                config.callBlockButton = settingsCallBlockButton.isChecked
-            }
-        }
-    }
-
-    private fun setupSimDialogStyle() {
-        binding.settingsSimDialogStyleHolder.beGoneIf(!hasMultipleSims)
-        binding.settingsSimDialogStyle.text = getSimDialogStyleText()
-        binding.settingsSimDialogStyleHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(SIM_DIALOG_STYLE_LIST, getString(R.string.list)),
-                RadioItem(SIM_DIALOG_STYLE_BUTTON, getString(R.string.buttons)))
-
-            RadioGroupDialog(this@SettingsActivity, items, config.simDialogStyle, R.string.sim_card_selection_dialog_style) {
-                config.simDialogStyle = it as Int
-                binding.settingsSimDialogStyle.text = getSimDialogStyleText()
-            }
-        }
-    }
-
-    private fun getSimDialogStyleText() = getString(
-        when (config.simDialogStyle) {
-            SIM_DIALOG_STYLE_LIST -> R.string.list
-            else -> R.string.buttons
-        }
-    )
-
-    private fun setupOverflowIcon() {
-        binding.apply {
-            settingsOverflowIcon.applyColorFilter(getProperTextColor())
-            settingsOverflowIcon.setImageResource(getOverflowIcon(baseConfig.overflowIcon))
-            settingsOverflowIconHolder.setOnClickListener {
-                val items = arrayListOf(
-                    com.goodwy.commons.R.drawable.ic_more_horiz,
-                    com.goodwy.commons.R.drawable.ic_three_dots_vector,
-                    com.goodwy.commons.R.drawable.ic_more_horiz_round
-                )
-
-                IconListDialog(
-                    activity = this@SettingsActivity,
-                    items = items,
-                    checkedItemId = baseConfig.overflowIcon + 1,
-                    defaultItemId = OVERFLOW_ICON_HORIZONTAL + 1,
-                    titleId = com.goodwy.strings.R.string.overflow_icon,
-                    size = pixels(com.goodwy.commons.R.dimen.normal_icon_size).toInt(),
-                    color = getProperTextColor()
-                ) { wasPositivePressed, newValue ->
-                    if (wasPositivePressed) {
-                        if (baseConfig.overflowIcon != newValue - 1) {
-                            baseConfig.overflowIcon = newValue - 1
-                            settingsOverflowIcon.setImageResource(getOverflowIcon(baseConfig.overflowIcon))
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setupFloatingButtonStyle() {
-        binding.apply {
-            settingsFloatingButtonStyle.applyColorFilter(getProperTextColor())
-            settingsFloatingButtonStyle.setImageResource(
-                if (baseConfig.materialDesign3) R.drawable.squircle_bg else R.drawable.ic_circle_filled
-            )
-            settingsFloatingButtonStyleHolder.setOnClickListener {
-                val items = arrayListOf(
-                    R.drawable.ic_circle_filled,
-                    R.drawable.squircle_bg
-                )
-
-                IconListDialog(
-                    activity = this@SettingsActivity,
-                    items = items,
-                    checkedItemId = if (baseConfig.materialDesign3) 2 else 1,
-                    defaultItemId = 1,
-                    titleId = com.goodwy.strings.R.string.floating_button_style,
-                    size = pixels(com.goodwy.commons.R.dimen.normal_icon_size).toInt(),
-                    color = getProperTextColor()
-                ) { wasPositivePressed, newValue ->
-                    if (wasPositivePressed) {
-                        if (newValue != if (baseConfig.materialDesign3) 2 else 1) {
-                            baseConfig.materialDesign3 = newValue == 2
-                            settingsFloatingButtonStyle.setImageResource(
-                                if (newValue == 2) R.drawable.squircle_bg else R.drawable.ic_circle_filled
-                            )
-                            config.needRestart = true
-                        }
-                    }
-                }
             }
         }
     }
@@ -1476,213 +585,6 @@ class SettingsActivity : SimpleActivity() {
 
     private fun hasColorChanged(old: Int, new: Int) = abs(old - new) > 1
 
-    private fun setupDialpadStyle() {
-        binding.settingsDialpadStyleHolder.setOnClickListener {
-            startActivity(Intent(applicationContext, SettingsDialpadActivity::class.java))
-        }
-    }
-
-    private fun setupShowRecentCallsOnDialpad() {
-        binding.apply {
-            settingsShowRecentCallsOnDialpad.isChecked = config.showRecentCallsOnDialpad
-            settingsShowRecentCallsOnDialpadHolder.setOnClickListener {
-                settingsShowRecentCallsOnDialpad.toggle()
-                config.showRecentCallsOnDialpad = settingsShowRecentCallsOnDialpad.isChecked
-            }
-        }
-    }
-
-    private fun setupSearchContactsInDialpad() {
-        binding.apply {
-            settingsSearchContactsInDialpad.isChecked = config.searchContactsInDialpad
-            settingsSearchContactsInDialpadHolder.setOnClickListener {
-                settingsSearchContactsInDialpad.toggle()
-                config.searchContactsInDialpad = settingsSearchContactsInDialpad.isChecked
-            }
-        }
-    }
-
-    private fun setupOpenSearch() {
-        binding.apply {
-            settingsOpenSearch.isChecked = config.openSearch
-            settingsOpenSearchHolder.setOnClickListener {
-                settingsOpenSearch.toggle()
-                config.openSearch = settingsOpenSearch.isChecked
-            }
-        }
-    }
-
-    private fun setupEndSearch() {
-        binding.apply {
-            settingsEndSearch.isChecked = config.closeSearch
-            settingsEndSearchHolder.setOnClickListener {
-                settingsEndSearch.toggle()
-                config.closeSearch = settingsEndSearch.isChecked
-            }
-        }
-    }
-
-    private fun setupOnFavoriteClick() = binding.apply {
-        settingsOnFavoriteClick.text = getOnRecentOrContactClickText(config.onFavoriteClick, true)
-        settingsOnFavoriteClickHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(SWIPE_ACTION_CALL, getString(R.string.call), icon = R.drawable.ic_phone_vector),
-                RadioItem(SWIPE_ACTION_MESSAGE, getString(R.string.send_sms), icon = R.drawable.ic_messages),
-                RadioItem(SWIPE_ACTION_WHATSAPP, getString(R.string.send_whatsapp), icon = R.drawable.ic_whatsapp_mono_vector),
-                RadioItem(SWIPE_ACTION_OPEN, getString(R.string.view_contact_details), icon = R.drawable.ic_info),
-                RadioItem(SWIPE_ACTION_EDIT, getString(R.string.edit_contact), icon = com.goodwy.commons.R.drawable.ic_edit_vector),
-                RadioItem(SWIPE_ACTION_NONE, getString(com.goodwy.commons.R.string.nothing)),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.onFavoriteClick,
-                R.string.on_favorite_click,
-                defaultItemId = SWIPE_ACTION_CALL
-            ) {
-                config.onFavoriteClick = it as Int
-                settingsOnFavoriteClick.text = getOnRecentOrContactClickText(config.onFavoriteClick, true)
-            }
-        }
-    }
-
-    private fun setupOnRecentClick() = binding.apply {
-        settingsOnRecentClick.text = getOnRecentOrContactClickText(config.onRecentClick, false)
-        settingsOnRecentClickHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(SWIPE_ACTION_CALL, getString(R.string.call), icon = R.drawable.ic_phone_vector),
-                RadioItem(SWIPE_ACTION_MESSAGE, getString(R.string.send_sms), icon = R.drawable.ic_messages),
-                RadioItem(SWIPE_ACTION_WHATSAPP, getString(R.string.send_whatsapp), icon = R.drawable.ic_whatsapp_mono_vector),
-                RadioItem(SWIPE_ACTION_OPEN, getString(R.string.show_call_details), icon = R.drawable.ic_info),
-                RadioItem(SWIPE_ACTION_NONE, getString(com.goodwy.commons.R.string.nothing)),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.onRecentClick,
-                R.string.on_recent_click,
-                defaultItemId = SWIPE_ACTION_CALL
-            ) {
-                config.onRecentClick = it as Int
-                settingsOnRecentClick.text = getOnRecentOrContactClickText(config.onRecentClick, false)
-            }
-        }
-    }
-
-    private fun setupOnContactClick() = binding.apply {
-        settingsOnContactClick.text = getOnRecentOrContactClickText(config.onContactClick, true)
-        settingsOnContactClickHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(SWIPE_ACTION_CALL, getString(R.string.call), icon = R.drawable.ic_phone_vector),
-                RadioItem(SWIPE_ACTION_MESSAGE, getString(R.string.send_sms), icon = R.drawable.ic_messages),
-                RadioItem(SWIPE_ACTION_WHATSAPP, getString(R.string.send_whatsapp), icon = R.drawable.ic_whatsapp_mono_vector),
-                RadioItem(SWIPE_ACTION_OPEN, getString(R.string.view_contact_details), icon = R.drawable.ic_info),
-                RadioItem(SWIPE_ACTION_EDIT, getString(R.string.edit_contact), icon = com.goodwy.commons.R.drawable.ic_edit_vector),
-                RadioItem(SWIPE_ACTION_NONE, getString(com.goodwy.commons.R.string.nothing)),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.onContactClick,
-                R.string.on_contact_click,
-                defaultItemId = SWIPE_ACTION_CALL
-            ) {
-                config.onContactClick = it as Int
-                settingsOnContactClick.text = getOnRecentOrContactClickText(config.onContactClick, true)
-            }
-        }
-    }
-
-    private fun getOnRecentOrContactClickText(currentConfig: Int, isContact: Boolean) = getString(
-        when (currentConfig) {
-            SWIPE_ACTION_CALL -> R.string.call
-            SWIPE_ACTION_MESSAGE -> R.string.send_sms
-            SWIPE_ACTION_WHATSAPP -> R.string.send_whatsapp
-            SWIPE_ACTION_OPEN -> if (isContact) R.string.view_contact_details else R.string.show_call_details
-            SWIPE_ACTION_EDIT -> R.string.edit_contact
-            else -> com.goodwy.commons.R.string.nothing
-        }
-    )
-
-    private fun setupUseSwipeToAction() {
-        updateSwipeToActionVisible()
-        binding.apply {
-            settingsUseSwipeToAction.isChecked = config.useSwipeToAction
-            settingsUseSwipeToActionHolder.setOnClickListener {
-                settingsUseSwipeToAction.toggle()
-                config.useSwipeToAction = settingsUseSwipeToAction.isChecked
-                updateSwipeToActionVisible()
-            }
-        }
-    }
-
-    private fun setupSwipeWidth() = binding.apply {
-        settingsSwipeWidthHolder.beVisibleIf(config.useSwipeToAction)
-        settingsSwipeWidth.text = getSwipeWidthText(config.swipeToActionWidth)
-        settingsSwipeWidthHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(2, "1/2"),
-                RadioItem(3, "1/3"),
-                RadioItem(4, "1/4"),
-                RadioItem(5, "1/5"),
-            )
-
-            RadioGroupIconDialog(
-                this@SettingsActivity,
-                items,
-                config.swipeToActionWidth,
-                R.string.swipe_width,
-                defaultItemId = 2
-            ) {
-                config.swipeToActionWidth = it as Int
-                settingsSwipeWidth.text = getSwipeWidthText(config.swipeToActionWidth)
-            }
-        }
-    }
-
-    private fun getSwipeWidthText(swipeWidth: Int): String {
-        return when (swipeWidth) {
-            3 -> "1/3"
-            4 -> "1/4"
-            5 -> "1/5"
-            else -> "1/2"
-        }
-    }
-
-    private fun updateSwipeToActionVisible() {
-        binding.apply {
-            settingsSwipeWidthHolder.beVisibleIf(config.useSwipeToAction)
-            settingsSwipeVibrationHolder.beVisibleIf(config.useSwipeToAction)
-            settingsSwipeRippleHolder.beVisibleIf(config.useSwipeToAction)
-            settingsSwipeRightActionHolder.beVisibleIf(config.useSwipeToAction)
-            settingsSwipeLeftActionHolder.beVisibleIf(config.useSwipeToAction)
-            settingsSkipDeleteConfirmationHolder.beVisibleIf(config.useSwipeToAction &&(config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE))
-        }
-    }
-
-    private fun setupSwipeVibration() {
-        binding.apply {
-            settingsSwipeVibration.isChecked = config.swipeVibration
-            settingsSwipeVibrationHolder.setOnClickListener {
-                settingsSwipeVibration.toggle()
-                config.swipeVibration = settingsSwipeVibration.isChecked
-            }
-        }
-    }
-
-    private fun setupSwipeRipple() {
-        binding.apply {
-            settingsSwipeRipple.isChecked = config.swipeRipple
-            settingsSwipeRippleHolder.setOnClickListener {
-                settingsSwipeRipple.toggle()
-                config.swipeRipple = settingsSwipeRipple.isChecked
-            }
-        }
-    }
-
     private fun setupSwipeRightAction() = binding.apply {
         if (isRTLLayout) settingsSwipeRightActionLabel.text = getString(R.string.swipe_left_action)
         settingsSwipeRightAction.text = getSwipeActionText(false)
@@ -1707,7 +609,6 @@ class SettingsActivity : SimpleActivity() {
             ) {
                 config.swipeRightAction = it as Int
                 settingsSwipeRightAction.text = getSwipeActionText(false)
-                settingsSkipDeleteConfirmationHolder.beVisibleIf(config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE)
             }
         }
     }
@@ -1740,9 +641,6 @@ class SettingsActivity : SimpleActivity() {
                 ) {
                     config.swipeLeftAction = it as Int
                     settingsSwipeLeftAction.text = getSwipeActionText(true)
-                    settingsSkipDeleteConfirmationHolder.beVisibleIf(
-                        config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE
-                    )
                 }
             }
         }
@@ -1759,27 +657,6 @@ class SettingsActivity : SimpleActivity() {
         }
     )
 
-    private fun setupDeleteConfirmation() {
-        binding.apply {
-            //settingsSkipDeleteConfirmationHolder.beVisibleIf(config.swipeLeftAction == SWIPE_ACTION_DELETE || config.swipeRightAction == SWIPE_ACTION_DELETE)
-            settingsSkipDeleteConfirmation.isChecked = config.skipDeleteConfirmation
-            settingsSkipDeleteConfirmationHolder.setOnClickListener {
-                settingsSkipDeleteConfirmation.toggle()
-                config.skipDeleteConfirmation = settingsSkipDeleteConfirmation.isChecked
-            }
-        }
-    }
-
-    private fun setupTipJar() = binding.apply {
-        settingsTipJarHolder.apply {
-            beVisibleIf(checkPro(false))
-            background.applyColorFilter(getColoredMaterialStatusBarColor().lightenColor(4))
-            setOnClickListener {
-                launchPurchase()
-            }
-        }
-    }
-
     private fun setupAbout() = binding.apply {
         val flavorName = BuildConfig.FLAVOR
         val storeDisplayName = when (flavorName) {
@@ -1793,7 +670,48 @@ class SettingsActivity : SimpleActivity() {
 
         settingsAboutVersion.text = fullVersionText
         settingsAboutHolder.setOnClickListener {
-            launchAbout()
+            startActivity(Intent(this@SettingsActivity, AboutActivity::class.java))
+        }
+    }
+
+    private fun setupSettingsExport() {
+        binding.settingsExportCallsHolder.setOnClickListener {
+            saveDocument.launch(SETTINGS_FILE_NAME)
+        }
+    }
+
+    private fun setupSettingsImport() {
+        binding.settingsImportCallsHolder.setOnClickListener {
+            getContent.launch(IMPORT_SETTINGS_FILE_TYPES.toTypedArray())
+        }
+    }
+
+    private fun exportSettings(uri: Uri) {
+        ensureBackgroundThread {
+            try {
+                val json = SettingsBackup.backup(getSharedPreferences(PREFS_KEY, MODE_PRIVATE))
+                // "wt" truncates, so a shorter export over an existing file leaves no stale tail
+                contentResolver.openOutputStream(uri, "wt")!!.use { it.write(json.toByteArray()) }
+                toast(R.string.exporting_successful)
+            } catch (e: Exception) {
+                showErrorToast(e)
+            }
+        }
+    }
+
+    private fun importSettings(uri: Uri) {
+        ensureBackgroundThread {
+            try {
+                val content = contentResolver.openInputStream(uri)!!.use { it.bufferedReader().readText() }
+                SettingsBackup.restore(getSharedPreferences(PREFS_KEY, MODE_PRIVATE), content)
+                applyPinnedSettings()
+                toast(R.string.importing_successful)
+                runOnUiThread { applyThemeChange() }
+            } catch (_: JSONException) {
+                toast(R.string.invalid_file_format)
+            } catch (e: Exception) {
+                showErrorToast(e)
+            }
         }
     }
 
@@ -1812,7 +730,9 @@ class SettingsActivity : SimpleActivity() {
             settingsCallVibration.isChecked = config.callVibration
             settingsCallVibrationHolder.setOnClickListener {
                 settingsCallVibration.toggle()
+                // One switch for both: in-call keys and the dialpad screen keys
                 config.callVibration = settingsCallVibration.isChecked
+                config.dialpadVibration = settingsCallVibration.isChecked
             }
         }
     }
@@ -1833,40 +753,6 @@ class SettingsActivity : SimpleActivity() {
             settingsDialpadBeepsHolder.setOnClickListener {
                 settingsDialpadBeeps.toggle()
                 config.dialpadBeeps = settingsDialpadBeeps.isChecked
-            }
-        }
-    }
-
-    private fun setupBlockCallFromAnotherApp() {
-        binding.apply {
-            settingsBlockCallFromAnotherApp.isChecked = config.blockCallFromAnotherApp
-            settingsBlockCallFromAnotherAppHolder.setOnClickListener {
-                settingsBlockCallFromAnotherApp.toggle()
-                config.blockCallFromAnotherApp = settingsBlockCallFromAnotherApp.isChecked
-            }
-            settingsBlockCallFromAnotherAppFaq.imageTintList = ColorStateList.valueOf(getProperTextColor())
-            settingsBlockCallFromAnotherAppFaq.setOnClickListener {
-                ConfirmationDialog(this@SettingsActivity, messageId = R.string.open_dialpad_when_call_from_another_app_summary, positive = com.goodwy.commons.R.string.ok, negative = 0) {}
-            }
-        }
-    }
-
-    private fun setupDisableSwipeToAnswer() {
-        binding.apply {
-            settingsDisableSwipeToAnswer.isChecked = config.disableSwipeToAnswer
-            settingsDisableSwipeToAnswerHolder.setOnClickListener {
-                settingsDisableSwipeToAnswer.toggle()
-                config.disableSwipeToAnswer = settingsDisableSwipeToAnswer.isChecked
-            }
-        }
-    }
-
-    private fun setupUseRelativeDate() {
-        binding.apply {
-            settingsRelativeDate.isChecked = config.useRelativeDate
-            settingsRelativeDateHolder.setOnClickListener {
-                settingsRelativeDate.toggle()
-                config.useRelativeDate = settingsRelativeDate.isChecked
             }
         }
     }

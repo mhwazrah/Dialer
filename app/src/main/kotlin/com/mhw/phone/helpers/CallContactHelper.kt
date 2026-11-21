@@ -106,19 +106,12 @@ fun getCallContact(context: Context, call: Call?, callback: (CallContact) -> Uni
                         callContact.numberLabel = context.getPhoneNumberTypeText(specificPhoneNumber.type, specificPhoneNumber.label)
                     }
 
-                    val showCallerDescription = try { context.config.showCallerDescription }  catch (_: Exception) { SHOW_CALLER_COMPANY }
-                    if (showCallerDescription != SHOW_CALLER_NOTHING) {
-                        if (contact.organization.company.isNotEmpty() && showCallerDescription == SHOW_CALLER_COMPANY) {
-                            if (contact.organization.jobPosition.isNotEmpty()) {
-                                callContact.description = contact.organization.company + " (" + contact.organization.jobPosition + ")"
-                            } else {
-                                callContact.description = contact.organization.company
-                            }
-                        }
-                        if (contact.nickname.isNotEmpty() && showCallerDescription == SHOW_CALLER_NICKNAME) {
-                            callContact.description = contact.nickname
-                        }
+                    // Company (with job position) and nickname, whichever the contact has
+                    val company = contact.organization.company.let { company ->
+                        val job = contact.organization.jobPosition
+                        if (company.isNotEmpty() && job.isNotEmpty()) "$company ($job)" else company
                     }
+                    callContact.description = listOf(company, contact.nickname).filter { it.isNotEmpty() }.joinToString(" · ")
 
                     callContact.isABusinessCall =
                         contact.organization.company.isNotEmpty() && contact.getNameToDisplay().contains(contact.organization.company)

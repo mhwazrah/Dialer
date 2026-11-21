@@ -7,6 +7,10 @@ import com.goodwy.commons.models.Release
 import com.mhw.phone.R
 
 // shared prefs
+const val APP_THEME = "app_theme"
+const val APP_THEME_SYSTEM = 0
+const val APP_THEME_LIGHT = 1
+const val APP_THEME_DARK = 2
 const val SPEED_DIAL = "speed_dial"
 const val REMEMBER_SIM_PREFIX = "remember_sim_"
 const val LEGACY_SIM_KEYS_MIGRATED = "legacy_sim_keys_migrated"

@@ -40,6 +40,7 @@ class ConferenceActivity : SimpleActivity() {
         super.onResume()
         setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow)
         binding.conferenceAppbar.setBackgroundColor(Color.TRANSPARENT)
+        binding.conferenceToolbar.setBackgroundColor(Color.TRANSPARENT)
     }
 
     override fun onDestroy() {
