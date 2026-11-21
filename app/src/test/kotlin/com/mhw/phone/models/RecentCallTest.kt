@@ -16,9 +16,10 @@ class RecentCallTest {
         name: String = "",
         company: String = "",
         startTS: Long = 0L,
+        simID: Int = 1,
     ) = RecentCall(
         id = 1, phoneNumber = number, name = name, company = company, photoUri = "", startTS = startTS,
-        duration = 0, type = 1, simID = 1, simColor = 0, specificNumber = "", specificType = "",
+        duration = 0, type = 1, simID = simID, simColor = 0, specificNumber = "", specificType = "",
         isUnknownNumber = false, isVoiceMail = false,
     )
 
@@ -58,5 +59,13 @@ class RecentCallTest {
     @Test
     fun groupedCallsDefaultsToNull() {
         assertNull(call().groupedCalls)
+    }
+
+    @Test
+    fun lastUsedSimIsTheNewestCallThatRecordedOne() {
+        val calls = listOf(call(startTS = 10, simID = 1), call(startTS = 30, simID = 2), call(startTS = 50, simID = -1))
+        assertEquals(2, calls.lastUsedSimId()) // the newest (50) recorded no SIM
+        assertEquals(null, listOf(call(simID = 0), call(simID = -1)).lastUsedSimId())
+        assertEquals(null, emptyList<RecentCall>().lastUsedSimId())
     }
 }

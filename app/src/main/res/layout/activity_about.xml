@@ -158,8 +158,12 @@
                         style="@style/SettingsHolderStyle">
 
                         <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/about_github_label"
                             style="@style/SettingsTextLabelStyle"
                             android:layout_centerVertical="true"
+                            android:drawableStart="@drawable/ic_brand_github"
+                            android:drawablePadding="@dimen/medium_margin"
+                            android:gravity="center_vertical"
                             android:text="@string/about_github" />
                     </RelativeLayout>
 
@@ -168,8 +172,12 @@
                         style="@style/SettingsHolderStyle">
 
                         <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/about_x_label"
                             style="@style/SettingsTextLabelStyle"
                             android:layout_centerVertical="true"
+                            android:drawableStart="@drawable/ic_brand_x"
+                            android:drawablePadding="@dimen/medium_margin"
+                            android:gravity="center_vertical"
                             android:text="@string/about_x" />
                     </RelativeLayout>
 
@@ -178,8 +186,12 @@
                         style="@style/SettingsHolderStyle">
 
                         <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/about_linkedin_label"
                             style="@style/SettingsTextLabelStyle"
                             android:layout_centerVertical="true"
+                            android:drawableStart="@drawable/ic_brand_linkedin"
+                            android:drawablePadding="@dimen/medium_margin"
+                            android:gravity="center_vertical"
                             android:text="@string/about_linkedin" />
                     </RelativeLayout>
                 </LinearLayout>

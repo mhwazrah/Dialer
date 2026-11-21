@@ -1,5 +1,6 @@
 package com.mhw.phone.helpers
 
+import com.goodwy.commons.extensions.baseConfig
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat
@@ -26,6 +27,7 @@ class AppStyleTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+        Config.resetForTests() // the singleton would still hold an earlier test's prefs
         // App.onCreate already ran both functions; start from clean prefs
         prefs.edit().clear().commit()
     }
@@ -185,6 +187,7 @@ class AppStyleTest {
             Triple("onRecentClick", SWIPE_ACTION_OPEN, c.onRecentClick),
             Triple("onContactClick", SWIPE_ACTION_OPEN, c.onContactClick),
             Triple("useSwipeToAction", true, c.useSwipeToAction),
+            Triple("swipeToActionWidth", 3, c.swipeToActionWidth),
             Triple("swipeVibration", true, c.swipeVibration),
             Triple("swipeRipple", true, c.swipeRipple),
             Triple("skipDeleteConfirmation", false, c.skipDeleteConfirmation),
@@ -225,5 +228,21 @@ class AppStyleTest {
             Triple("useRelativeDate", false, c.useRelativeDate)
         )
         expected.forEach { (name, value, actual) -> assertEquals(name, value, actual) }
+    }
+
+    @Test
+    fun blockingIsOnByDefaultButAnExplicitChoiceIsKept() {
+        context.applyPinnedSettings()
+        assertTrue(context.baseConfig.blockingEnabled)
+
+        context.baseConfig.blockingEnabled = false
+        context.applyPinnedSettings()
+        assertFalse(context.baseConfig.blockingEnabled)
+    }
+
+    @Test
+    fun swipeDefaultsAreCallRightAndMessageLeft() {
+        assertEquals(SWIPE_ACTION_CALL, context.config.swipeRightAction)
+        assertEquals(SWIPE_ACTION_MESSAGE, context.config.swipeLeftAction)
     }
 }

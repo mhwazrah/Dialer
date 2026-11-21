@@ -1,5 +1,6 @@
 package com.mhw.phone.activities
 
+import com.mhw.phone.models.lastUsedSimId
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.ContentUris
@@ -1072,15 +1073,17 @@ class CallHistoryActivity : SimpleActivity() {
         }
     }
 
+    // A SIM saved for this number (the SIM buttons on this page) wins; otherwise the call goes straight out on the SIM
+    // last used with this contact. Without either, or with one SIM, the normal path picks it.
     private fun makeCall(call: RecentCall, prefix: String = "") {
-        val phoneNumber = call.phoneNumber
-        if (config.showCallConfirmation) {
-            CallConfirmationDialog(this as SimpleActivity, call.name) {
-                launchCallIntent("$prefix$phoneNumber", key = BuildConfig.RIGHT_APP_KEY)
-            }
-        } else {
-            launchCallIntent("$prefix$phoneNumber", key = BuildConfig.RIGHT_APP_KEY)
+        val number = "$prefix${call.phoneNumber}"
+        val hasSavedSim = config.getCustomSIM("tel:${call.phoneNumber.replace("+", "%2B")}") != null
+        val lastSimId = (currentRecentCallList.orEmpty() + call).lastUsedSimId()
+        val start = {
+            if (!hasSavedSim && lastSimId != null && areMultipleSIMsAvailable()) callContactWithSim(number, useMainSIM = lastSimId == 1)
+            else placeCall(number)
         }
+        if (config.showCallConfirmation) CallConfirmationDialog(this as SimpleActivity, call.name) { start() } else start()
     }
 
     // One-off call with a chosen SIM; the number's saved SIM is left as it is. A custom glass popup, not PopupMenu:

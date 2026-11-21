@@ -3,6 +3,7 @@ package com.mhw.phone.extensions
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
@@ -14,10 +15,12 @@ import com.goodwy.commons.dialogs.PermissionRequiredDialog
 import com.goodwy.commons.extensions.canUseFullScreenIntent
 import com.goodwy.commons.extensions.initiateCall
 import com.goodwy.commons.extensions.isDefaultDialer
-import com.goodwy.commons.extensions.launchCallIntent
+import com.goodwy.commons.extensions.launchActivityIntent
 import com.goodwy.commons.extensions.openFullScreenIntentSettings
 import com.goodwy.commons.extensions.openNotificationSettings
 import com.goodwy.commons.extensions.telecomManager
+import com.goodwy.commons.helpers.IS_RIGHT_APP
+import com.goodwy.commons.helpers.PERMISSION_CALL_PHONE
 import com.goodwy.commons.helpers.PERMISSION_READ_PHONE_STATE
 import com.goodwy.commons.models.contacts.Contact
 import com.mhw.phone.BuildConfig
@@ -29,6 +32,22 @@ import com.mhw.phone.models.SIMAccount
 import com.mhw.phone.dialogs.SelectSimButtonDialog
 import com.mhw.phone.helpers.SIM_DIALOG_STYLE_LIST
 
+/**
+ * Places a call through this app. Commons' launchCallIntent addresses the call to the package "com.goodwy.dialer"
+ * whenever this app is the default dialer (and fails once that app is gone), so calls go to our own DialerActivity.
+ * Without the call permission it opens the dialer with the number instead, like commons.
+ */
+fun BaseSimpleActivity.placeCall(recipient: String, handle: PhoneAccountHandle? = null) {
+    handlePermission(PERMISSION_CALL_PHONE) { granted ->
+        val intent = Intent(if (granted) Intent.ACTION_CALL else Intent.ACTION_DIAL, Uri.fromParts("tel", recipient, null)).apply {
+            if (handle != null) putExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle)
+            putExtra(IS_RIGHT_APP, BuildConfig.RIGHT_APP_KEY)
+            if (granted && isDefaultDialer()) setClass(this@placeCall, DialerActivity::class.java)
+        }
+        launchActivityIntent(intent)
+    }
+}
+
 fun SimpleActivity.startCallIntent(
     recipient: String,
     forceSimSelector: Boolean = false
@@ -39,10 +58,10 @@ fun SimpleActivity.startCallIntent(
             phoneNumber = recipient,
             forceSimSelector = forceSimSelector
         ) { handle ->
-            launchCallIntent(recipient, handle, BuildConfig.RIGHT_APP_KEY)
+            placeCall(recipient, handle)
         }
     } else {
-        launchCallIntent(recipient, null, BuildConfig.RIGHT_APP_KEY)
+        placeCall(recipient)
     }
 }
 
@@ -66,10 +85,10 @@ fun SimpleActivity.startCallWithConfirmationCheck(contact: Contact) {
             activity = this,
             callee = contact.getNameToDisplay()
         ) {
-            initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+            initiateCall(contact) { placeCall(it) }
         }
     } else {
-        initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+        initiateCall(contact) { placeCall(it) }
     }
 }
 
@@ -83,7 +102,7 @@ fun BaseSimpleActivity.callContactWithSim(
         val handle = getAvailableSIMCardLabels()
             .sortedBy { it.id }
             .getOrNull(wantedSimIndex)?.handle
-        launchCallIntent(recipient, handle, BuildConfig.RIGHT_APP_KEY)
+        placeCall(recipient, handle)
     }
 }
 

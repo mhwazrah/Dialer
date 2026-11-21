@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.core.content.ContextCompat
+import com.goodwy.commons.extensions.baseConfig
 import com.goodwy.commons.helpers.FONT_SIZE_MEDIUM
 import com.goodwy.commons.helpers.OVERFLOW_ICON_VERTICAL
+import com.goodwy.commons.helpers.PREFS_KEY
 import com.mhw.phone.R
 import com.mhw.phone.extensions.config
 
@@ -75,6 +77,7 @@ fun Context.applyPinnedSettings() {
     pin(c.onRecentClick, SWIPE_ACTION_OPEN) { c.onRecentClick = it }
     pin(c.onContactClick, SWIPE_ACTION_OPEN) { c.onContactClick = it }
     pin(c.useSwipeToAction, true) { c.useSwipeToAction = it }
+    pin(c.swipeToActionWidth, 3) { c.swipeToActionWidth = it } // a swipe acts after 1/3 of the screen width
     pin(c.swipeVibration, true) { c.swipeVibration = it }
     pin(c.swipeRipple, true) { c.swipeRipple = it }
     pin(c.skipDeleteConfirmation, false) { c.skipDeleteConfirmation = it }
@@ -116,7 +119,13 @@ fun Context.applyPinnedSettings() {
     pin(c.showPhoneNumbers, true) { c.showPhoneNumbers = it }
     pin(c.showNicknameInsteadNames, false) { c.showNicknameInsteadNames = it }
     pin(c.useRelativeDate, false) { c.useRelativeDate = it }
+
+    // Defaults the user can still change: written only when never set, since commons' own default (off) can't be changed
+    val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+    if (!prefs.contains(BLOCKING_ENABLED_KEY)) baseConfig.blockingEnabled = true
 }
+
+private const val BLOCKING_ENABLED_KEY = "blocking_enabled" // commons BaseConfig.blockingEnabled
 
 // Every write is a SharedPreferences commit, so only write what differs
 private inline fun pin(current: Boolean, value: Boolean, set: (Boolean) -> Unit) { if (current != value) set(value) }

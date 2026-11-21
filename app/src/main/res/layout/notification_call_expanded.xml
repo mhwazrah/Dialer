@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expanded ongoing-call notification (under the system header, which shows the photo): caller, then icon buttons whose fill shows their state -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/notification_caller_name"
+        style="@android:style/TextAppearance.Material.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/notification_caller_number"
+        style="@android:style/TextAppearance.Material.Notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+    <!-- Three equal cells, each with a centred round button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/notification_speaker"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_notification_action_idle"
+                android:contentDescription="@string/audio_route_speaker"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_volume_up_vector" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/notification_mute"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_notification_action_idle"
+                android:contentDescription="@string/mute"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_microphone_vector" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/notification_hang_up"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_notification_action_hang_up"
+                android:contentDescription="@string/hang_up"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_phone_down_vector" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

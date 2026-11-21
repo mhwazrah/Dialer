@@ -1,5 +1,6 @@
 package com.mhw.phone.adapters
 
+import com.mhw.phone.extensions.placeCall
 import com.mhw.phone.extensions.showSwipeActionsOnlyWhileSwiping
 import com.mhw.phone.extensions.loadBrandedContactImage
 
@@ -60,7 +61,6 @@ import com.goodwy.commons.extensions.isNumberBlocked
 import com.goodwy.commons.extensions.isRTLLayout
 import com.goodwy.commons.extensions.isSystemInDarkMode
 import com.goodwy.commons.extensions.launchActivityIntent
-import com.goodwy.commons.extensions.launchCallIntent
 import com.goodwy.commons.extensions.launchInternetSearch
 import com.goodwy.commons.extensions.setHeightAndWidth
 import com.goodwy.commons.extensions.setupViewBackground
@@ -1232,13 +1232,13 @@ class RecentCallsAdapter(
 
     private fun callRecentNumber(recentCall: RecentCall) {
         if (!areMultipleSIMsAvailable) {
-            activity.launchCallIntent(recentCall.phoneNumber, key = BuildConfig.RIGHT_APP_KEY)
+            activity.placeCall(recentCall.phoneNumber)
             return
         }
         // Same resolver as the dialpad SIM picker's highlight, so a swipe calls with the highlighted SIM.
         activity.handlePermission(PERMISSION_READ_PHONE_STATE) { granted ->
             val handle = if (granted) activity.recentCallSim(recentCall, simAccounts)?.handle else null
-            activity.launchCallIntent(recentCall.phoneNumber, handle, BuildConfig.RIGHT_APP_KEY)
+            activity.placeCall(recentCall.phoneNumber, handle)
         }
     }
 

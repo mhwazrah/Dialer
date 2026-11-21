@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="notification_icon">@color/white</color>
+    <!-- Ongoing-call notification buttons when not active (follows the system light/dark notification) -->
+    <color name="notification_action_idle_fill">#33FFFFFF</color>
+    <color name="notification_action_idle_icon">#FFFFFFFF</color>
 </resources>

@@ -1,5 +1,8 @@
 package com.mhw.phone.activities
 
+import androidx.core.widget.TextViewCompat
+import com.goodwy.commons.extensions.getProperTextColor
+import android.content.res.ColorStateList
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Color
@@ -43,6 +46,9 @@ class AboutActivity : SimpleActivity() {
             updateTextColors(aboutHolder)
             val primaryColor = getProperPrimaryColor()
             arrayOf(aboutPhilosophyLabel, aboutFollowLabel).forEach { it.setTextColor(primaryColor) }
+            // Brand icons take the text colour, so they read in both themes
+            val iconTint = ColorStateList.valueOf(getProperTextColor())
+            arrayOf(aboutGithubLabel, aboutXLabel, aboutLinkedinLabel).forEach { TextViewCompat.setCompoundDrawableTintList(it, iconTint) }
         }
     }
 

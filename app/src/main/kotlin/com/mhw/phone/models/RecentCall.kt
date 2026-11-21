@@ -54,3 +54,6 @@ data class RecentCall(
 
     fun isABusinessCall() = name.contains(company) && company.isNotEmpty()
 }
+
+/** SIM of the newest call that recorded one (simID > 0), or null when none did. */
+fun List<RecentCall>.lastUsedSimId(): Int? = filter { it.simID > 0 }.maxByOrNull { it.startTS }?.simID

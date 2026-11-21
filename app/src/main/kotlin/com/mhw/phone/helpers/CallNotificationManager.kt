@@ -132,7 +132,6 @@ class CallNotificationManager(private val context: Context) {
                 }
                 val callType = context.getString(callTypeId)
 
-                val isMicrophoneMute = CallManager.isMicrophoneMuted
                 val connectTime = CallManager.getCallConnectTime()
                 val showChronometer = callState == Call.STATE_ACTIVE && connectTime > 0
 
@@ -191,33 +190,11 @@ class CallNotificationManager(private val context: Context) {
                         ).build()
                     )
                 } else {
-                    // Like Mute/Unmute, the action names what a tap does: on the speaker it names the route it goes
-                    // back to. Android 12+ shows these actions as text only, so the label is the only visible state.
-                    val speakerTarget = CallManager.speakerToggleTarget() ?: AudioRoute.SPEAKER
-                    val speakerLabel = context.getString(speakerTarget.stringRes)
-                    val muteLabel = context.getString(if (isMicrophoneMute) R.string.unmute else R.string.mute)
-                    val hangUpLabel = context.getString(R.string.hang_up)
-
-                    val speakerIcon = speakerTarget.iconRes
-                    builder.addAction(
-                        Notification.Action.Builder(
-                            Icon.createWithResource(context, speakerIcon),
-                            speakerLabel, speakerPendingIntent
-                        ).build()
-                    )
-                    val microphoneIcon = if (isMicrophoneMute) R.drawable.ic_microphone_off_vector else R.drawable.ic_microphone_vector
-                    builder.addAction(
-                        Notification.Action.Builder(
-                            Icon.createWithResource(context, microphoneIcon),
-                            muteLabel, microphonePendingIntent
-                        ).build()
-                    )
-                    builder.addAction(
-                        Notification.Action.Builder(
-                            Icon.createWithResource(context, R.drawable.ic_phone_down_vector),
-                            hangUpLabel, declinePendingIntent
-                        ).build()
-                    )
+                    // Android 12+ draws standard notification actions as text only, so the expanded view is custom:
+                    // round icon buttons whose fill shows the state (accent = on), under the system header.
+                    builder.setStyle(Notification.DecoratedCustomViewStyle())
+                    val actions = OngoingCallActions(speakerPendingIntent, microphonePendingIntent, declinePendingIntent)
+                    builder.setCustomBigContentView(context.ongoingCallView(contentTitle, phoneNumber, actions))
                 }
 
                 if (isHighPriority) {

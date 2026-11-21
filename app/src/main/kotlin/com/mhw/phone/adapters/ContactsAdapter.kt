@@ -289,12 +289,12 @@ class ContactsAdapter(
         if (activity.config.showCallConfirmation) {
             CallConfirmationDialog(activity as SimpleActivity, contact.getNameToDisplay()) {
                 activity.apply {
-                    initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+                    initiateCall(contact) { placeCall(it) }
                 }
             }
         } else {
             activity.apply {
-                initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+                initiateCall(contact) { placeCall(it) }
             }
         }
     }
@@ -902,12 +902,12 @@ class ContactsAdapter(
         if (activity.config.showCallConfirmation) {
             CallConfirmationDialog(activity as SimpleActivity, contact.getNameToDisplay()) {
                 activity.apply {
-                    initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+                    initiateCall(contact) { placeCall(it) }
                 }
             }
         } else {
             activity.apply {
-                initiateCall(contact) { launchCallIntent(it, key = BuildConfig.RIGHT_APP_KEY) }
+                initiateCall(contact) { placeCall(it) }
             }
         }
     }

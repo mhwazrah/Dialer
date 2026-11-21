@@ -1,5 +1,6 @@
 package com.mhw.phone.fragments
 
+import com.mhw.phone.extensions.placeCall
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -25,7 +26,6 @@ import com.goodwy.commons.extensions.hideKeyboard
 import com.goodwy.commons.extensions.isDynamicTheme
 import com.goodwy.commons.extensions.isSystemInDarkMode
 import com.goodwy.commons.extensions.launchActivityIntent
-import com.goodwy.commons.extensions.launchCallIntent
 import com.goodwy.commons.extensions.underlineText
 import com.goodwy.commons.helpers.CONTACT_ID
 import com.goodwy.commons.helpers.FontHelper
@@ -491,7 +491,7 @@ class RecentsFragment(
             activity?.callContactWithSim(recentCall.phoneNumber, sim)
         }
         else {
-            activity?.launchCallIntent(recentCall.phoneNumber, key = BuildConfig.RIGHT_APP_KEY)
+            activity?.placeCall(recentCall.phoneNumber)
         }
     }
 

@@ -1778,7 +1778,7 @@ class DialpadActivity : SimpleActivity() {
             callContactWithSim(recentCall.phoneNumber, sim)
         }
         else {
-            launchCallIntent(recentCall.phoneNumber, key = BuildConfig.RIGHT_APP_KEY)
+            placeCall(recentCall.phoneNumber)
         }
     }
 

@@ -27,4 +27,7 @@
     <color name="glass_search_hint_dark">#FF9FB0C2</color>
     <color name="glass_search_icon_dark">#BFFFFFFF</color>
     <color name="glass_search_cursor_dark">#FF8CC4FF</color>
+    <!-- Ongoing-call notification buttons when not active (follows the system light/dark notification) -->
+    <color name="notification_action_idle_fill">#1F000000</color>
+    <color name="notification_action_idle_icon">#DE000000</color>
 </resources>

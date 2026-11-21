@@ -224,6 +224,17 @@ class SettingsActivity : SimpleActivity() {
     )
 
     // Other screens pick the new colours up through needRestart (MainActivity / DialpadActivity recreate on resume)
+    // A fresh start, not recreate(): recreate restores each switch's old position and, set again straight away, the
+    // switch keeps showing it. Restarting without saved state shows the imported values.
+    private fun restartAfterImport() {
+        applyAppTheme()
+        config.needRestart = true
+        startActivity(Intent(this, SettingsActivity::class.java))
+        finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(0, 0)
+    }
+
     private fun applyThemeChange() {
         applyAppTheme()
         config.needRestart = true
@@ -708,7 +719,7 @@ class SettingsActivity : SimpleActivity() {
                 SettingsBackup.restore(getSharedPreferences(PREFS_KEY, MODE_PRIVATE), content)
                 applyPinnedSettings()
                 toast(R.string.importing_successful)
-                runOnUiThread { applyThemeChange() }
+                runOnUiThread { restartAfterImport() }
             } catch (_: JSONException) {
                 toast(R.string.invalid_file_format)
             } catch (e: Exception) {

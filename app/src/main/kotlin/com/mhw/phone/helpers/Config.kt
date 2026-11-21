@@ -28,6 +28,12 @@ class Config private constructor(context: Context) : BaseConfig(context) {
         // Created on first access, never in App.onCreate: direct-boot-aware components run before the user unlocks.
         fun getInstance(context: Context): Config =
             instance ?: synchronized(this) { instance ?: Config(context.applicationContext).also { instance = it } }
+
+        /** Tests get a new Application (and prefs) each time; the cached instance would keep the previous one's. */
+        @androidx.annotation.VisibleForTesting
+        internal fun resetForTests() {
+            instance = null
+        }
     }
 
     // Read per call: the SIM / network country changes while the process lives.
@@ -377,11 +383,11 @@ class Config private constructor(context: Context) : BaseConfig(context) {
 
     //Swipe
     var swipeRightAction: Int
-        get() = prefs.getInt(SWIPE_RIGHT_ACTION, SWIPE_ACTION_MESSAGE)
+        get() = prefs.getInt(SWIPE_RIGHT_ACTION, SWIPE_ACTION_CALL)
         set(swipeRightAction) = prefs.edit { putInt(SWIPE_RIGHT_ACTION, swipeRightAction) }
 
     var swipeLeftAction: Int
-        get() = prefs.getInt(SWIPE_LEFT_ACTION, SWIPE_ACTION_DELETE)
+        get() = prefs.getInt(SWIPE_LEFT_ACTION, SWIPE_ACTION_MESSAGE)
         set(swipeLeftAction) = prefs.edit { putInt(SWIPE_LEFT_ACTION, swipeLeftAction) }
 
     var swipeVibration: Boolean
