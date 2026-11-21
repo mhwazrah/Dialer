@@ -82,6 +82,7 @@ class CallBackdropDrawable(context: Context) : Drawable() {
     override fun onBoundsChange(bounds: Rect) {
         val w = bounds.width().toFloat()
         val h = bounds.height().toFloat()
+        if (w <= 0f || h <= 0f) return // not laid out yet: gradients need a positive radius
         basePaint.shader = LinearGradient(
             0f, 0f, 0f, h,
             intArrayOf(0xFF08284A.toInt(), 0xFF001E3C.toInt(), 0xFF000A18.toInt()), floatArrayOf(0f, 0.5f, 1f),
@@ -100,6 +101,7 @@ class CallBackdropDrawable(context: Context) : Drawable() {
 
     override fun draw(canvas: Canvas) {
         val b = bounds
+        if (b.isEmpty) return // shaders are built in onBoundsChange for a non-empty size
         canvas.drawRect(b, basePaint)
 
         val animating = ringing && animator.isRunning

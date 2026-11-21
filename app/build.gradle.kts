@@ -33,6 +33,11 @@ base {
 }
 
 android {
+    testOptions {
+        // Robolectric tests read the app's real resources (strings, colours, drawables)
+        unitTests.isIncludeAndroidResources = true
+    }
+
     compileSdk = project.libs.versions.app.build.compileSDKVersion.get().toInt()
 
     defaultConfig {
@@ -180,5 +185,15 @@ dependencies {
     //timer
     implementation(libs.bundles.lifecycle)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     ksp(libs.androidx.room.compiler)
+}
+
+// Print each test's result and why a test failed, so a quiet (-q) run still shows what ran
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
+    }
 }

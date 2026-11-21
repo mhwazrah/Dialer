@@ -28,6 +28,8 @@ swipeToActionLayout = "94ab9268eb"
 liquidGlass = "v2.0.11"
 #Test
 junit = "4.13.2"
+robolectric = "4.17"
+androidxTestCore = "1.6.1"
 #build
 app-build-compileSDKVersion = "37"
 app-build-targetSDK = "36"
@@ -63,6 +65,8 @@ swipe-action = { module = "com.github.Goodwy:SwipeActionView", version.ref = "sw
 liquid-glass = { module = "com.github.QWEA0:liquidglass", version.ref = "liquidGlass" }
 #Test
 junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
 [bundles]
 lifecycle = [
     "androidx-lifecycle-runtime",

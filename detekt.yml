@@ -1,0 +1,11 @@
+# detekt runs on top of its default rule set (buildUponDefaultConfig = true in app/build.gradle.kts).
+# Existing findings are recorded in app/detekt-baseline.xml; anything new fails the build.
+# Only deviations from the defaults go here.
+
+style:
+  # Android code uses many small Int constants (colours, alphas, durations)
+  MagicNumber:
+    active: false
+  # Long, readable lines are already capped by the IDE formatter
+  MaxLineLength:
+    maxLineLength: 140

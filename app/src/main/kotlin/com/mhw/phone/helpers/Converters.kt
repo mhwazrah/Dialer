@@ -35,8 +35,13 @@ class Converters {
     fun jsonToTimerState(value: String?): TimerState {
         if (value.isNullOrEmpty()) return TimerState.Idle
         return try {
-            val state = gsonTimer.fromJson(value, StateWrapper::class.java).state
-            if (state is TimerState.Running && state.endTime == 0L) migrateLegacyRunning(state, value) else state
+            when (val state = gsonTimer.fromJson(value, StateWrapper::class.java).state) {
+                // Gson builds new instances of the object states: hand back the singletons so == works
+                is TimerState.Idle -> TimerState.Idle
+                is TimerState.Finished -> TimerState.Finished
+                is TimerState.Running -> if (state.endTime == 0L) migrateLegacyRunning(state, value) else state
+                else -> state
+            }
         } catch (_: Exception) {
             TimerState.Idle
         }
