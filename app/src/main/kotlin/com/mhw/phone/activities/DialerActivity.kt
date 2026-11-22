@@ -17,6 +17,7 @@ import com.goodwy.commons.helpers.REQUEST_CODE_SET_DEFAULT_DIALER
 import com.mhw.phone.BuildConfig
 import com.mhw.phone.R
 import com.mhw.phone.extensions.config
+import com.mhw.phone.extensions.isDefaultPhoneApp
 import com.mhw.phone.extensions.getHandleToUse
 import com.mhw.phone.helpers.SHOW_RECENT_CALLS_ON_DIALPAD
 import androidx.core.net.toUri
@@ -36,7 +37,7 @@ class DialerActivity : SimpleActivity() {
             callNumber = intent.data
 
             // make sure Simple Dialer is the default Phone app before initiating an outgoing call
-            if (!isDefaultDialer()) {
+            if (!isDefaultPhoneApp()) {
                 launchSetDefaultDialerIntent()
             } else {
                 val key = intent.getStringExtra(IS_RIGHT_APP) ?: ""
@@ -100,7 +101,7 @@ class DialerActivity : SimpleActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
         if (requestCode == REQUEST_CODE_SET_DEFAULT_DIALER) {
-            if (!isDefaultDialer()) {
+            if (!isDefaultPhoneApp()) {
                 try {
                     hideKeyboard()
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {

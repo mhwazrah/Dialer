@@ -67,6 +67,9 @@ import java.util.Locale
 
 val Context.config: Config get() = Config.getInstance(applicationContext)
 
+/** Commons' isDefaultDialer() answers true for any package outside goodwy's, so the app never asked for the role. */
+fun Context.isDefaultPhoneApp(): Boolean = telecomManager.defaultDialerPackage == packageName
+
 val Context.audioManager: AudioManager
     get() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 

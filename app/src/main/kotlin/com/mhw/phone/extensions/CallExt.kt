@@ -14,7 +14,6 @@ import com.goodwy.commons.dialogs.CallConfirmationDialog
 import com.goodwy.commons.dialogs.PermissionRequiredDialog
 import com.goodwy.commons.extensions.canUseFullScreenIntent
 import com.goodwy.commons.extensions.initiateCall
-import com.goodwy.commons.extensions.isDefaultDialer
 import com.goodwy.commons.extensions.launchActivityIntent
 import com.goodwy.commons.extensions.openFullScreenIntentSettings
 import com.goodwy.commons.extensions.openNotificationSettings
@@ -42,7 +41,7 @@ fun BaseSimpleActivity.placeCall(recipient: String, handle: PhoneAccountHandle? 
         val intent = Intent(if (granted) Intent.ACTION_CALL else Intent.ACTION_DIAL, Uri.fromParts("tel", recipient, null)).apply {
             if (handle != null) putExtra(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle)
             putExtra(IS_RIGHT_APP, BuildConfig.RIGHT_APP_KEY)
-            if (granted && isDefaultDialer()) setClass(this@placeCall, DialerActivity::class.java)
+            if (granted && isDefaultPhoneApp()) setClass(this@placeCall, DialerActivity::class.java)
         }
         launchActivityIntent(intent)
     }
@@ -52,7 +51,7 @@ fun SimpleActivity.startCallIntent(
     recipient: String,
     forceSimSelector: Boolean = false
 ) {
-    if (isDefaultDialer()) {
+    if (isDefaultPhoneApp()) {
         getHandleToUse(
             intent = null,
             phoneNumber = recipient,

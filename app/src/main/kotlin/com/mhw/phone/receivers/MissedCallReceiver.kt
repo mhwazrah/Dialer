@@ -13,6 +13,7 @@ import android.telephony.PhoneNumberUtils
 import android.telecom.TelecomManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import androidx.core.text.BidiFormatter
 import com.goodwy.commons.extensions.*
 import com.goodwy.commons.helpers.CURRENT_PHONE_NUMBER
 import com.goodwy.commons.helpers.SimpleContactsHelper
@@ -76,7 +77,8 @@ class MissedCallReceiver : BroadcastReceiver() {
             else -> context.contactLetterBitmap(name)
         }
 
-        var callerName = name
+        // Isolated, so an Arabic name followed by an English label ("Mobile") is not reordered in the notification
+        var callerName = BidiFormatter.getInstance().unicodeWrap(name)
         val specificPhoneNumber = phoneNumber?.let { number ->
             contact?.phoneNumbers?.firstOrNull { it.normalizedNumber == number.normalizePhoneNumber() }
         }

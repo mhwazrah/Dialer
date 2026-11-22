@@ -134,7 +134,7 @@ class MainActivity : SimpleActivity() {
         launchedDialer = savedInstanceState?.getBoolean(OPEN_DIAL_PAD_AT_LAUNCH) ?: false
         val properBackgroundColor = getProperBackgroundColor()
 
-        if (isDefaultDialer()) {
+        if (isDefaultPhoneApp()) {
             checkContactPermissions()
 
             if (!config.wasOverlaySnackbarConfirmed && !Settings.canDrawOverlays(this)) {
@@ -301,7 +301,7 @@ class MainActivity : SimpleActivity() {
         // The page listeners are normally added from the contacts-permission callback, which never fires when that
         // dialog is dismissed without an answer; without them, switching tabs leaves a stale title and menu.
         // (Idempotent: initFragments runs its setup only once.)
-        if (isDefaultDialer()) initFragments()
+        if (isDefaultPhoneApp()) initFragments()
         val privateContactsStale = ContactsRepository.invalidateIfHoldsPrivateContacts()
         val listsOutdated = binding.viewPager.adapter == null || repositoryChanged || privateContactsStale || permissionsChanged ||
             config.needUpdateRecents || listSettings != storedListSettings

@@ -7,6 +7,7 @@ import android.graphics.drawable.LayerDrawable
 import android.telecom.Call
 import android.view.Menu
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import com.bumptech.glide.Glide
 import com.goodwy.commons.adapters.MyRecyclerViewAdapter
@@ -21,6 +22,7 @@ import com.mhw.phone.databinding.ItemConferenceCallBinding
 import com.mhw.phone.extensions.hasCapability
 import com.mhw.phone.extensions.loadBrandedContactImage
 import com.mhw.phone.helpers.getCallContact
+import com.mhw.phone.models.CallContact
 import kotlin.math.abs
 
 class ConferenceCallsAdapter(
@@ -61,28 +63,11 @@ class ConferenceCallsAdapter(
                 itemConferenceCallName.tag = call
                 getCallContact(itemView.context, call) { callContact ->
                     root.post {
-                        if (itemConferenceCallName.tag !== call) return@post // the holder was rebound to another call
+                        // Skip when the holder was rebound to another call, or when the lookup outlived the screen (it is
+                        // relaunched right after opening, and Glide throws for a destroyed activity)
+                        if (itemConferenceCallName.tag !== call || activity.isDestroyed) return@post
                         itemConferenceCallName.text = callContact.name.ifEmpty { itemView.context.getString(R.string.unknown_caller) }
-                        if (callContact.number == callContact.name || callContact.isABusinessCall || callContact.isVoiceMail) {
-                            val drawable = when {
-                                callContact.isVoiceMail -> {
-                                    @SuppressLint("UseCompatLoadingForDrawables")
-                                    // mutate(): the tint below must not leak into the shared drawable state
-                                    val drawableVoicemail = resources.getDrawable(R.drawable.placeholder_voicemail, activity.theme).mutate()
-                                    if (baseConfig.useColoredContacts) {
-                                        val letterBackgroundColors = activity.getLetterBackgroundColors()
-                                        val color = letterBackgroundColors[abs(callContact.name.hashCode()) % letterBackgroundColors.size].toInt()
-                                        (drawableVoicemail as LayerDrawable).findDrawableByLayerId(R.id.placeholder_contact_background).applyColorFilter(color)
-                                    }
-                                    drawableVoicemail
-                                }
-                                callContact.isABusinessCall -> SimpleContactsHelper(activity).getColoredCompanyIcon(callContact.name)
-                                else -> SimpleContactsHelper(activity).getColoredContactIcon(callContact.name)
-                            }
-                            itemConferenceCallImage.setImageDrawable(drawable)
-                        } else {
-                            itemConferenceCallImage.loadBrandedContactImage(callContact.photoUri, callContact.name)
-                        }
+                        bindContactImage(itemConferenceCallImage, callContact)
                     }
                 }
 
@@ -119,6 +104,29 @@ class ConferenceCallsAdapter(
             }
         }
         bindViewHolder(holder)
+    }
+
+    private fun bindContactImage(image: ImageView, callContact: CallContact) {
+        if (callContact.number == callContact.name || callContact.isABusinessCall || callContact.isVoiceMail) {
+            val drawable = when {
+                callContact.isVoiceMail -> {
+                    @SuppressLint("UseCompatLoadingForDrawables")
+                    // mutate(): the tint below must not leak into the shared drawable state
+                    val drawableVoicemail = resources.getDrawable(R.drawable.placeholder_voicemail, activity.theme).mutate()
+                    if (baseConfig.useColoredContacts) {
+                        val letterBackgroundColors = activity.getLetterBackgroundColors()
+                        val color = letterBackgroundColors[abs(callContact.name.hashCode()) % letterBackgroundColors.size].toInt()
+                        (drawableVoicemail as LayerDrawable).findDrawableByLayerId(R.id.placeholder_contact_background).applyColorFilter(color)
+                    }
+                    drawableVoicemail
+                }
+                callContact.isABusinessCall -> SimpleContactsHelper(activity).getColoredCompanyIcon(callContact.name)
+                else -> SimpleContactsHelper(activity).getColoredContactIcon(callContact.name)
+            }
+            image.setImageDrawable(drawable)
+        } else {
+            image.loadBrandedContactImage(callContact.photoUri, callContact.name)
+        }
     }
 
     // Resolve the row at click time: the position captured at bind time goes stale once other rows are removed.

@@ -379,7 +379,7 @@ internal fun speakerToggleTarget(route: Int, supportedRoutes: Int, previousRoute
     }
 }
 
-/** Ringing size of the caller's photo: twice [baseSize], but no more than a quarter of [screenHeight] (never below [baseSize]). */
+/** Caller photo size on the call screen: twice [baseSize], at most a quarter of [screenHeight] (never below [baseSize]). */
 internal fun ringingAvatarSize(baseSize: Int, screenHeight: Int): Int = minOf(baseSize * 2, maxOf(baseSize, screenHeight / 4))
 
 interface CallManagerListener {

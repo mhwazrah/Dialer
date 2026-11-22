@@ -131,8 +131,9 @@
             <com.goodwy.commons.views.MyTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/medium_margin"
+                android:layout_marginHorizontal="@dimen/activity_margin"
                 android:layout_marginTop="@dimen/activity_margin"
+                android:paddingHorizontal="@dimen/activity_margin"
                 android:text="@string/about_goal"
                 android:textStyle="bold" />
 

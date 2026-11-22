@@ -188,6 +188,8 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
             }
             binding.dialpadInput.disableKeyboard()
         }
+        // Keep an enlarged photo clear of the buttons (see fitEnlargedAvatar); posted, so it never resizes mid-layout
+        binding.callHolder.addOnLayoutChangeListener { holder, _, _, _, _, _, _, _, _ -> holder.post { fitEnlargedAvatar() } }
         updateCallContactInfo(CallManager.getPrimaryCall())
 
         binding.apply {
@@ -1392,7 +1394,7 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         val isBusy = call.details.connectTimeMillis == 0L
 
         val state = call.getStateCompat()
-        setRingingAvatarSize(state == Call.STATE_RINGING)
+        enlargeAvatar()
         when (state) {
             Call.STATE_RINGING -> callRinging()
             Call.STATE_ACTIVE -> callStarted()
@@ -1552,8 +1554,8 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
     private fun updateCallContactInfo(call: Call?) {
         binding.callDetails.beVisibleIf(call.isHD())
         // Size the photo before it loads: the image loader decodes at the view's size, so a photo loaded small and
-        // then enlarged for ringing would be blurry
-        setRingingAvatarSize(call.getStateCompat() == Call.STATE_RINGING)
+        // then enlarged would be blurry
+        enlargeAvatar()
         getCallContact(applicationContext, call) { contact ->
             if (isDestroyed || call != CallManager.getPrimaryCall()) {
                 return@getCallContact
@@ -1625,14 +1627,46 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         needHapticFeedback = true
     }
 
-    // The caller's photo is twice its size while the call rings, and back to the layout's size once it is answered.
+    // The caller's photo is twice the layout's size in every call state (ringing, dialing and connected).
     // On short screens it grows only up to a quarter of the screen height, so the status stays clear of the buttons.
     private var avatarBaseSize = 0
 
-    private fun setRingingAvatarSize(ringing: Boolean) {
+    // Largest enlarged size that left the status line clear of the buttons on this screen (found by fitEnlargedAvatar)
+    private var avatarFitLimit = Int.MAX_VALUE
+
+    // The dialing and connected layouts have their buttons much higher than the incoming one, so on a short screen the
+    // enlarged photo can push the name and status under them: shrink it by the overlap (never below the layout's size)
+    // and remember the limit.
+    private fun fitEnlargedAvatar() {
+        val overlap = enlargedAvatarOverlap()
+        val params = binding.callerAvatar.layoutParams
+        if (overlap <= 0 || params == null) return
+        avatarFitLimit = maxOf(avatarBaseSize, params.width - overlap)
+        if (avatarFitLimit != params.width) {
+            params.width = avatarFitLimit
+            params.height = avatarFitLimit
+            binding.callerAvatar.layoutParams = params
+        }
+    }
+
+    // How far the status line reaches into the first row of buttons while the photo is enlarged; 0 when clear
+    private fun enlargedAvatarOverlap(): Int {
+        val width = binding.callerAvatar.layoutParams?.width ?: 0
+        val firstButtons = if (binding.incomingCallHolder.isVisible()) binding.callRemind else binding.callToggleMicrophone
+        val applies = !isDestroyed && avatarBaseSize > 0 && width > avatarBaseSize &&
+            firstButtons.isVisible() && binding.callStatusLabel.isVisible()
+        if (!applies) return 0
+        val window = IntArray(2)
+        binding.callStatusLabel.getLocationInWindow(window)
+        val statusBottom = window[1] + binding.callStatusLabel.height
+        firstButtons.getLocationInWindow(window)
+        return statusBottom + resources.getDimensionPixelSize(com.goodwy.commons.R.dimen.medium_margin) - window[1]
+    }
+
+    private fun enlargeAvatar() {
         val params = binding.callerAvatar.layoutParams ?: return
         if (avatarBaseSize == 0) avatarBaseSize = params.width
-        val size = if (ringing) ringingAvatarSize(avatarBaseSize, resources.displayMetrics.heightPixels) else avatarBaseSize
+        val size = minOf(ringingAvatarSize(avatarBaseSize, resources.displayMetrics.heightPixels), avatarFitLimit)
         if (params.width == size) return
         params.width = size
         params.height = size

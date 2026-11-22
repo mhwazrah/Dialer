@@ -1169,7 +1169,7 @@ class CallHistoryActivity : SimpleActivity() {
     }
 
     private fun askConfirmBlock() {
-        if (!isDefaultDialer()) {
+        if (!isDefaultPhoneApp()) {
             toast(R.string.default_phone_app_prompt, Toast.LENGTH_LONG)
             return
         }

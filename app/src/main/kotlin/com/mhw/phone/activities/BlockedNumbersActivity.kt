@@ -18,6 +18,7 @@ import com.mhw.phone.R
 import com.mhw.phone.databinding.ActivityBlockedNumbersBinding
 import com.mhw.phone.databinding.DialogAddBlockedNumberBinding
 import com.mhw.phone.databinding.ItemBlockedNumberBinding
+import com.mhw.phone.helpers.ContactsRepository
 
 class BlockedNumbersActivity : SimpleActivity() {
     private val binding by viewBinding(ActivityBlockedNumbersBinding::inflate)
@@ -171,15 +172,23 @@ class BlockedNumbersActivity : SimpleActivity() {
             } catch (_: SecurityException) {
                 arrayListOf()
             }
-            runOnUiThread { if (!isDestroyed) showBlockedNumbers(numbers) }
+            // Name of the contact each number belongs to, when it is saved in the phone
+            val names = numbers.associate { blocked ->
+                blocked.number to runCatching { ContactsRepository.findByNumber(this, blocked.number)?.getNameToDisplay() }.getOrNull()
+            }
+            runOnUiThread { if (!isDestroyed) showBlockedNumbers(numbers, names) }
         }
     }
 
-    private fun showBlockedNumbers(numbers: List<BlockedNumber>) = binding.apply {
+    private fun showBlockedNumbers(numbers: List<BlockedNumber>, names: Map<String, String?>) = binding.apply {
         blockedList.removeAllViews()
         numbers.forEach { blocked ->
             val item = ItemBlockedNumberBinding.inflate(layoutInflater, blockedList, false)
+            val name = names[blocked.number]?.takeIf { it.isNotBlank() && it != blocked.number }
+            item.blockedNumberName.text = name
+            item.blockedNumberName.beVisibleIf(name != null)
             item.blockedNumberText.text = blocked.number
+            if (name != null) item.blockedNumberText.alpha = SECONDARY_TEXT_ALPHA
             item.blockedNumberDelete.applyColorFilter(getProperTextColor())
             item.blockedNumberDelete.setOnClickListener { deleteBlockedNumberAsync(blocked.number) }
             blockedList.addView(item.root)
@@ -225,5 +234,9 @@ class BlockedNumbersActivity : SimpleActivity() {
                 runOnUiThread { toast(com.goodwy.commons.R.string.unknown_error_occurred) }
             }
         }
+    }
+
+    private companion object {
+        const val SECONDARY_TEXT_ALPHA = 0.7f // the number under a contact name
     }
 }

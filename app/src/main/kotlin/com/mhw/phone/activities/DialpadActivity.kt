@@ -1270,7 +1270,7 @@ class DialpadActivity : SimpleActivity() {
         //Only works for system apps, CALL_PRIVILEGED and MODIFY_PHONE_STATE permissions are required
         if (len > 8 && textFormat.startsWith("*#*#") && textFormat.endsWith("#*#*")) {
             val secretCode = textFormat.substring(4, textFormat.length - 4)
-            if (isDefaultDialer()) {
+            if (isDefaultPhoneApp()) {
                 getSystemService(TelephonyManager::class.java)?.sendDialerSpecialCode(secretCode)
             } else {
                 launchSetDefaultDialerIntent()
@@ -1439,7 +1439,7 @@ class DialpadActivity : SimpleActivity() {
     @SuppressLint("MissingSuperCall")
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == REQUEST_CODE_SET_DEFAULT_DIALER && isDefaultDialer()) {
+        if (requestCode == REQUEST_CODE_SET_DEFAULT_DIALER && isDefaultPhoneApp()) {
             dialpadValueChanged(binding.dialpadInput.value)
         }
     }

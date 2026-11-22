@@ -1,22 +1,26 @@
 package com.mhw.phone.activities
 
-import android.os.Bundle
+import android.content.Context
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import com.goodwy.commons.activities.BaseSimpleActivity
 import com.mhw.phone.R
+import com.mhw.phone.extensions.AlwaysDarkScreen
 import com.mhw.phone.extensions.applyLiquidBackdrop
 import com.mhw.phone.extensions.isLiquidLightTheme
 import com.mhw.phone.helpers.applyAppTheme
 
 open class SimpleActivity : BaseSimpleActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        applyAppTheme()
-        // Follow the app theme (not the system) for -night resources, so dark-theme variants of
-        // the glass drawables (e.g. darker row cards) load. Set before super: no recreation.
-        delegate.localNightMode =
-            if (isLiquidLightTheme()) AppCompatDelegate.MODE_NIGHT_NO else AppCompatDelegate.MODE_NIGHT_YES
-        super.onCreate(savedInstanceState)
+    // Follow the app theme (not the system) for -night resources, so dark-theme variants of the glass drawables (e.g.
+    // darker row cards) load; the call screens are always dark. Set before attaching, AppCompat gives this activity its
+    // own override configuration. Set in onCreate it rewrote the Resources shared with the other screens (the call
+    // screen handles uiMode itself), so a list row built behind a call got the dark card under light text.
+    override fun attachBaseContext(newBase: Context) {
+        // Refresh the palette first: after a system light/dark switch it still holds the previous theme's colours
+        newBase.applicationContext.applyAppTheme()
+        val light = this !is AlwaysDarkScreen && newBase.applicationContext.isLiquidLightTheme()
+        delegate.localNightMode = if (light) AppCompatDelegate.MODE_NIGHT_NO else AppCompatDelegate.MODE_NIGHT_YES
+        super.attachBaseContext(newBase)
     }
 
     override fun onResume() {

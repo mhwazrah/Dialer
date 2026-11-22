@@ -55,7 +55,7 @@ import com.goodwy.commons.extensions.getLetterBackgroundColors
 import com.goodwy.commons.extensions.getPopupMenuTheme
 import com.goodwy.commons.extensions.getTextSize
 import com.goodwy.commons.extensions.highlightTextPart
-import com.goodwy.commons.extensions.isDefaultDialer
+import com.mhw.phone.extensions.isDefaultPhoneApp
 import com.goodwy.commons.extensions.isDynamicTheme
 import com.goodwy.commons.extensions.isNumberBlocked
 import com.goodwy.commons.extensions.isRTLLayout
@@ -401,7 +401,7 @@ class RecentCallsAdapter(
     }
 
     private fun askConfirmBlock() {
-        if (activity.isDefaultDialer()) {
+        if (activity.isDefaultPhoneApp()) {
             val numbers = TextUtils.join(", ", getSelectedItems().distinctBy { it.phoneNumber }.map { it.phoneNumber })
             val baseString = R.string.block_confirmation
             val question = String.format(resources.getString(baseString), numbers)
@@ -438,7 +438,7 @@ class RecentCallsAdapter(
     }
 
     private fun askConfirmUnblock() {
-        if (activity.isDefaultDialer()) {
+        if (activity.isDefaultPhoneApp()) {
             val numbers = TextUtils.join(", ", getSelectedItems().distinctBy { it.phoneNumber }.map { it.phoneNumber })
             val baseString = R.string.unblock_confirmation
             val question = String.format(resources.getString(baseString), numbers)
