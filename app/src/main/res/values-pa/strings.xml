@@ -8,4 +8,34 @@
     <string name="decline_with_message">ਸੁਨੇਹੇ ਨਾਲ ਅਸਵੀਕਾਰ ਕਰੋ</string>
     <string name="flip_to_silence">ਕਾਲ ਚੁੱਪ ਕਰਨ ਲਈ ਫ਼ੋਨ ਪਲਟੋ</string>
     <string name="announce_caller_name">ਰਿੰਗ ਹੋਣ ਸਮੇਂ ਕਾਲਰ ਦਾ ਨਾਮ ਬੋਲੋ</string>
+    <string name="add_quick_answer">ਜਵਾਬ ਸ਼ਾਮਲ ਕਰੋ</string>
+    <string name="quick_answers_empty">ਹਾਲੇ ਕੋਈ ਜਵਾਬ ਨਹੀਂ। ਬਣਾਉਣ ਲਈ ਜਵਾਬ ਸ਼ਾਮਲ ਕਰੋ \'ਤੇ ਟੈਪ ਕਰੋ।</string>
+    <string name="announce_only_with_headset">ਸਿਰਫ਼ ਹੈੱਡਫ਼ੋਨ ਜੁੜੇ ਹੋਣ \'ਤੇ</string>
+    <string name="blocked_calls_filter">ਬਲਾਕ ਕੀਤੇ</string>
+    <string name="block_reason_list">ਤੁਹਾਡੀ ਬਲਾਕ ਸੂਚੀ ਵਿੱਚ</string>
+    <string name="block_reason_unknown">ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਵਿੱਚ ਨਹੀਂ</string>
+    <string name="block_reason_hidden">ਲੁਕਿਆ ਹੋਇਆ ਨੰਬਰ</string>
+    <string name="block_reason_system">ਸਿਸਟਮ ਵੱਲੋਂ ਬਲਾਕ ਕੀਤਾ</string>
+    <string name="remind_in_minutes">%d ਮਿੰਟ ਵਿੱਚ ਯਾਦ ਕਰਵਾਓ</string>
+    <string name="reminder_set">ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਕੀਤਾ: %s</string>
+    <string name="call_statistics">ਕਾਲ ਅੰਕੜੇ</string>
+    <string name="stats_last_7_days">7 ਦਿਨ</string>
+    <string name="stats_last_30_days">30 ਦਿਨ</string>
+    <string name="stats_all_time">ਸਾਰਾ ਸਮਾਂ</string>
+    <string name="stats_talk_time">ਗੱਲਬਾਤ ਦਾ ਸਮਾਂ</string>
+    <string name="stats_total_calls">ਕੁੱਲ</string>
+    <string name="stats_average_call">ਔਸਤ ਕਾਲ: %s</string>
+    <string name="stats_busiest_hour">ਸਭ ਤੋਂ ਵਿਅਸਤ ਘੰਟਾ: %s</string>
+    <string name="stats_top_contacts">ਸਭ ਤੋਂ ਵੱਧ ਕਾਲ ਕੀਤੇ</string>
+    <string name="stats_no_calls">ਇਸ ਮਿਆਦ ਵਿੱਚ ਕੋਈ ਕਾਲ ਨਹੀਂ</string>
+    <string name="widget_favorites_title">ਮਨਪਸੰਦ</string>
+    <string name="widget_recents_title">ਹਾਲੀਆ ਕਾਲਾਂ</string>
+    <string name="widget_favorites_description">ਇੱਕ ਟੈਪ ਵਿੱਚ ਆਪਣੇ ਮਨਪਸੰਦ ਸੰਪਰਕਾਂ ਨੂੰ ਕਾਲ ਕਰੋ</string>
+    <string name="widget_recents_description">ਤੁਹਾਡੀਆਂ ਤਾਜ਼ਾ ਕਾਲਾਂ, ਵਾਪਸ ਕਾਲ ਕਰਨ ਲਈ ਇੱਕ ਟੈਪ</string>
+    <string name="widget_favorites_empty">ਹਾਲੇ ਕੋਈ ਮਨਪਸੰਦ ਨਹੀਂ। ਕੁਝ ਜੋੜਨ ਜਾਂ ਸੰਪਰਕ ਪਹੁੰਚ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣ ਲਈ MHW Phone ਖੋਲ੍ਹੋ।</string>
+    <string name="widget_recents_empty">ਕੋਈ ਹਾਲੀਆ ਕਾਲ ਨਹੀਂ। ਕਾਲ ਲੌਗ ਪਹੁੰਚ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣ ਲਈ MHW Phone ਖੋਲ੍ਹੋ।</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d ਕਾਲ</item>
+        <item quantity="other">%d ਕਾਲਾਂ</item>
+    </plurals>
 </resources>

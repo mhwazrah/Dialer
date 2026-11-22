@@ -84,4 +84,34 @@
     <string name="decline_with_message">Mesajla reddet</string>
     <string name="flip_to_silence">Aramaları sessize almak için telefonu ters çevirin</string>
     <string name="announce_caller_name">Arayanın adını seslendir</string>
+    <string name="add_quick_answer">Yanıt ekle</string>
+    <string name="quick_answers_empty">Henüz yanıt yok. Oluşturmak için Yanıt ekle\'ye dokunun.</string>
+    <string name="announce_only_with_headset">Yalnızca kulaklık bağlıyken</string>
+    <string name="blocked_calls_filter">Engellenenler</string>
+    <string name="block_reason_list">Engelleme listenizde</string>
+    <string name="block_reason_unknown">Kişilerinizde yok</string>
+    <string name="block_reason_hidden">Gizli numara</string>
+    <string name="block_reason_system">Sistem tarafından engellendi</string>
+    <string name="remind_in_minutes">%d dk sonra hatırlat</string>
+    <string name="reminder_set">Hatırlatıcı ayarlandı: %s</string>
+    <string name="call_statistics">Arama istatistikleri</string>
+    <string name="stats_last_7_days">7 gün</string>
+    <string name="stats_last_30_days">30 gün</string>
+    <string name="stats_all_time">Tüm zamanlar</string>
+    <string name="stats_talk_time">Konuşma süresi</string>
+    <string name="stats_total_calls">Toplam</string>
+    <string name="stats_average_call">Ortalama arama: %s</string>
+    <string name="stats_busiest_hour">En yoğun saat: %s</string>
+    <string name="stats_top_contacts">En çok arananlar</string>
+    <string name="stats_no_calls">Bu dönemde arama yok</string>
+    <string name="widget_favorites_title">Favoriler</string>
+    <string name="widget_recents_title">Son aramalar</string>
+    <string name="widget_favorites_description">Favori kişilerinizi tek dokunuşla arayın</string>
+    <string name="widget_recents_description">Son aramalarınız, geri aramak için tek dokunuş</string>
+    <string name="widget_favorites_empty">Henüz favori yok. Eklemek veya kişilere erişime izin vermek için MHW Phone\'u açın.</string>
+    <string name="widget_recents_empty">Son arama yok. Arama kaydına erişime izin vermek için MHW Phone\'u açın.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d arama</item>
+        <item quantity="other">%d arama</item>
+    </plurals>
 </resources>

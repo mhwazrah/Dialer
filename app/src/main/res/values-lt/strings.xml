@@ -62,4 +62,36 @@
     <string name="decline_with_message">Atmesti su žinute</string>
     <string name="flip_to_silence">Apverskite telefoną, kad nutildytumėte skambutį</string>
     <string name="announce_caller_name">Ištarti skambinančiojo vardą</string>
+    <string name="add_quick_answer">Pridėti atsakymą</string>
+    <string name="quick_answers_empty">Atsakymų dar nėra. Palieskite Pridėti atsakymą, kad sukurtumėte.</string>
+    <string name="announce_only_with_headset">Tik kai prijungtos ausinės</string>
+    <string name="blocked_calls_filter">Užblokuota</string>
+    <string name="block_reason_list">Jūsų blokavimo sąraše</string>
+    <string name="block_reason_unknown">Nėra jūsų kontaktuose</string>
+    <string name="block_reason_hidden">Paslėptas numeris</string>
+    <string name="block_reason_system">Užblokavo sistema</string>
+    <string name="remind_in_minutes">Priminti po %d min.</string>
+    <string name="reminder_set">Priminimas nustatytas: %s</string>
+    <string name="call_statistics">Skambučių statistika</string>
+    <string name="stats_last_7_days">7 dienos</string>
+    <string name="stats_last_30_days">30 dienų</string>
+    <string name="stats_all_time">Visas laikas</string>
+    <string name="stats_talk_time">Pokalbių laikas</string>
+    <string name="stats_total_calls">Iš viso</string>
+    <string name="stats_average_call">Vidutinis skambutis: %s</string>
+    <string name="stats_busiest_hour">Judriausia valanda: %s</string>
+    <string name="stats_top_contacts">Dažniausiai skambinta</string>
+    <string name="stats_no_calls">Per šį laikotarpį skambučių nėra</string>
+    <string name="widget_favorites_title">Mėgstamiausi</string>
+    <string name="widget_recents_title">Naujausi skambučiai</string>
+    <string name="widget_favorites_description">Skambinkite mėgstamiems kontaktams vienu palietimu</string>
+    <string name="widget_recents_description">Naujausi skambučiai, vienas palietimas perskambinti</string>
+    <string name="widget_favorites_empty">Mėgstamiausių dar nėra. Atidarykite MHW Phone, kad pridėtumėte arba leistumėte prieigą prie kontaktų.</string>
+    <string name="widget_recents_empty">Naujausių skambučių nėra. Atidarykite MHW Phone, kad leistumėte prieigą prie skambučių žurnalo.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d skambutis</item>
+        <item quantity="few">%d skambučiai</item>
+        <item quantity="many">%d skambučio</item>
+        <item quantity="other">%d skambučių</item>
+    </plurals>
 </resources>

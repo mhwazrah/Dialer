@@ -11,11 +11,13 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.extensions.baseConfig
 import com.goodwy.commons.extensions.beGone
 import com.goodwy.commons.extensions.beGoneIf
 import com.goodwy.commons.extensions.beVisible
+import com.goodwy.commons.extensions.beVisibleIf
+import com.goodwy.commons.extensions.isVisible
 import com.goodwy.commons.extensions.getContrastColor
 import com.goodwy.commons.extensions.getProperBackgroundColor
 import com.goodwy.commons.extensions.getProperPrimaryColor
@@ -53,6 +55,9 @@ import com.mhw.phone.helpers.ContactsRepository
 import com.mhw.phone.helpers.CURRENT_RECENT_CALL_LIST
 import com.mhw.phone.helpers.FILTER_RECENT_CALLS_ALL
 import com.mhw.phone.helpers.FILTER_RECENT_CALLS_CONTACTS
+import com.mhw.phone.helpers.FILTER_RECENT_CALLS_BLOCKED
+import com.mhw.phone.helpers.FILTER_RECENT_CALLS_SIM_BASE
+import com.mhw.phone.extensions.getAvailableSIMCardLabels
 import com.mhw.phone.helpers.RECENT_CALL_CACHE_SIZE
 import com.mhw.phone.helpers.RecentsHelper
 import com.mhw.phone.helpers.foldArabic
@@ -105,143 +110,60 @@ class RecentsFragment(
             }
         }
 
-        updateFilterButton()
-        binding.recentsFilters.apply {
-            val typeface = FontHelper.getTypeface(context)
+        setupFilterButtons()
+    }
 
-            allCalls.setTypeface(typeface)
-            allCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != FILTER_RECENT_CALLS_ALL) {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
-                    updateItems()
-                    updateFilterButton()
-                }
-            }
+    // Each chip and the filter it selects; tapping the selected chip again goes back to All.
+    private fun filterButtons(): List<Pair<MaterialButton, Int>> = binding.recentsFilters.run {
+        listOf(
+            allCalls to FILTER_RECENT_CALLS_ALL,
+            missedCalls to Calls.MISSED_TYPE,
+            incomingCalls to Calls.INCOMING_TYPE,
+            outgoingCalls to Calls.OUTGOING_TYPE,
+            rejectedCalls to Calls.REJECTED_TYPE,
+            blockedCalls to FILTER_RECENT_CALLS_BLOCKED,
+            contactCalls to FILTER_RECENT_CALLS_CONTACTS,
+            sim1Calls to FILTER_RECENT_CALLS_SIM_BASE + 1,
+            sim2Calls to FILTER_RECENT_CALLS_SIM_BASE + 2,
+        )
+    }
 
-            missedCalls.setTypeface(typeface)
-            missedCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != Calls.MISSED_TYPE) {
-                    context.config.filterRecentCalls = Calls.MISSED_TYPE
-                    updateItems()
-                    updateFilterButton()
+    private fun setupFilterButtons() {
+        val typeface = FontHelper.getTypeface(context)
+        // SIM chips only with two SIMs, named like the SIMs; a saved SIM filter whose SIM is gone falls back to All
+        val sims = context.getAvailableSIMCardLabels()
+        val simChips = listOf(binding.recentsFilters.sim1Calls, binding.recentsFilters.sim2Calls)
+        simChips.forEachIndexed { index, chip ->
+            val sim = sims.getOrNull(index).takeIf { sims.size > 1 }
+            chip.beVisibleIf(sim != null)
+            if (sim != null) chip.text = sim.label.substringBefore(" (").ifBlank { "SIM ${sim.id}" }
+        }
+        val config = context.config
+        if (filterButtons().none { (chip, filter) -> filter == config.filterRecentCalls && chip.isVisible() }) {
+            config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
+        }
+        filterButtons().forEach { (chip, filter) ->
+            chip.setTypeface(typeface)
+            chip.setOnClickListener {
+                val wasBlocked = config.filterRecentCalls == FILTER_RECENT_CALLS_BLOCKED
+                config.filterRecentCalls = if (config.filterRecentCalls == filter) FILTER_RECENT_CALLS_ALL else filter
+                // Calls from blocked numbers are only loaded for the Blocked filter (unless shown anyway): reload on the switch
+                if (!config.showBlockedNumbers && wasBlocked != (config.filterRecentCalls == FILTER_RECENT_CALLS_BLOCKED)) {
+                    config.needUpdateRecents = true
+                    refreshItems()
                 } else {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
                     updateItems()
-                    updateFilterButton()
                 }
-            }
-
-            incomingCalls.setTypeface(typeface)
-            incomingCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != Calls.INCOMING_TYPE) {
-                    context.config.filterRecentCalls = Calls.INCOMING_TYPE
-                    updateItems()
-                    updateFilterButton()
-                } else {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
-                    updateItems()
-                    updateFilterButton()
-                }
-            }
-
-            outgoingCalls.setTypeface(typeface)
-            outgoingCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != Calls.OUTGOING_TYPE) {
-                    context.config.filterRecentCalls = Calls.OUTGOING_TYPE
-                    updateItems()
-                    updateFilterButton()
-                } else {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
-                    updateItems()
-                    updateFilterButton()
-                }
-            }
-
-            rejectedCalls.setTypeface(typeface)
-            rejectedCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != Calls.REJECTED_TYPE) {
-                    context.config.filterRecentCalls = Calls.REJECTED_TYPE
-                    updateItems()
-                    updateFilterButton()
-                } else {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
-                    updateItems()
-                    updateFilterButton()
-                }
-            }
-
-            contactCalls.setTypeface(typeface)
-            contactCalls.setOnClickListener {
-                if (context.config.filterRecentCalls != FILTER_RECENT_CALLS_CONTACTS) {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_CONTACTS
-                    updateItems()
-                    updateFilterButton()
-                } else {
-                    context.config.filterRecentCalls = FILTER_RECENT_CALLS_ALL
-                    updateItems()
-                    updateFilterButton()
-                }
+                updateFilterButton()
             }
         }
+        updateFilterButton()
     }
 
     private fun updateFilterButton() {
-        binding.recentsFilters.apply {
-            when (context.config.filterRecentCalls) {
-                Calls.MISSED_TYPE -> {
-                    allCalls.setFilterDisableColor()
-                    missedCalls.setFilterEnableColor()
-                    incomingCalls.setFilterDisableColor()
-                    outgoingCalls.setFilterDisableColor()
-                    rejectedCalls.setFilterDisableColor()
-                    contactCalls.setFilterDisableColor()
-                }
-
-                Calls.INCOMING_TYPE -> {
-                    allCalls.setFilterDisableColor()
-                    missedCalls.setFilterDisableColor()
-                    incomingCalls.setFilterEnableColor()
-                    outgoingCalls.setFilterDisableColor()
-                    rejectedCalls.setFilterDisableColor()
-                    contactCalls.setFilterDisableColor()
-                }
-
-                Calls.OUTGOING_TYPE -> {
-                    allCalls.setFilterDisableColor()
-                    missedCalls.setFilterDisableColor()
-                    incomingCalls.setFilterDisableColor()
-                    outgoingCalls.setFilterEnableColor()
-                    rejectedCalls.setFilterDisableColor()
-                    contactCalls.setFilterDisableColor()
-                }
-
-                Calls.REJECTED_TYPE -> {
-                    allCalls.setFilterDisableColor()
-                    missedCalls.setFilterDisableColor()
-                    incomingCalls.setFilterDisableColor()
-                    outgoingCalls.setFilterDisableColor()
-                    rejectedCalls.setFilterEnableColor()
-                    contactCalls.setFilterDisableColor()
-                }
-
-                FILTER_RECENT_CALLS_CONTACTS -> {
-                    allCalls.setFilterDisableColor()
-                    missedCalls.setFilterDisableColor()
-                    incomingCalls.setFilterDisableColor()
-                    outgoingCalls.setFilterDisableColor()
-                    rejectedCalls.setFilterDisableColor()
-                    contactCalls.setFilterEnableColor()
-                }
-
-                else -> { //FILTER_RECENT_CALLS_ALL
-                    allCalls.setFilterEnableColor()
-                    missedCalls.setFilterDisableColor()
-                    incomingCalls.setFilterDisableColor()
-                    outgoingCalls.setFilterDisableColor()
-                    rejectedCalls.setFilterDisableColor()
-                    contactCalls.setFilterDisableColor()
-                }
-            }
+        val selected = context.config.filterRecentCalls
+        filterButtons().forEach { (chip, filter) ->
+            if (filter == selected) chip.setFilterEnableColor() else chip.setFilterDisableColor()
         }
     }
 
@@ -645,7 +567,7 @@ class RecentsFragment(
     private fun actionCall(call: RecentCall) {
         val recentCall = call
         if (context.config.showCallConfirmation) {
-            CallConfirmationDialog(activity as SimpleActivity, recentCall.name) {
+            CallConfirmDialog(activity as SimpleActivity, recentCall.name, recentCall.phoneNumber, recentCall.photoUri) {
                 callRecentNumber(recentCall)
             }
         } else {

@@ -84,4 +84,36 @@
     <string name="decline_with_message">Відхилити з повідомленням</string>
     <string name="flip_to_silence">Переверніть телефон, щоб вимкнути звук виклику</string>
     <string name="announce_caller_name">Озвучувати ім\'я абонента</string>
+    <string name="add_quick_answer">Додати відповідь</string>
+    <string name="quick_answers_empty">Відповідей ще немає. Торкніться «Додати відповідь», щоб створити.</string>
+    <string name="announce_only_with_headset">Лише коли підключено навушники</string>
+    <string name="blocked_calls_filter">Заблоковані</string>
+    <string name="block_reason_list">У вашому списку блокування</string>
+    <string name="block_reason_unknown">Немає у ваших контактах</string>
+    <string name="block_reason_hidden">Прихований номер</string>
+    <string name="block_reason_system">Заблоковано системою</string>
+    <string name="remind_in_minutes">Нагадати через %d хв</string>
+    <string name="reminder_set">Нагадування встановлено: %s</string>
+    <string name="call_statistics">Статистика дзвінків</string>
+    <string name="stats_last_7_days">7 днів</string>
+    <string name="stats_last_30_days">30 днів</string>
+    <string name="stats_all_time">Весь час</string>
+    <string name="stats_talk_time">Час розмов</string>
+    <string name="stats_total_calls">Усього</string>
+    <string name="stats_average_call">Середній дзвінок: %s</string>
+    <string name="stats_busiest_hour">Найзавантаженіша година: %s</string>
+    <string name="stats_top_contacts">Найчастіші дзвінки</string>
+    <string name="stats_no_calls">Немає дзвінків за цей період</string>
+    <string name="widget_favorites_title">Обране</string>
+    <string name="widget_recents_title">Нещодавні дзвінки</string>
+    <string name="widget_favorites_description">Дзвоніть обраним контактам одним дотиком</string>
+    <string name="widget_recents_description">Ваші останні дзвінки, один дотик — і передзвін</string>
+    <string name="widget_favorites_empty">Обраних поки немає. Відкрийте MHW Phone, щоб додати їх або дозволити доступ до контактів.</string>
+    <string name="widget_recents_empty">Немає нещодавніх дзвінків. Відкрийте MHW Phone, щоб дозволити доступ до журналу викликів.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d дзвінок</item>
+        <item quantity="few">%d дзвінки</item>
+        <item quantity="many">%d дзвінків</item>
+        <item quantity="other">%d дзвінка</item>
+    </plurals>
 </resources>

@@ -75,4 +75,34 @@
     <string name="decline_with_message">Απόρριψη με μήνυμα</string>
     <string name="flip_to_silence">Αναποδογυρίστε το τηλέφωνο για σίγαση κλήσεων</string>
     <string name="announce_caller_name">Εκφώνηση ονόματος καλούντος</string>
+    <string name="add_quick_answer">Προσθήκη απάντησης</string>
+    <string name="quick_answers_empty">Δεν υπάρχουν απαντήσεις ακόμη. Πατήστε Προσθήκη απάντησης για να δημιουργήσετε.</string>
+    <string name="announce_only_with_headset">Μόνο όταν είναι συνδεδεμένα ακουστικά</string>
+    <string name="blocked_calls_filter">Αποκλεισμένες</string>
+    <string name="block_reason_list">Στη λίστα αποκλεισμού σας</string>
+    <string name="block_reason_unknown">Δεν είναι στις επαφές σας</string>
+    <string name="block_reason_hidden">Κρυφός αριθμός</string>
+    <string name="block_reason_system">Αποκλείστηκε από το σύστημα</string>
+    <string name="remind_in_minutes">Υπενθύμιση σε %d λεπτά</string>
+    <string name="reminder_set">Η υπενθύμιση ορίστηκε: %s</string>
+    <string name="call_statistics">Στατιστικά κλήσεων</string>
+    <string name="stats_last_7_days">7 ημέρες</string>
+    <string name="stats_last_30_days">30 ημέρες</string>
+    <string name="stats_all_time">Όλες</string>
+    <string name="stats_talk_time">Χρόνος ομιλίας</string>
+    <string name="stats_total_calls">Σύνολο</string>
+    <string name="stats_average_call">Μέση κλήση: %s</string>
+    <string name="stats_busiest_hour">Πιο πολυάσχολη ώρα: %s</string>
+    <string name="stats_top_contacts">Πιο συχνές κλήσεις</string>
+    <string name="stats_no_calls">Δεν υπάρχουν κλήσεις σε αυτήν την περίοδο</string>
+    <string name="widget_favorites_title">Αγαπημένα</string>
+    <string name="widget_recents_title">Πρόσφατες κλήσεις</string>
+    <string name="widget_favorites_description">Καλέστε τις αγαπημένες σας επαφές με ένα πάτημα</string>
+    <string name="widget_recents_description">Οι τελευταίες κλήσεις σας, ένα πάτημα για επανάκληση</string>
+    <string name="widget_favorites_empty">Δεν υπάρχουν αγαπημένα ακόμη. Ανοίξτε το MHW Phone για να προσθέσετε ή να επιτρέψετε πρόσβαση στις επαφές.</string>
+    <string name="widget_recents_empty">Δεν υπάρχουν πρόσφατες κλήσεις. Ανοίξτε το MHW Phone για να επιτρέψετε πρόσβαση στο ιστορικό κλήσεων.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d κλήση</item>
+        <item quantity="other">%d κλήσεις</item>
+    </plurals>
 </resources>

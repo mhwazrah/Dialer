@@ -76,4 +76,36 @@
     <string name="decline_with_message">Zavrni s sporočilom</string>
     <string name="flip_to_silence">Obrnite telefon, da utišate klic</string>
     <string name="announce_caller_name">Izgovori ime klicatelja</string>
+    <string name="add_quick_answer">Dodaj odgovor</string>
+    <string name="quick_answers_empty">Še ni odgovorov. Tapnite Dodaj odgovor, da ga ustvarite.</string>
+    <string name="announce_only_with_headset">Samo ko so priključene slušalke</string>
+    <string name="blocked_calls_filter">Blokirano</string>
+    <string name="block_reason_list">Na vašem seznamu blokiranih</string>
+    <string name="block_reason_unknown">Ni med vašimi stiki</string>
+    <string name="block_reason_hidden">Skrita številka</string>
+    <string name="block_reason_system">Blokirano s strani sistema</string>
+    <string name="remind_in_minutes">Opomni čez %d min</string>
+    <string name="reminder_set">Opomnik nastavljen: %s</string>
+    <string name="call_statistics">Statistika klicev</string>
+    <string name="stats_last_7_days">7 dni</string>
+    <string name="stats_last_30_days">30 dni</string>
+    <string name="stats_all_time">Ves čas</string>
+    <string name="stats_talk_time">Čas pogovorov</string>
+    <string name="stats_total_calls">Skupaj</string>
+    <string name="stats_average_call">Povprečen klic: %s</string>
+    <string name="stats_busiest_hour">Najbolj obremenjena ura: %s</string>
+    <string name="stats_top_contacts">Največ klicani</string>
+    <string name="stats_no_calls">V tem obdobju ni klicev</string>
+    <string name="widget_favorites_title">Priljubljeni</string>
+    <string name="widget_recents_title">Nedavni klici</string>
+    <string name="widget_favorites_description">Pokličite priljubljene stike z enim dotikom</string>
+    <string name="widget_recents_description">Vaši zadnji klici, en dotik za povratni klic</string>
+    <string name="widget_favorites_empty">Še ni priljubljenih. Odprite MHW Phone, da jih dodate ali dovolite dostop do stikov.</string>
+    <string name="widget_recents_empty">Ni nedavnih klicev. Odprite MHW Phone, da dovolite dostop do dnevnika klicev.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d klic</item>
+        <item quantity="two">%d klica</item>
+        <item quantity="few">%d klici</item>
+        <item quantity="other">%d klicev</item>
+    </plurals>
 </resources>

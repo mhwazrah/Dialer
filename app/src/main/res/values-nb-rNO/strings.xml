@@ -50,4 +50,34 @@
     <string name="decline_with_message">Avvis med melding</string>
     <string name="flip_to_silence">Snu telefonen for å dempe anrop</string>
     <string name="announce_caller_name">Si navnet på den som ringer</string>
+    <string name="add_quick_answer">Legg til svar</string>
+    <string name="quick_answers_empty">Ingen svar ennå. Trykk på Legg til svar for å lage ett.</string>
+    <string name="announce_only_with_headset">Bare når hodetelefoner er koblet til</string>
+    <string name="blocked_calls_filter">Blokkert</string>
+    <string name="block_reason_list">På blokkeringslisten din</string>
+    <string name="block_reason_unknown">Ikke i kontaktene dine</string>
+    <string name="block_reason_hidden">Skjult nummer</string>
+    <string name="block_reason_system">Blokkert av systemet</string>
+    <string name="remind_in_minutes">Påminn om %d min</string>
+    <string name="reminder_set">Påminnelse satt: %s</string>
+    <string name="call_statistics">Samtalestatistikk</string>
+    <string name="stats_last_7_days">7 dager</string>
+    <string name="stats_last_30_days">30 dager</string>
+    <string name="stats_all_time">All tid</string>
+    <string name="stats_talk_time">Taletid</string>
+    <string name="stats_total_calls">Totalt</string>
+    <string name="stats_average_call">Gjennomsnittlig samtale: %s</string>
+    <string name="stats_busiest_hour">Travleste time: %s</string>
+    <string name="stats_top_contacts">Mest ringt</string>
+    <string name="stats_no_calls">Ingen samtaler i denne perioden</string>
+    <string name="widget_favorites_title">Favoritter</string>
+    <string name="widget_recents_title">Siste samtaler</string>
+    <string name="widget_favorites_description">Ring favorittkontaktene dine med ett trykk</string>
+    <string name="widget_recents_description">Dine siste samtaler, ett trykk for å ringe tilbake</string>
+    <string name="widget_favorites_empty">Ingen favoritter ennå. Åpne MHW Phone for å legge til noen, eller for å gi tilgang til kontakter.</string>
+    <string name="widget_recents_empty">Ingen siste samtaler. Åpne MHW Phone for å gi tilgang til samtaleloggen.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d samtale</item>
+        <item quantity="other">%d samtaler</item>
+    </plurals>
 </resources>

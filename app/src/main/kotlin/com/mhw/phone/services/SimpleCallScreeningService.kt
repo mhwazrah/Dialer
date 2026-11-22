@@ -11,6 +11,10 @@ import com.goodwy.commons.helpers.ContactLookupResult
 import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.goodwy.commons.helpers.isQPlus
 import com.mhw.phone.extensions.config
+import com.mhw.phone.helpers.BLOCK_REASON_HIDDEN
+import com.mhw.phone.helpers.BLOCK_REASON_LIST
+import com.mhw.phone.helpers.BLOCK_REASON_UNKNOWN
+import com.mhw.phone.helpers.BlockedCallLog
 import com.mhw.phone.extensions.lookupContactSync
 import com.mhw.phone.models.Events
 import org.greenrobot.eventbus.EventBus
@@ -20,33 +24,35 @@ class SimpleCallScreeningService : CallScreeningService() {
     // The blocked-number provider and contact lookup are I/O: decide on a worker thread, then respond (the system allows a few seconds).
     override fun onScreenCall(callDetails: Call.Details) {
         ensureBackgroundThread {
-            val isBlocked = try {
-                shouldBlock(callDetails)
+            val reason = try {
+                blockReason(callDetails)
             } catch (_: SecurityException) {
-                false
+                null
             }
-            respondToCall(callDetails, isBlocked)
+            if (reason != null) BlockedCallLog.add(this, callDetails.handle?.schemeSpecificPart.orEmpty(), reason)
+            respondToCall(callDetails, reason != null)
         }
     }
 
-    private fun shouldBlock(callDetails: Call.Details): Boolean {
+    /** Why this call is blocked, or null to let it ring. */
+    private fun blockReason(callDetails: Call.Details): Int? {
         val number = callDetails.handle?.schemeSpecificPart
         return when {
             // Blocking only applies to incoming calls; outgoing calls (our app, another app, a car) must go through
-            isQPlus() && callDetails.callDirection == Call.Details.DIRECTION_OUTGOING -> false
+            isQPlus() && callDetails.callDirection == Call.Details.DIRECTION_OUTGOING -> null
 
             //To speed things up, we will not check any conditions if blocking is disabled
-            !baseConfig.blockingEnabled -> false
+            !baseConfig.blockingEnabled -> null
 
             number != null && isNumberBlocked(number) -> {
-                if (baseConfig.doNotBlockContactsAndRecent) isUnknownCaller(number) else true
+                BLOCK_REASON_LIST.takeIf { !baseConfig.doNotBlockContactsAndRecent || isUnknownCaller(number) }
             }
 
-            number != null && baseConfig.blockUnknownNumbers -> isUnknownCaller(number)
+            number != null && baseConfig.blockUnknownNumbers -> BLOCK_REASON_UNKNOWN.takeIf { isUnknownCaller(number) }
 
-            number == null && baseConfig.blockHiddenNumbers -> true
+            number == null && baseConfig.blockHiddenNumbers -> BLOCK_REASON_HIDDEN
 
-            else -> false
+            else -> null
         }
     }
 

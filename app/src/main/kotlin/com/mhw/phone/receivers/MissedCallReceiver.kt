@@ -112,8 +112,8 @@ class MissedCallReceiver : BroadcastReceiver() {
         val intent = Intent(context, NotificationActivity::class.java).apply {
             this.action = action
             putExtra(CURRENT_PHONE_NUMBER, key)
-            // Opening the app must not wipe a task that is already running (e.g. a live call screen)
-            this.flags = if (action == MISSED_CALL_OPEN) Intent.FLAG_ACTIVITY_NEW_TASK
+            // Opening the app or setting a reminder must not wipe a task that is already running (e.g. a live call screen)
+            this.flags = if (action == MISSED_CALL_OPEN || action == MISSED_CALL_REMIND) Intent.FLAG_ACTIVITY_NEW_TASK
             else Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         return PendingIntent.getActivity(context, key.hashCode(), intent, flags)
@@ -158,6 +158,13 @@ class MissedCallReceiver : BroadcastReceiver() {
                     R.drawable.ic_messages,
                     context.getString(R.string.message),
                     notificationActivityIntent(context, MISSED_CALL_MESSAGE, key, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
+                )
+                addAction(
+                    R.drawable.ic_remind_call,
+                    context.getString(R.string.remind_in_minutes, CALL_BACK_REMINDER_MINUTES),
+                    notificationActivityIntent(
+                        context, MISSED_CALL_REMIND, key, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
+                    )
                 )
             }
         }.build()

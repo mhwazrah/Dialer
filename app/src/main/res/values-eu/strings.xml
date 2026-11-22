@@ -84,4 +84,34 @@
     <string name="decline_with_message">Baztertu mezu batekin</string>
     <string name="flip_to_silence">Irauli telefonoa deiak isilarazteko</string>
     <string name="announce_caller_name">Esan deitzailearen izena</string>
+    <string name="add_quick_answer">Gehitu erantzuna</string>
+    <string name="quick_answers_empty">Oraindik ez dago erantzunik. Sortzeko, ukitu Gehitu erantzuna.</string>
+    <string name="announce_only_with_headset">Aurikularrak konektatuta daudenean soilik</string>
+    <string name="blocked_calls_filter">Blokeatuak</string>
+    <string name="block_reason_list">Zure blokeo-zerrendan</string>
+    <string name="block_reason_unknown">Ez dago zure kontaktuetan</string>
+    <string name="block_reason_hidden">Zenbaki ezkutua</string>
+    <string name="block_reason_system">Sistemak blokeatua</string>
+    <string name="remind_in_minutes">Gogorarazi %d min barru</string>
+    <string name="reminder_set">Gogorarazpena ezarrita: %s</string>
+    <string name="call_statistics">Deien estatistikak</string>
+    <string name="stats_last_7_days">7 egun</string>
+    <string name="stats_last_30_days">30 egun</string>
+    <string name="stats_all_time">Beti</string>
+    <string name="stats_talk_time">Hizketaldi-denbora</string>
+    <string name="stats_total_calls">Guztira</string>
+    <string name="stats_average_call">Batez besteko deia: %s</string>
+    <string name="stats_busiest_hour">Ordurik okupatuena: %s</string>
+    <string name="stats_top_contacts">Gehien deitutakoak</string>
+    <string name="stats_no_calls">Ez dago deirik aldi honetan</string>
+    <string name="widget_favorites_title">Gogokoak</string>
+    <string name="widget_recents_title">Azken deiak</string>
+    <string name="widget_favorites_description">Deitu zure gogoko kontaktuei ukitu batekin</string>
+    <string name="widget_recents_description">Zure azken deiak, ukitu bat berriro deitzeko</string>
+    <string name="widget_favorites_empty">Oraindik ez dago gogokorik. Ireki MHW Phone gehitzeko edo kontaktuetarako sarbidea baimentzeko.</string>
+    <string name="widget_recents_empty">Ez dago azken deirik. Ireki MHW Phone deien erregistrorako sarbidea baimentzeko.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d dei</item>
+        <item quantity="other">%d dei</item>
+    </plurals>
 </resources>

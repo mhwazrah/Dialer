@@ -1,5 +1,6 @@
 package com.mhw.phone
 
+import com.mhw.phone.widgets.refreshCallWidgets
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
@@ -38,6 +39,7 @@ class App : RightApp(), DefaultLifecycleObserver {
         ensureBackgroundThread { warmUpNativeGlassBlur() }
         // Observers only mark the contact snapshot dirty; nothing is loaded until a screen asks for it
         ContactsRepository.registerObservers(this)
+        ContactsRepository.addListener { refreshCallWidgets(this) }
         EventBus.getDefault().register(this)
         unlockAllFeatures()
         applyPinnedSettings()
@@ -125,7 +127,8 @@ class App : RightApp(), DefaultLifecycleObserver {
             override fun onFinish() {
                 countDownTimers.remove(timerId)
                 EventBus.getDefault().post(TimerEvent.Finish(timerId, duration))
-                EventBus.getDefault().post(TimerStopService)
+                // Other reminders may still be counting down: the service keeps their notification until the last one
+                if (countDownTimers.isEmpty()) EventBus.getDefault().post(TimerStopService)
             }
         }.start()
     }

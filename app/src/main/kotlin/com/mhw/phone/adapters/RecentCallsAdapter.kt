@@ -32,7 +32,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.behaviorule.arturdumchev.library.pixels
 import com.bumptech.glide.Glide
 import com.goodwy.commons.adapters.MyRecyclerViewListAdapter
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.extensions.addBlockedNumber
 import com.goodwy.commons.extensions.adjustAlpha
@@ -85,6 +85,7 @@ import com.mhw.phone.R
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import com.mhw.phone.activities.CallHistoryActivity
+import com.mhw.phone.helpers.startCallBackReminder
 import com.mhw.phone.helpers.ContactsRepository
 import com.mhw.phone.helpers.PlaceholderDrawableCache
 import com.mhw.phone.activities.SimpleActivity
@@ -107,7 +108,11 @@ import com.mhw.phone.extensions.startSystemContactDetails
 import com.mhw.phone.helpers.CURRENT_RECENT_CALL
 import com.mhw.phone.helpers.CURRENT_RECENT_CALL_LIST
 import com.mhw.phone.helpers.FILTER_RECENT_CALLS_ALL
-import com.mhw.phone.helpers.FILTER_RECENT_CALLS_CONTACTS
+import com.mhw.phone.helpers.BlockedCall
+import com.mhw.phone.helpers.BlockedCallLog
+import com.mhw.phone.helpers.blockReasonIn
+import com.mhw.phone.helpers.blockReasonText
+import com.mhw.phone.helpers.matchesRecentsFilter
 import com.mhw.phone.helpers.RecentsHelper
 import com.mhw.phone.helpers.highlightFoldedMatch
 import com.mhw.phone.helpers.SWIPE_ACTION_BLOCK
@@ -127,6 +132,8 @@ import kotlin.time.Duration.Companion.minutes
 import org.joda.time.DateTime
 import kotlin.math.abs
 
+private val REMIND_MINUTES = mapOf(R.id.cab_remind_10 to 10, R.id.cab_remind_30 to 30, R.id.cab_remind_60 to 60)
+
 class RecentCallsAdapter(
     activity: SimpleActivity,
     recyclerView: MyRecyclerView,
@@ -145,6 +152,7 @@ class RecentCallsAdapter(
     private lateinit var incomingCallIcon: Drawable
     private lateinit var incomingMissedCallIcon: Drawable
     private lateinit var blockedCallIcon: Drawable
+    private var blockRecords: List<BlockedCall> = emptyList()
     var fontSize: Float = activity.getTextSize()
     private var ellipsizeMode = activity.config.ellipsizeMode
     private val areMultipleSIMsAvailable = activity.areMultipleSIMsAvailable()
@@ -200,6 +208,8 @@ class RecentCallsAdapter(
             findItem(R.id.cab_copy_number).isVisible = isOneItemSelected
             findItem(R.id.web_search).isVisible = isOneItemSelected
             findItem(R.id.cab_view_details)?.isVisible = isOneItemSelected && findContactByCall(selectedItems.first()) != null
+            findItem(R.id.cab_remind).isVisible = isOneItemSelected && !selectedItems.first().isUnknownNumber
+            setRemindTitles(this)
         }
     }
 
@@ -223,6 +233,10 @@ class RecentCallsAdapter(
         }
 
         when (id) {
+            in REMIND_MINUTES -> {
+                getSelectedItems().firstOrNull()?.let { remindToCallBack(it, REMIND_MINUTES.getValue(id)) }
+                finishActMode()
+            }
             R.id.cab_call_sim_1 -> callContact(true)
             R.id.cab_call_sim_2 -> callContact(false)
             R.id.cab_remove_default_sim -> removeDefaultSIM()
@@ -355,14 +369,11 @@ class RecentCallsAdapter(
         val now = DateTime.now()
         todayCode = now.millis.getDayCode()
         yesterdayCode = now.minusDays(1).millis.getDayCode()
+        blockRecords = BlockedCallLog.read(activity)
+        val filter = activity.config.filterRecentCalls
         val listFilter =
-            when (activity.config.filterRecentCalls) {
-                FILTER_RECENT_CALLS_ALL -> list
-                FILTER_RECENT_CALLS_CONTACTS -> list?.filterIsInstance<RecentCall>()
-                    ?.filter { it.contactID != null }
-                else -> list?.filterIsInstance<RecentCall>()
-                    ?.filter { it.type == activity.config.filterRecentCalls }
-            }
+            if (filter == FILTER_RECENT_CALLS_ALL) list
+            else list?.filterIsInstance<RecentCall>()?.filter { it.matchesRecentsFilter(filter, blockRecords) }
         super.submitList(listFilter) {
             // Do not fight a user who is already scrolling while the diff was computed.
             if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) layoutManager.onRestoreInstanceState(recyclerViewState)
@@ -591,6 +602,21 @@ class RecentCallsAdapter(
 
     private fun getSelectedName() = getSelectedItems().firstOrNull()?.name
 
+    private fun setRemindTitles(menu: Menu) = REMIND_MINUTES.forEach { (id, minutes) ->
+        menu.findItem(id)?.title = resources.getQuantityString(R.plurals.minutes, minutes, minutes)
+    }
+
+    private fun remindToCallBack(call: RecentCall, minutes: Int) {
+        activity.handleNotificationPermission { granted ->
+            if (granted) {
+                activity.startCallBackReminder(call.name, call.phoneNumber, minutes * 60)
+                activity.toast(resources.getString(R.string.reminder_set, resources.getQuantityString(R.plurals.minutes, minutes, minutes)))
+            } else {
+                activity.toast(R.string.allow_notifications_reminders)
+            }
+        }
+    }
+
     private fun showPopupMenu(view: View, call: RecentCall) {
         finishActMode()
         val theme = activity.getPopupMenuTheme()
@@ -615,9 +641,15 @@ class RecentCallsAdapter(
                 findItem(R.id.cab_block_number).isVisible = !call.isUnknownNumber && !activity.isNumberBlocked(call.phoneNumber, blockedNumbers)
                 findItem(R.id.cab_unblock_number).isVisible = !call.isUnknownNumber && activity.isNumberBlocked(call.phoneNumber, blockedNumbers)
                 findItem(R.id.cab_remove_default_sim).isVisible = (activity.config.getCustomSIM(selectedNumber) ?: "") != "" && !call.isUnknownNumber
+                findItem(R.id.cab_remind).isVisible = !call.isUnknownNumber
+                setRemindTitles(this)
             }
             setOnMenuItemClickListener { item ->
                 val callId = call.id
+                REMIND_MINUTES[item.itemId]?.let { minutes ->
+                    remindToCallBack(call, minutes)
+                    return@setOnMenuItemClickListener true
+                }
                 when (item.itemId) {
                     R.id.cab_call -> {
                         executeItemMenuOperation(callId) {
@@ -814,6 +846,11 @@ class RecentCallsAdapter(
                     }
                 }
                 text = if (name != call.phoneNumber && textToHighlight.isNotEmpty()) numberToShow else formatterUnicodeWrap(recentsNumber)
+                // Blocked calls say why: block list, not a contact, hidden number
+                call.blockReasonIn(blockRecords)?.let {
+                    val reason = resources.getString(blockReasonText(it))
+                    if (text.isNullOrBlank()) text = reason else append(" · $reason")
+                }
             }
 
             v.dateTime.apply {
@@ -1222,7 +1259,7 @@ class RecentCallsAdapter(
 
     private fun swipedCall(call: RecentCall) {
         if (activity.config.showCallConfirmation) {
-            CallConfirmationDialog(activity as SimpleActivity, call.name) {
+            CallConfirmDialog(activity, call.name, call.phoneNumber, call.photoUri) {
                 callRecentNumber(call)
             }
         } else {

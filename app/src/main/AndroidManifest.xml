@@ -194,6 +194,50 @@
         </activity>
 
         <activity
+            android:name=".activities.WidgetCallActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:label=""
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/WidgetCallTheme" />
+
+        <receiver
+            android:name=".widgets.FavoritesWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_favorites_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_favorites_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.RecentsWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_recents_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_recents_info" />
+        </receiver>
+
+        <service
+            android:name=".widgets.CallWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity
+            android:name=".activities.StatisticsActivity"
+            android:exported="false"
+            android:label="@string/call_statistics"
+            android:parentActivityName=".activities.MainActivity" />
+
+        <activity
             android:name=".activities.AboutActivity"
             android:configChanges="orientation"
             android:exported="false"

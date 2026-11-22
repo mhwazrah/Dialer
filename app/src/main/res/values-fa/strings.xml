@@ -76,4 +76,34 @@
     <string name="decline_with_message">رد با پیام</string>
     <string name="flip_to_silence">برای بی‌صدا کردن تماس، گوشی را برگردانید</string>
     <string name="announce_caller_name">خواندن نام تماس‌گیرنده هنگام زنگ</string>
+    <string name="add_quick_answer">افزودن پاسخ</string>
+    <string name="quick_answers_empty">هنوز پاسخی وجود ندارد. برای ایجاد، روی افزودن پاسخ بزنید.</string>
+    <string name="announce_only_with_headset">فقط هنگام اتصال هدفون</string>
+    <string name="blocked_calls_filter">مسدود شده</string>
+    <string name="block_reason_list">در فهرست مسدودی شما</string>
+    <string name="block_reason_unknown">در مخاطبین شما نیست</string>
+    <string name="block_reason_hidden">شماره مخفی</string>
+    <string name="block_reason_system">مسدود شده توسط سیستم</string>
+    <string name="remind_in_minutes">یادآوری پس از %d دقیقه</string>
+    <string name="reminder_set">یادآور تنظیم شد: %s</string>
+    <string name="call_statistics">آمار تماس‌ها</string>
+    <string name="stats_last_7_days">۷ روز</string>
+    <string name="stats_last_30_days">۳۰ روز</string>
+    <string name="stats_all_time">همه زمان‌ها</string>
+    <string name="stats_talk_time">مدت مکالمه</string>
+    <string name="stats_total_calls">مجموع</string>
+    <string name="stats_average_call">میانگین تماس: %s</string>
+    <string name="stats_busiest_hour">شلوغ‌ترین ساعت: %s</string>
+    <string name="stats_top_contacts">بیشترین تماس‌ها</string>
+    <string name="stats_no_calls">در این بازه تماسی وجود ندارد</string>
+    <string name="widget_favorites_title">علاقه‌مندی‌ها</string>
+    <string name="widget_recents_title">تماس‌های اخیر</string>
+    <string name="widget_favorites_description">با یک ضربه با مخاطبین مورد علاقه‌تان تماس بگیرید</string>
+    <string name="widget_recents_description">آخرین تماس‌های شما، با یک ضربه تماس مجدد بگیرید</string>
+    <string name="widget_favorites_empty">هنوز علاقه‌مندی‌ای وجود ندارد. MHW Phone را باز کنید تا اضافه کنید یا دسترسی به مخاطبین را مجاز کنید.</string>
+    <string name="widget_recents_empty">تماس اخیری وجود ندارد. MHW Phone را باز کنید تا دسترسی به گزارش تماس‌ها را مجاز کنید.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d تماس</item>
+        <item quantity="other">%d تماس</item>
+    </plurals>
 </resources>

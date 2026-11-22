@@ -84,4 +84,35 @@
     <string name="decline_with_message">Rebutja amb un missatge</string>
     <string name="flip_to_silence">Gira el telèfon per silenciar les trucades</string>
     <string name="announce_caller_name">Digues el nom de qui truca</string>
+    <string name="add_quick_answer">Afegeix resposta</string>
+    <string name="quick_answers_empty">Encara no hi ha respostes. Toqueu Afegeix resposta per crear-ne una.</string>
+    <string name="announce_only_with_headset">Només quan hi ha auriculars connectats</string>
+    <string name="blocked_calls_filter">Bloquejades</string>
+    <string name="block_reason_list">A la vostra llista de bloqueig</string>
+    <string name="block_reason_unknown">No és als vostres contactes</string>
+    <string name="block_reason_hidden">Número ocult</string>
+    <string name="block_reason_system">Bloquejada pel sistema</string>
+    <string name="remind_in_minutes">Recorda d\'aquí a %d min</string>
+    <string name="reminder_set">Recordatori establert: %s</string>
+    <string name="call_statistics">Estadístiques de trucades</string>
+    <string name="stats_last_7_days">7 dies</string>
+    <string name="stats_last_30_days">30 dies</string>
+    <string name="stats_all_time">Tot el temps</string>
+    <string name="stats_talk_time">Temps de conversa</string>
+    <string name="stats_total_calls">Total</string>
+    <string name="stats_average_call">Trucada mitjana: %s</string>
+    <string name="stats_busiest_hour">Hora de més activitat: %s</string>
+    <string name="stats_top_contacts">Més trucats</string>
+    <string name="stats_no_calls">Cap trucada en aquest període</string>
+    <string name="widget_favorites_title">Preferits</string>
+    <string name="widget_recents_title">Trucades recents</string>
+    <string name="widget_favorites_description">Truqueu als vostres contactes preferits amb un toc</string>
+    <string name="widget_recents_description">Les últimes trucades, un toc per tornar a trucar</string>
+    <string name="widget_favorites_empty">Encara no hi ha preferits. Obriu MHW Phone per afegir-ne o per permetre l\'accés als contactes.</string>
+    <string name="widget_recents_empty">No hi ha trucades recents. Obriu MHW Phone per permetre l\'accés al registre de trucades.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d trucada</item>
+        <item quantity="many">%d de trucades</item>
+        <item quantity="other">%d trucades</item>
+    </plurals>
 </resources>

@@ -71,7 +71,8 @@ class TimerService : Service() {
                 val contextText = when {
                     firstTimer.label.isNotEmpty() -> getString(
                         R.string.call_back_person_g,
-                        firstTimer.label
+                        // The caller's name when the reminder has one, else the number
+                        firstTimer.title.takeIf { it.isNotBlank() && it != "Timer" } ?: firstTimer.label
                     )
 
                     else -> resources.getQuantityString(

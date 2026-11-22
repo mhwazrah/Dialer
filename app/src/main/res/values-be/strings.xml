@@ -64,4 +64,36 @@
     <string name="decline_with_message">Адхіліць з паведамленнем</string>
     <string name="flip_to_silence">Перавярніце тэлефон, каб выключыць гук выкліку</string>
     <string name="announce_caller_name">Агучваць імя абанента пры выкліку</string>
+    <string name="add_quick_answer">Дадаць адказ</string>
+    <string name="quick_answers_empty">Адказаў пакуль няма. Націсніце «Дадаць адказ», каб стварыць.</string>
+    <string name="announce_only_with_headset">Толькі пры падключаных навушніках</string>
+    <string name="blocked_calls_filter">Заблакіравана</string>
+    <string name="block_reason_list">У вашым спісе блакіроўкі</string>
+    <string name="block_reason_unknown">Няма ў вашых кантактах</string>
+    <string name="block_reason_hidden">Схаваны нумар</string>
+    <string name="block_reason_system">Заблакіравана сістэмай</string>
+    <string name="remind_in_minutes">Нагадаць праз %d хв</string>
+    <string name="reminder_set">Нагадванне ўсталявана: %s</string>
+    <string name="call_statistics">Статыстыка выклікаў</string>
+    <string name="stats_last_7_days">7 дзён</string>
+    <string name="stats_last_30_days">30 дзён</string>
+    <string name="stats_all_time">Увесь час</string>
+    <string name="stats_talk_time">Час размовы</string>
+    <string name="stats_total_calls">Усяго</string>
+    <string name="stats_average_call">Сярэдні выклік: %s</string>
+    <string name="stats_busiest_hour">Самая загружаная гадзіна: %s</string>
+    <string name="stats_top_contacts">Часцей за ўсё тэлефанавалі</string>
+    <string name="stats_no_calls">У гэты перыяд выклікаў няма</string>
+    <string name="widget_favorites_title">Абранае</string>
+    <string name="widget_recents_title">Апошнія выклікі</string>
+    <string name="widget_favorites_description">Тэлефануйце абраным кантактам адным націскам</string>
+    <string name="widget_recents_description">Вашы апошнія выклікі, адзін націск для зваротнага выкліку</string>
+    <string name="widget_favorites_empty">Абранага пакуль няма. Адкрыйце MHW Phone, каб дадаць, або дайце доступ да кантактаў.</string>
+    <string name="widget_recents_empty">Апошніх выклікаў няма. Адкрыйце MHW Phone, каб даць доступ да журнала выклікаў.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d выклік</item>
+        <item quantity="few">%d выклікі</item>
+        <item quantity="many">%d выклікаў</item>
+        <item quantity="other">%d выкліку</item>
+    </plurals>
 </resources>

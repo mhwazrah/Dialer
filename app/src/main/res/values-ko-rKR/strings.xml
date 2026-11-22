@@ -89,4 +89,33 @@
     <string name="decline_with_message">메시지로 거절</string>
     <string name="flip_to_silence">휴대전화를 뒤집어 전화 무음</string>
     <string name="announce_caller_name">전화 올 때 발신자 이름 읽기</string>
+    <string name="add_quick_answer">답장 추가</string>
+    <string name="quick_answers_empty">아직 답장이 없습니다. 답장 추가를 눌러 만드세요.</string>
+    <string name="announce_only_with_headset">헤드폰이 연결된 경우에만</string>
+    <string name="blocked_calls_filter">차단됨</string>
+    <string name="block_reason_list">차단 목록에 있음</string>
+    <string name="block_reason_unknown">연락처에 없음</string>
+    <string name="block_reason_hidden">발신번호 제한</string>
+    <string name="block_reason_system">시스템에서 차단함</string>
+    <string name="remind_in_minutes">%d분 후 알림</string>
+    <string name="reminder_set">알림 설정됨: %s</string>
+    <string name="call_statistics">통화 통계</string>
+    <string name="stats_last_7_days">7일</string>
+    <string name="stats_last_30_days">30일</string>
+    <string name="stats_all_time">전체 기간</string>
+    <string name="stats_talk_time">통화 시간</string>
+    <string name="stats_total_calls">전체</string>
+    <string name="stats_average_call">평균 통화: %s</string>
+    <string name="stats_busiest_hour">가장 바쁜 시간: %s</string>
+    <string name="stats_top_contacts">자주 건 번호</string>
+    <string name="stats_no_calls">이 기간에 통화 없음</string>
+    <string name="widget_favorites_title">즐겨찾기</string>
+    <string name="widget_recents_title">최근 통화</string>
+    <string name="widget_favorites_description">즐겨찾는 연락처에 한 번에 전화하기</string>
+    <string name="widget_recents_description">최근 통화를 한 번 눌러 다시 걸기</string>
+    <string name="widget_favorites_empty">즐겨찾기가 없습니다. MHW Phone을 열어 추가하거나 연락처 접근을 허용하세요.</string>
+    <string name="widget_recents_empty">최근 통화가 없습니다. MHW Phone을 열어 통화 기록 접근을 허용하세요.</string>
+    <plurals name="stats_calls">
+        <item quantity="other">통화 %d건</item>
+    </plurals>
 </resources>

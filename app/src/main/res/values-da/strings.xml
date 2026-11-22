@@ -91,4 +91,34 @@
     <string name="decline_with_message">Afvis med besked</string>
     <string name="flip_to_silence">Vend telefonen for at gøre opkald lydløse</string>
     <string name="announce_caller_name">Sig navnet på den, der ringer</string>
+    <string name="add_quick_answer">Tilføj svar</string>
+    <string name="quick_answers_empty">Ingen svar endnu. Tryk på Tilføj svar for at oprette et.</string>
+    <string name="announce_only_with_headset">Kun når hovedtelefoner er tilsluttet</string>
+    <string name="blocked_calls_filter">Blokeret</string>
+    <string name="block_reason_list">På din blokeringsliste</string>
+    <string name="block_reason_unknown">Ikke i dine kontakter</string>
+    <string name="block_reason_hidden">Skjult nummer</string>
+    <string name="block_reason_system">Blokeret af systemet</string>
+    <string name="remind_in_minutes">Påmind om %d min.</string>
+    <string name="reminder_set">Påmindelse indstillet: %s</string>
+    <string name="call_statistics">Opkaldsstatistik</string>
+    <string name="stats_last_7_days">7 dage</string>
+    <string name="stats_last_30_days">30 dage</string>
+    <string name="stats_all_time">Altid</string>
+    <string name="stats_talk_time">Taletid</string>
+    <string name="stats_total_calls">I alt</string>
+    <string name="stats_average_call">Gennemsnitligt opkald: %s</string>
+    <string name="stats_busiest_hour">Travleste time: %s</string>
+    <string name="stats_top_contacts">Mest ringet til</string>
+    <string name="stats_no_calls">Ingen opkald i denne periode</string>
+    <string name="widget_favorites_title">Favoritter</string>
+    <string name="widget_recents_title">Seneste opkald</string>
+    <string name="widget_favorites_description">Ring til dine favoritkontakter med ét tryk</string>
+    <string name="widget_recents_description">Dine seneste opkald, ét tryk for at ringe op igen</string>
+    <string name="widget_favorites_empty">Ingen favoritter endnu. Åbn MHW Phone for at tilføje nogen eller give adgang til kontakter.</string>
+    <string name="widget_recents_empty">Ingen seneste opkald. Åbn MHW Phone for at give adgang til opkaldslisten.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d opkald</item>
+        <item quantity="other">%d opkald</item>
+    </plurals>
 </resources>

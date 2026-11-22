@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Call confirmation: who is being called (photo or letter, name, number, saved SIM), then Cancel and a filled Call.
+     The glass sheet comes from the dialog window, so this root stays transparent -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="28dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="20dp">
+
+    <!-- 88dp avatar on a 112dp stage, so the soft ring can pulse outwards -->
+    <FrameLayout
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        android:clipChildren="false">
+
+        <View
+            android:id="@+id/call_confirm_ring"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_dialog_call_ring" />
+
+        <ImageView
+            android:id="@+id/call_confirm_photo"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_dialog_icon"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/call_confirm_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="2"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        tools:text="Mohammed Ahmed" />
+
+    <!-- Left to right, so "+966 50 …" never reorders in Arabic -->
+    <TextView
+        android:id="@+id/call_confirm_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:alpha="0.75"
+        android:gravity="center"
+        android:letterSpacing="0.02"
+        android:maxLines="1"
+        android:textAlignment="center"
+        android:textDirection="ltr"
+        android:textSize="17sp"
+        tools:text="+966 50 123 4567" />
+
+    <TextView
+        android:id="@+id/call_confirm_sim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/btn_dialog_tonal"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minHeight="28dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:text="SIM 1"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/call_confirm_cancel"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_dialog_outline"
+            android:lines="1"
+            android:stateListAnimator="@null"
+            android:text="@string/cancel"
+            android:textAllCaps="false"
+            android:textSize="16sp" />
+
+        <!-- Filled green, wider, with the phone icon: the one action that stands out -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/call_confirm_call"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1.4"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:lines="1"
+            android:text="@string/call"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/green_call"
+            app:cornerRadius="26dp"
+            app:icon="@drawable/ic_phone_vector"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="20dp"
+            app:iconTint="@android:color/black"
+            app:rippleColor="#33000000" />
+    </LinearLayout>
+</LinearLayout>

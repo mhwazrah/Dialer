@@ -84,4 +84,35 @@
     <string name="decline_with_message">Одбиј поруком</string>
     <string name="flip_to_silence">Окрените телефон да утишате позив</string>
     <string name="announce_caller_name">Изговори име позиваоца</string>
+    <string name="add_quick_answer">Додај одговор</string>
+    <string name="quick_answers_empty">Још нема одговора. Додирните Додај одговор да направите један.</string>
+    <string name="announce_only_with_headset">Само када су слушалице повезане</string>
+    <string name="blocked_calls_filter">Блокирани</string>
+    <string name="block_reason_list">На вашој листи блокираних</string>
+    <string name="block_reason_unknown">Није у вашим контактима</string>
+    <string name="block_reason_hidden">Сакривен број</string>
+    <string name="block_reason_system">Блокирао систем</string>
+    <string name="remind_in_minutes">Подсети за %d мин</string>
+    <string name="reminder_set">Подсетник постављен: %s</string>
+    <string name="call_statistics">Статистика позива</string>
+    <string name="stats_last_7_days">7 дана</string>
+    <string name="stats_last_30_days">30 дана</string>
+    <string name="stats_all_time">Све време</string>
+    <string name="stats_talk_time">Време разговора</string>
+    <string name="stats_total_calls">Укупно</string>
+    <string name="stats_average_call">Просечан позив: %s</string>
+    <string name="stats_busiest_hour">Најпрометнији сат: %s</string>
+    <string name="stats_top_contacts">Најчешће позивани</string>
+    <string name="stats_no_calls">Нема позива у овом периоду</string>
+    <string name="widget_favorites_title">Омиљени</string>
+    <string name="widget_recents_title">Недавни позиви</string>
+    <string name="widget_favorites_description">Позовите омиљене контакте једним додиром</string>
+    <string name="widget_recents_description">Ваши последњи позиви, један додир за узвратни позив</string>
+    <string name="widget_favorites_empty">Још нема омиљених. Отворите MHW Phone да их додате или да дозволите приступ контактима.</string>
+    <string name="widget_recents_empty">Нема недавних позива. Отворите MHW Phone да дозволите приступ евиденцији позива.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d позив</item>
+        <item quantity="few">%d позива</item>
+        <item quantity="other">%d позива</item>
+    </plurals>
 </resources>

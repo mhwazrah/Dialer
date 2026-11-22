@@ -136,6 +136,14 @@ class Config private constructor(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(ANNOUNCE_CALLER_NAME, false)
         set(announceCallerName) = prefs.edit { putBoolean(ANNOUNCE_CALLER_NAME, announceCallerName) }
 
+    var blockedCallsLog: String
+        get() = prefs.getString(BLOCKED_CALLS_LOG, "")!!
+        set(blockedCallsLog) = prefs.edit { putString(BLOCKED_CALLS_LOG, blockedCallsLog) }
+
+    var announceOnlyWithHeadset: Boolean
+        get() = prefs.getBoolean(ANNOUNCE_ONLY_WITH_HEADSET, false)
+        set(announceOnlyWithHeadset) = prefs.edit { putBoolean(ANNOUNCE_ONLY_WITH_HEADSET, announceOnlyWithHeadset) }
+
     var disableSwipeToAnswer: Boolean
         get() = prefs.getBoolean(DISABLE_SWIPE_TO_ANSWER, true)
         set(disableSwipeToAnswer) = prefs.edit { putBoolean(DISABLE_SWIPE_TO_ANSWER, disableSwipeToAnswer) }
@@ -285,9 +293,9 @@ class Config private constructor(context: Context) : BaseConfig(context) {
                 ContextCompat.getString(context, com.mhw.phone.R.string.message_on_my_way),
                 ContextCompat.getString(context, com.mhw.phone.R.string.message_cant_talk_right_now)
             )
-            // Callers index 0..2: anything but exactly three saved lines falls back to the defaults.
-            val saved = prefs.getString(QUICK_ANSWERS, null)?.lines()
-            return if (saved != null && saved.size == 3) ArrayList(saved) else defaultList
+            // Never saved: the defaults. Saved empty: the user removed every reply.
+            val saved = prefs.getString(QUICK_ANSWERS, null) ?: return defaultList
+            return ArrayList(saved.lines().filter { it.isNotBlank() })
         }
         set(quickAnswers) = prefs.edit { putString(QUICK_ANSWERS, quickAnswers.joinToString(separator = "\n") { it.replace('\n', ' ') }) }
 

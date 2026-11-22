@@ -84,4 +84,33 @@
     <string name="decline_with_message">メッセージを送って拒否</string>
     <string name="flip_to_silence">端末を裏返して着信音を消す</string>
     <string name="announce_caller_name">着信時に発信者名を読み上げる</string>
+    <string name="add_quick_answer">返信を追加</string>
+    <string name="quick_answers_empty">返信はまだありません。「返信を追加」をタップして作成します。</string>
+    <string name="announce_only_with_headset">ヘッドホン接続時のみ</string>
+    <string name="blocked_calls_filter">ブロック済み</string>
+    <string name="block_reason_list">ブロックリストに登録済み</string>
+    <string name="block_reason_unknown">連絡先にありません</string>
+    <string name="block_reason_hidden">非通知</string>
+    <string name="block_reason_system">システムによりブロック</string>
+    <string name="remind_in_minutes">%d分後にリマインド</string>
+    <string name="reminder_set">リマインダーを設定しました: %s</string>
+    <string name="call_statistics">通話統計</string>
+    <string name="stats_last_7_days">7日間</string>
+    <string name="stats_last_30_days">30日間</string>
+    <string name="stats_all_time">全期間</string>
+    <string name="stats_talk_time">通話時間</string>
+    <string name="stats_total_calls">合計</string>
+    <string name="stats_average_call">平均通話時間: %s</string>
+    <string name="stats_busiest_hour">最も忙しい時間帯: %s</string>
+    <string name="stats_top_contacts">よく発信した相手</string>
+    <string name="stats_no_calls">この期間の通話はありません</string>
+    <string name="widget_favorites_title">お気に入り</string>
+    <string name="widget_recents_title">最近の通話</string>
+    <string name="widget_favorites_description">お気に入りの連絡先にワンタップで発信</string>
+    <string name="widget_recents_description">最近の通話をワンタップで発信</string>
+    <string name="widget_favorites_empty">お気に入りはまだありません。MHW Phone を開いて追加するか、連絡先へのアクセスを許可してください。</string>
+    <string name="widget_recents_empty">最近の通話はありません。MHW Phone を開いて通話履歴へのアクセスを許可してください。</string>
+    <plurals name="stats_calls">
+        <item quantity="other">%d件の通話</item>
+    </plurals>
 </resources>

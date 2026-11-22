@@ -84,4 +84,36 @@
     <string name="decline_with_message">Odrzuć z wiadomością</string>
     <string name="flip_to_silence">Odwróć telefon, aby wyciszyć połączenie</string>
     <string name="announce_caller_name">Odczytuj nazwę dzwoniącego</string>
+    <string name="add_quick_answer">Dodaj odpowiedź</string>
+    <string name="quick_answers_empty">Brak odpowiedzi. Kliknij „Dodaj odpowiedź”, aby utworzyć.</string>
+    <string name="announce_only_with_headset">Tylko po podłączeniu słuchawek</string>
+    <string name="blocked_calls_filter">Zablokowane</string>
+    <string name="block_reason_list">Na Twojej liście blokowanych</string>
+    <string name="block_reason_unknown">Brak w kontaktach</string>
+    <string name="block_reason_hidden">Ukryty numer</string>
+    <string name="block_reason_system">Zablokowane przez system</string>
+    <string name="remind_in_minutes">Przypomnij za %d min</string>
+    <string name="reminder_set">Ustawiono przypomnienie: %s</string>
+    <string name="call_statistics">Statystyki połączeń</string>
+    <string name="stats_last_7_days">7 dni</string>
+    <string name="stats_last_30_days">30 dni</string>
+    <string name="stats_all_time">Cały czas</string>
+    <string name="stats_talk_time">Czas rozmów</string>
+    <string name="stats_total_calls">Razem</string>
+    <string name="stats_average_call">Średnia rozmowa: %s</string>
+    <string name="stats_busiest_hour">Najbardziej aktywna godzina: %s</string>
+    <string name="stats_top_contacts">Najczęściej dzwonione</string>
+    <string name="stats_no_calls">Brak połączeń w tym okresie</string>
+    <string name="widget_favorites_title">Ulubione</string>
+    <string name="widget_recents_title">Ostatnie połączenia</string>
+    <string name="widget_favorites_description">Dzwoń do ulubionych kontaktów jednym dotknięciem</string>
+    <string name="widget_recents_description">Twoje ostatnie połączenia, oddzwoń jednym dotknięciem</string>
+    <string name="widget_favorites_empty">Brak ulubionych. Otwórz MHW Phone, aby je dodać lub zezwolić na dostęp do kontaktów.</string>
+    <string name="widget_recents_empty">Brak ostatnich połączeń. Otwórz MHW Phone, aby zezwolić na dostęp do rejestru połączeń.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d połączenie</item>
+        <item quantity="few">%d połączenia</item>
+        <item quantity="many">%d połączeń</item>
+        <item quantity="other">%d połączenia</item>
+    </plurals>
 </resources>

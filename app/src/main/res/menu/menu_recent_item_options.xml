@@ -16,6 +16,22 @@
         android:id="@+id/cab_send_sms"
         android:title="@string/send_sms" />
     <item
+        android:id="@+id/cab_remind"
+        android:title="@string/remind_me">
+        <!-- Titles ("10 minutes" …) come from the plurals in code -->
+        <menu>
+            <item
+                android:id="@+id/cab_remind_10"
+                android:title="@string/remind_me" />
+            <item
+                android:id="@+id/cab_remind_30"
+                android:title="@string/remind_me" />
+            <item
+                android:id="@+id/cab_remind_60"
+                android:title="@string/remind_me" />
+        </menu>
+    </item>
+    <item
         android:id="@+id/cab_copy_number"
         android:title="@string/copy_number_to_clipboard" />
     <item

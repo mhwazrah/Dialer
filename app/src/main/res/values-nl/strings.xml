@@ -84,4 +84,34 @@
     <string name="decline_with_message">Weigeren met bericht</string>
     <string name="flip_to_silence">Telefoon omdraaien om oproepen te dempen</string>
     <string name="announce_caller_name">Naam van beller uitspreken</string>
+    <string name="add_quick_answer">Antwoord toevoegen</string>
+    <string name="quick_answers_empty">Nog geen antwoorden. Tik op Antwoord toevoegen om er een te maken.</string>
+    <string name="announce_only_with_headset">Alleen als koptelefoon is aangesloten</string>
+    <string name="blocked_calls_filter">Geblokkeerd</string>
+    <string name="block_reason_list">Op je blokkeerlijst</string>
+    <string name="block_reason_unknown">Niet in je contacten</string>
+    <string name="block_reason_hidden">Verborgen nummer</string>
+    <string name="block_reason_system">Geblokkeerd door het systeem</string>
+    <string name="remind_in_minutes">Herinner over %d min</string>
+    <string name="reminder_set">Herinnering ingesteld: %s</string>
+    <string name="call_statistics">Gespreksstatistieken</string>
+    <string name="stats_last_7_days">7 dagen</string>
+    <string name="stats_last_30_days">30 dagen</string>
+    <string name="stats_all_time">Altijd</string>
+    <string name="stats_talk_time">Gesprekstijd</string>
+    <string name="stats_total_calls">Totaal</string>
+    <string name="stats_average_call">Gemiddeld gesprek: %s</string>
+    <string name="stats_busiest_hour">Drukste uur: %s</string>
+    <string name="stats_top_contacts">Meest gebeld</string>
+    <string name="stats_no_calls">Geen gesprekken in deze periode</string>
+    <string name="widget_favorites_title">Favorieten</string>
+    <string name="widget_recents_title">Recente gesprekken</string>
+    <string name="widget_favorites_description">Bel je favoriete contacten met één tik</string>
+    <string name="widget_recents_description">Je laatste gesprekken, één tik om terug te bellen</string>
+    <string name="widget_favorites_empty">Nog geen favorieten. Open MHW Phone om er toe te voegen of om toegang tot contacten toe te staan.</string>
+    <string name="widget_recents_empty">Geen recente gesprekken. Open MHW Phone om toegang tot het gespreksoverzicht toe te staan.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d gesprek</item>
+        <item quantity="other">%d gesprekken</item>
+    </plurals>
 </resources>

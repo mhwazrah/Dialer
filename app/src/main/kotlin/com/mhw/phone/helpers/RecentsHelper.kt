@@ -68,7 +68,9 @@ class RecentsHelper(private val context: Context) {
 
     private fun loadLookups(): LoadLookups {
         val sims = context.getAvailableSIMCardLabels()
-        val blocked = if (context.config.showBlockedNumbers) null else try {
+        // The Blocked filter needs those calls even while blocked numbers are hidden from Recents
+        val showBlocked = context.config.showBlockedNumbers || context.config.filterRecentCalls == FILTER_RECENT_CALLS_BLOCKED
+        val blocked = if (showBlocked) null else try {
             context.getBlockedNumbers()
         } catch (_: SecurityException) {
             ArrayList()

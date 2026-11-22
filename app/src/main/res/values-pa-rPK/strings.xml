@@ -17,4 +17,34 @@
     <string name="decline_with_message">سنیہے نال رد کرو</string>
     <string name="flip_to_silence">کال چپ کرن لئی فون پلٹو</string>
     <string name="announce_caller_name">رنگ ہون ویلے کالر دا ناں بولو</string>
+    <string name="add_quick_answer">جواب شامل کرو</string>
+    <string name="quick_answers_empty">ہلے کوئی جواب نئیں۔ جواب بنان لئی ‘جواب شامل کرو’ دباؤ۔</string>
+    <string name="announce_only_with_headset">صرف جدوں ہیڈفون لگے ہون</string>
+    <string name="blocked_calls_filter">بلاک کیتے</string>
+    <string name="block_reason_list">تہاڈی بلاک لسٹ وچ</string>
+    <string name="block_reason_unknown">تہاڈے روابط وچ نئیں</string>
+    <string name="block_reason_hidden">چھپیا ہویا نمبر</string>
+    <string name="block_reason_system">سسٹم ولوں بلاک</string>
+    <string name="remind_in_minutes">%d منٹ وچ یاد دلاؤ</string>
+    <string name="reminder_set">یاد دہانی لگ گئی: %s</string>
+    <string name="call_statistics">کال اعداد و شمار</string>
+    <string name="stats_last_7_days">7 دن</string>
+    <string name="stats_last_30_days">30 دن</string>
+    <string name="stats_all_time">سارا وقت</string>
+    <string name="stats_talk_time">گل بات دا وقت</string>
+    <string name="stats_total_calls">کل</string>
+    <string name="stats_average_call">اوسط کال: %s</string>
+    <string name="stats_busiest_hour">سب توں مصروف گھنٹہ: %s</string>
+    <string name="stats_top_contacts">سب توں ودھ کال کیتے</string>
+    <string name="stats_no_calls">اس مدت وچ کوئی کال نئیں</string>
+    <string name="widget_favorites_title">پسندیدہ</string>
+    <string name="widget_recents_title">حالیہ کالاں</string>
+    <string name="widget_favorites_description">اک ٹیپ نال اپنے پسندیدہ روابط نوں کال کرو</string>
+    <string name="widget_recents_description">تہاڈیاں تازہ کالاں، واپس کال لئی اک ٹیپ</string>
+    <string name="widget_favorites_empty">ہلے کوئی پسندیدہ نئیں۔ کجھ شامل کرن یا روابط تک رسائی دین لئی MHW Phone کھولو۔</string>
+    <string name="widget_recents_empty">کوئی حالیہ کال نئیں۔ کال لاگ تک رسائی دین لئی MHW Phone کھولو۔</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d کال</item>
+        <item quantity="other">%d کالاں</item>
+    </plurals>
 </resources>

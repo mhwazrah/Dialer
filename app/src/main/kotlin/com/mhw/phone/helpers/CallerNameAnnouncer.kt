@@ -3,7 +3,9 @@ package com.mhw.phone.helpers
 import android.app.NotificationManager
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -11,6 +13,7 @@ import android.telecom.Call
 import com.goodwy.commons.extensions.baseConfig
 import com.goodwy.commons.extensions.isNumberBlocked
 import com.goodwy.commons.helpers.ensureBackgroundThread
+import com.mhw.phone.extensions.config
 import java.util.Locale
 
 /**
@@ -19,6 +22,14 @@ import java.util.Locale
  * blocklist silences) and for callers without a saved name.
  */
 class CallerNameAnnouncer(private val context: Context) {
+    private companion object {
+        val HEADSET_TYPES = buildSet {
+            addAll(listOf(AudioDeviceInfo.TYPE_WIRED_HEADSET, AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_USB_HEADSET))
+            addAll(listOf(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) add(AudioDeviceInfo.TYPE_BLE_HEADSET)
+        }
+    }
+
     private val mainHandler = Handler(Looper.getMainLooper())
     private var announcedCall: Call? = null
     private var tts: TextToSpeech? = null
@@ -27,7 +38,8 @@ class CallerNameAnnouncer(private val context: Context) {
         if (announcedCall == call) return
         stop()
         announcedCall = call
-        if (!isRingingAudibly()) return
+        val headsetMissing = context.config.announceOnlyWithHeadset && !isHeadsetConnected()
+        if (!isRingingAudibly() || headsetMissing) return
         getCallContact(context, call) { contact ->
             val name = contact.name
             if (name.isBlank() || name == contact.number) return@getCallContact
@@ -75,6 +87,11 @@ class CallerNameAnnouncer(private val context: Context) {
     // Arabic, Arabic Supplement and the Arabic presentation forms
     private fun isArabicLetter(c: Char) =
         c.code in 0x0600..0x06FF || c.code in 0x0750..0x077F || c.code in 0xFB50..0xFDFF || c.code in 0xFE70..0xFEFF
+
+    private fun isHeadsetConnected(): Boolean {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any { it.type in HEADSET_TYPES }
+    }
 
     private fun isRingingAudibly(): Boolean {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager

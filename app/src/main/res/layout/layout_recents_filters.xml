@@ -9,7 +9,7 @@
         android:id="@+id/choose_wrapper"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="all_calls,missed_calls,incoming_calls,outgoing_calls,rejected_calls,contact_calls"
+        app:constraint_referenced_ids="all_calls,missed_calls,incoming_calls,outgoing_calls,rejected_calls,blocked_calls,contact_calls,sim1_calls,sim2_calls"
         app:flow_horizontalGap="@dimen/smaller_margin"
         app:flow_wrapMode="none"
         app:layout_constraintEnd_toEndOf="parent"
@@ -72,6 +72,17 @@
         app:cornerRadius="12dp" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/blocked_calls"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:paddingHorizontal="@dimen/activity_margin"
+        android:paddingVertical="0dp"
+        android:text="@string/blocked_calls_filter"
+        android:includeFontPadding="false"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        app:cornerRadius="12dp" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/contact_calls"
         android:layout_width="wrap_content"
         android:layout_height="38dp"
@@ -82,4 +93,26 @@
         style="@style/Widget.Material3.Button.OutlinedButton"
         app:cornerRadius="12dp" />
 
+    <!-- Shown with the SIM names only when two SIMs are active -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sim1_calls"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:paddingHorizontal="@dimen/activity_margin"
+        android:paddingVertical="0dp"
+        android:visibility="gone"
+        android:includeFontPadding="false"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        app:cornerRadius="12dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sim2_calls"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:paddingHorizontal="@dimen/activity_margin"
+        android:paddingVertical="0dp"
+        android:visibility="gone"
+        android:includeFontPadding="false"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        app:cornerRadius="12dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

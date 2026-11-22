@@ -84,4 +84,34 @@
     <string name="decline_with_message">Keeldu sõnumiga</string>
     <string name="flip_to_silence">Kõne vaigistamiseks pööra telefon ümber</string>
     <string name="announce_caller_name">Loe helistaja nimi ette</string>
+    <string name="add_quick_answer">Lisa vastus</string>
+    <string name="quick_answers_empty">Vastuseid veel pole. Loomiseks puudutage nuppu Lisa vastus.</string>
+    <string name="announce_only_with_headset">Ainult kui kõrvaklapid on ühendatud</string>
+    <string name="blocked_calls_filter">Blokeeritud</string>
+    <string name="block_reason_list">Teie blokeerimisloendis</string>
+    <string name="block_reason_unknown">Pole teie kontaktide hulgas</string>
+    <string name="block_reason_hidden">Peidetud number</string>
+    <string name="block_reason_system">Süsteemi blokeeritud</string>
+    <string name="remind_in_minutes">Meenuta %d min pärast</string>
+    <string name="reminder_set">Meeldetuletus määratud: %s</string>
+    <string name="call_statistics">Kõnestatistika</string>
+    <string name="stats_last_7_days">7 päeva</string>
+    <string name="stats_last_30_days">30 päeva</string>
+    <string name="stats_all_time">Kogu aeg</string>
+    <string name="stats_talk_time">Kõneaeg</string>
+    <string name="stats_total_calls">Kokku</string>
+    <string name="stats_average_call">Keskmine kõne: %s</string>
+    <string name="stats_busiest_hour">Kõige tihedam tund: %s</string>
+    <string name="stats_top_contacts">Enim helistatud</string>
+    <string name="stats_no_calls">Sel perioodil kõnesid pole</string>
+    <string name="widget_favorites_title">Lemmikud</string>
+    <string name="widget_recents_title">Viimased kõned</string>
+    <string name="widget_favorites_description">Helistage lemmikkontaktidele ühe puudutusega</string>
+    <string name="widget_recents_description">Teie viimased kõned, tagasihelistamiseks üks puudutus</string>
+    <string name="widget_favorites_empty">Lemmikuid veel pole. Lisamiseks või kontaktidele juurdepääsu lubamiseks avage MHW Phone.</string>
+    <string name="widget_recents_empty">Viimaseid kõnesid pole. Kõnelogile juurdepääsu lubamiseks avage MHW Phone.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d kõne</item>
+        <item quantity="other">%d kõnet</item>
+    </plurals>
 </resources>

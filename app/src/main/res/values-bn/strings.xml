@@ -8,4 +8,34 @@
     <string name="decline_with_message">বার্তা দিয়ে প্রত্যাখ্যান</string>
     <string name="flip_to_silence">কল নীরব করতে ফোন উল্টে দিন</string>
     <string name="announce_caller_name">রিং হওয়ার সময় কলারের নাম বলুন</string>
+    <string name="add_quick_answer">উত্তর যোগ করুন</string>
+    <string name="quick_answers_empty">এখনও কোনো উত্তর নেই। তৈরি করতে উত্তর যোগ করুন-এ ট্যাপ করুন।</string>
+    <string name="announce_only_with_headset">শুধু হেডফোন সংযুক্ত থাকলে</string>
+    <string name="blocked_calls_filter">ব্লক করা</string>
+    <string name="block_reason_list">আপনার ব্লক তালিকায় আছে</string>
+    <string name="block_reason_unknown">আপনার কন্টাক্টে নেই</string>
+    <string name="block_reason_hidden">লুকানো নম্বর</string>
+    <string name="block_reason_system">সিস্টেম দ্বারা ব্লক করা</string>
+    <string name="remind_in_minutes">%d মিনিট পরে মনে করিয়ে দিন</string>
+    <string name="reminder_set">রিমাইন্ডার সেট হয়েছে: %s</string>
+    <string name="call_statistics">কল পরিসংখ্যান</string>
+    <string name="stats_last_7_days">৭ দিন</string>
+    <string name="stats_last_30_days">৩০ দিন</string>
+    <string name="stats_all_time">সব সময়</string>
+    <string name="stats_talk_time">কথা বলার সময়</string>
+    <string name="stats_total_calls">মোট</string>
+    <string name="stats_average_call">গড় কল: %s</string>
+    <string name="stats_busiest_hour">সবচেয়ে ব্যস্ত ঘণ্টা: %s</string>
+    <string name="stats_top_contacts">সবচেয়ে বেশি কল করা</string>
+    <string name="stats_no_calls">এই সময়ে কোনো কল নেই</string>
+    <string name="widget_favorites_title">প্রিয়</string>
+    <string name="widget_recents_title">সাম্প্রতিক কল</string>
+    <string name="widget_favorites_description">এক ট্যাপে আপনার প্রিয় কন্টাক্টে কল করুন</string>
+    <string name="widget_recents_description">আপনার সাম্প্রতিক কল, ফিরতি কলের জন্য এক ট্যাপ</string>
+    <string name="widget_favorites_empty">এখনও কোনো প্রিয় নেই। যোগ করতে বা কন্টাক্টে অ্যাক্সেস দিতে MHW Phone খুলুন।</string>
+    <string name="widget_recents_empty">কোনো সাম্প্রতিক কল নেই। কল লগে অ্যাক্সেস দিতে MHW Phone খুলুন।</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%dটি কল</item>
+        <item quantity="other">%dটি কল</item>
+    </plurals>
 </resources>

@@ -63,4 +63,34 @@
     <string name="decline_with_message">സന്ദേശത്തോടെ നിരസിക്കുക</string>
     <string name="flip_to_silence">കോൾ നിശബ്ദമാക്കാൻ ഫോൺ മറിച്ചിടുക</string>
     <string name="announce_caller_name">റിംഗ് ചെയ്യുമ്പോൾ വിളിക്കുന്നയാളുടെ പേര് പറയുക</string>
+    <string name="add_quick_answer">മറുപടി ചേർക്കുക</string>
+    <string name="quick_answers_empty">മറുപടികളൊന്നും ഇതുവരെയില്ല. ഒന്ന് സൃഷ്ടിക്കാൻ മറുപടി ചേർക്കുക ടാപ്പ് ചെയ്യുക.</string>
+    <string name="announce_only_with_headset">ഹെഡ്ഫോൺ കണക്റ്റ് ചെയ്തിരിക്കുമ്പോൾ മാത്രം</string>
+    <string name="blocked_calls_filter">ബ്ലോക്ക് ചെയ്തവ</string>
+    <string name="block_reason_list">നിങ്ങളുടെ ബ്ലോക്ക് ലിസ്റ്റിൽ</string>
+    <string name="block_reason_unknown">നിങ്ങളുടെ കോൺടാക്റ്റുകളിൽ ഇല്ല</string>
+    <string name="block_reason_hidden">മറച്ച നമ്പർ</string>
+    <string name="block_reason_system">സിസ്റ്റം ബ്ലോക്ക് ചെയ്തത്</string>
+    <string name="remind_in_minutes">%d മിനിറ്റിനുള്ളിൽ ഓർമ്മിപ്പിക്കുക</string>
+    <string name="reminder_set">ഓർമ്മപ്പെടുത്തൽ സജ്ജമാക്കി: %s</string>
+    <string name="call_statistics">കോൾ സ്ഥിതിവിവരക്കണക്കുകൾ</string>
+    <string name="stats_last_7_days">7 ദിവസം</string>
+    <string name="stats_last_30_days">30 ദിവസം</string>
+    <string name="stats_all_time">എല്ലാ സമയവും</string>
+    <string name="stats_talk_time">സംസാര സമയം</string>
+    <string name="stats_total_calls">ആകെ</string>
+    <string name="stats_average_call">ശരാശരി കോൾ: %s</string>
+    <string name="stats_busiest_hour">ഏറ്റവും തിരക്കേറിയ മണിക്കൂർ: %s</string>
+    <string name="stats_top_contacts">ഏറ്റവും കൂടുതൽ വിളിച്ചവ</string>
+    <string name="stats_no_calls">ഈ കാലയളവിൽ കോളുകളില്ല</string>
+    <string name="widget_favorites_title">പ്രിയപ്പെട്ടവ</string>
+    <string name="widget_recents_title">സമീപകാല കോളുകൾ</string>
+    <string name="widget_favorites_description">ഒറ്റ ടാപ്പിൽ പ്രിയപ്പെട്ട കോൺടാക്റ്റുകളെ വിളിക്കുക</string>
+    <string name="widget_recents_description">നിങ്ങളുടെ പുതിയ കോളുകൾ, തിരികെ വിളിക്കാൻ ഒരു ടാപ്പ്</string>
+    <string name="widget_favorites_empty">പ്രിയപ്പെട്ടവയൊന്നും ഇതുവരെയില്ല. ചേർക്കാനോ കോൺടാക്റ്റ് ആക്സസ് അനുവദിക്കാനോ MHW Phone തുറക്കുക.</string>
+    <string name="widget_recents_empty">സമീപകാല കോളുകളില്ല. കോൾ ലോഗ് ആക്സസ് അനുവദിക്കാൻ MHW Phone തുറക്കുക.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d കോൾ</item>
+        <item quantity="other">%d കോളുകൾ</item>
+    </plurals>
 </resources>

@@ -84,4 +84,37 @@
     <string name="decline_with_message">Diúltaigh le teachtaireacht</string>
     <string name="flip_to_silence">Iompaigh an fón chun glaonna a chiúnú</string>
     <string name="announce_caller_name">Abair ainm an ghlaoiteora</string>
+    <string name="add_quick_answer">Cuir freagra leis</string>
+    <string name="quick_answers_empty">Gan freagraí fós. Tapáil Cuir freagra leis chun ceann a chruthú.</string>
+    <string name="announce_only_with_headset">Nuair a bhíonn cluasáin ceangailte amháin</string>
+    <string name="blocked_calls_filter">Blocáilte</string>
+    <string name="block_reason_list">Ar do liosta bloic</string>
+    <string name="block_reason_unknown">Níl sé i do theagmhálaithe</string>
+    <string name="block_reason_hidden">Uimhir fholaithe</string>
+    <string name="block_reason_system">Blocáilte ag an gcóras</string>
+    <string name="remind_in_minutes">Cuir i gcuimhne i gceann %d nóim</string>
+    <string name="reminder_set">Meabhrúchán socraithe: %s</string>
+    <string name="call_statistics">Staitisticí glaonna</string>
+    <string name="stats_last_7_days">7 lá</string>
+    <string name="stats_last_30_days">30 lá</string>
+    <string name="stats_all_time">An t-am ar fad</string>
+    <string name="stats_talk_time">Am cainte</string>
+    <string name="stats_total_calls">Iomlán</string>
+    <string name="stats_average_call">Meánghlao: %s</string>
+    <string name="stats_busiest_hour">Uair is gnóthaí: %s</string>
+    <string name="stats_top_contacts">Glaonna is minice</string>
+    <string name="stats_no_calls">Gan glaonna sa tréimhse seo</string>
+    <string name="widget_favorites_title">Ceanáin</string>
+    <string name="widget_recents_title">Glaonna le déanaí</string>
+    <string name="widget_favorites_description">Glaoigh ar do theagmhálaithe is fearr le tapáil amháin</string>
+    <string name="widget_recents_description">Do ghlaonna is déanaí, tapáil amháin chun glaoch ar ais</string>
+    <string name="widget_favorites_empty">Gan ceanáin fós. Oscail MHW Phone chun cuid a chur leis, nó chun rochtain ar theagmhálaithe a cheadú.</string>
+    <string name="widget_recents_empty">Gan glaonna le déanaí. Oscail MHW Phone chun rochtain ar an logchomhad glaonna a cheadú.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d ghlao</item>
+        <item quantity="two">%d ghlao</item>
+        <item quantity="few">%d glaonna</item>
+        <item quantity="many">%d nglaonna</item>
+        <item quantity="other">%d glao</item>
+    </plurals>
 </resources>

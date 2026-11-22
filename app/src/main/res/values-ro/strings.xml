@@ -76,4 +76,35 @@
     <string name="decline_with_message">Respinge cu mesaj</string>
     <string name="flip_to_silence">Întoarceți telefonul pentru a opri soneria</string>
     <string name="announce_caller_name">Rostește numele apelantului</string>
+    <string name="add_quick_answer">Adaugă răspuns</string>
+    <string name="quick_answers_empty">Niciun răspuns încă. Atinge Adaugă răspuns pentru a crea unul.</string>
+    <string name="announce_only_with_headset">Doar când sunt conectate căștile</string>
+    <string name="blocked_calls_filter">Blocate</string>
+    <string name="block_reason_list">În lista ta de blocare</string>
+    <string name="block_reason_unknown">Nu este în contacte</string>
+    <string name="block_reason_hidden">Număr ascuns</string>
+    <string name="block_reason_system">Blocat de sistem</string>
+    <string name="remind_in_minutes">Reamintește în %d min</string>
+    <string name="reminder_set">Memento setat: %s</string>
+    <string name="call_statistics">Statistici apeluri</string>
+    <string name="stats_last_7_days">7 zile</string>
+    <string name="stats_last_30_days">30 de zile</string>
+    <string name="stats_all_time">Tot timpul</string>
+    <string name="stats_talk_time">Timp de convorbire</string>
+    <string name="stats_total_calls">Total</string>
+    <string name="stats_average_call">Apel mediu: %s</string>
+    <string name="stats_busiest_hour">Ora cea mai aglomerată: %s</string>
+    <string name="stats_top_contacts">Cele mai apelate</string>
+    <string name="stats_no_calls">Niciun apel în această perioadă</string>
+    <string name="widget_favorites_title">Favorite</string>
+    <string name="widget_recents_title">Apeluri recente</string>
+    <string name="widget_favorites_description">Sună-ți favoritele cu o singură atingere</string>
+    <string name="widget_recents_description">Ultimele tale apeluri, o atingere pentru a reapela</string>
+    <string name="widget_favorites_empty">Încă nu ai favorite. Deschide MHW Phone pentru a adăuga sau pentru a permite accesul la contacte.</string>
+    <string name="widget_recents_empty">Niciun apel recent. Deschide MHW Phone pentru a permite accesul la jurnalul de apeluri.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d apel</item>
+        <item quantity="few">%d apeluri</item>
+        <item quantity="other">%d de apeluri</item>
+    </plurals>
 </resources>

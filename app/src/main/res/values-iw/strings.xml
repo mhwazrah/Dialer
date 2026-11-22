@@ -84,4 +84,35 @@
     <string name="decline_with_message">דחייה עם הודעה</string>
     <string name="flip_to_silence">הפיכת הטלפון להשתקת שיחות</string>
     <string name="announce_caller_name">הקראת שם המתקשר</string>
+    <string name="add_quick_answer">הוסף תשובה</string>
+    <string name="quick_answers_empty">אין תשובות עדיין. הקש על הוסף תשובה כדי ליצור אחת.</string>
+    <string name="announce_only_with_headset">רק כשאוזניות מחוברות</string>
+    <string name="blocked_calls_filter">חסומות</string>
+    <string name="block_reason_list">ברשימת החסומים שלך</string>
+    <string name="block_reason_unknown">לא באנשי הקשר שלך</string>
+    <string name="block_reason_hidden">מספר חסוי</string>
+    <string name="block_reason_system">נחסם על ידי המערכת</string>
+    <string name="remind_in_minutes">הזכר בעוד %d דק׳</string>
+    <string name="reminder_set">התזכורת נקבעה: %s</string>
+    <string name="call_statistics">סטטיסטיקת שיחות</string>
+    <string name="stats_last_7_days">7 ימים</string>
+    <string name="stats_last_30_days">30 ימים</string>
+    <string name="stats_all_time">כל הזמן</string>
+    <string name="stats_talk_time">זמן שיחה</string>
+    <string name="stats_total_calls">סה״כ</string>
+    <string name="stats_average_call">שיחה ממוצעת: %s</string>
+    <string name="stats_busiest_hour">השעה העמוסה ביותר: %s</string>
+    <string name="stats_top_contacts">הכי הרבה שיחות</string>
+    <string name="stats_no_calls">אין שיחות בתקופה זו</string>
+    <string name="widget_favorites_title">מועדפים</string>
+    <string name="widget_recents_title">שיחות אחרונות</string>
+    <string name="widget_favorites_description">התקשר לאנשי הקשר המועדפים בהקשה אחת</string>
+    <string name="widget_recents_description">השיחות האחרונות שלך, הקשה אחת כדי להתקשר בחזרה</string>
+    <string name="widget_favorites_empty">אין מועדפים עדיין. פתח את MHW Phone כדי להוסיף, או כדי לאפשר גישה לאנשי הקשר.</string>
+    <string name="widget_recents_empty">אין שיחות אחרונות. פתח את MHW Phone כדי לאפשר גישה ליומן השיחות.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d שיחה</item>
+        <item quantity="two">%d שיחות</item>
+        <item quantity="other">%d שיחות</item>
+    </plurals>
 </resources>

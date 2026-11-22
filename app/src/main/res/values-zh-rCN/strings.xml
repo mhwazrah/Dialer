@@ -84,4 +84,33 @@
     <string name="decline_with_message">拒接并发送短信</string>
     <string name="flip_to_silence">翻转手机以静音来电</string>
     <string name="announce_caller_name">来电时播报来电者姓名</string>
+    <string name="add_quick_answer">添加回复</string>
+    <string name="quick_answers_empty">还没有回复。点按“添加回复”来创建。</string>
+    <string name="announce_only_with_headset">仅在连接耳机时</string>
+    <string name="blocked_calls_filter">已拦截</string>
+    <string name="block_reason_list">在您的拦截名单中</string>
+    <string name="block_reason_unknown">不在您的联系人中</string>
+    <string name="block_reason_hidden">隐藏号码</string>
+    <string name="block_reason_system">被系统拦截</string>
+    <string name="remind_in_minutes">%d 分钟后提醒</string>
+    <string name="reminder_set">已设置提醒：%s</string>
+    <string name="call_statistics">通话统计</string>
+    <string name="stats_last_7_days">7 天</string>
+    <string name="stats_last_30_days">30 天</string>
+    <string name="stats_all_time">全部时间</string>
+    <string name="stats_talk_time">通话时长</string>
+    <string name="stats_total_calls">总计</string>
+    <string name="stats_average_call">平均通话：%s</string>
+    <string name="stats_busiest_hour">最繁忙时段：%s</string>
+    <string name="stats_top_contacts">最常拨打</string>
+    <string name="stats_no_calls">此期间没有通话</string>
+    <string name="widget_favorites_title">收藏</string>
+    <string name="widget_recents_title">最近通话</string>
+    <string name="widget_favorites_description">一键呼叫收藏的联系人</string>
+    <string name="widget_recents_description">您最近的通话，一键回拨</string>
+    <string name="widget_favorites_empty">还没有收藏。打开 MHW Phone 添加收藏或允许访问联系人。</string>
+    <string name="widget_recents_empty">没有最近通话。打开 MHW Phone 以允许访问通话记录。</string>
+    <plurals name="stats_calls">
+        <item quantity="other">%d 次通话</item>
+    </plurals>
 </resources>

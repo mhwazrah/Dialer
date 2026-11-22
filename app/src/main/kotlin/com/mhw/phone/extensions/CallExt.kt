@@ -10,7 +10,7 @@ import android.telecom.TelecomManager
 import androidx.core.content.IntentCompat
 import com.goodwy.commons.R
 import com.goodwy.commons.activities.BaseSimpleActivity
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.dialogs.PermissionRequiredDialog
 import com.goodwy.commons.extensions.canUseFullScreenIntent
 import com.goodwy.commons.extensions.initiateCall
@@ -24,6 +24,7 @@ import com.goodwy.commons.helpers.PERMISSION_READ_PHONE_STATE
 import com.goodwy.commons.models.contacts.Contact
 import com.mhw.phone.BuildConfig
 import com.mhw.phone.activities.DialerActivity
+import com.mhw.phone.activities.WidgetCallActivity
 import com.mhw.phone.activities.SimpleActivity
 import com.mhw.phone.dialogs.SelectSIMDialog
 import com.mhw.phone.models.RecentCall
@@ -67,10 +68,12 @@ fun SimpleActivity.startCallIntent(
 fun SimpleActivity.startCallWithConfirmationCheck(
     recipient: String,
     name: String,
-    forceSimSelector: Boolean = false
+    forceSimSelector: Boolean = false,
+    photoUri: String? = null,
+    onCancel: () -> Unit = {}
 ) {
     if (config.showCallConfirmation) {
-        CallConfirmationDialog(this, name) {
+        CallConfirmDialog(this, name, recipient, photoUri, onCancel = onCancel) {
             startCallIntent(recipient, forceSimSelector)
         }
     } else {
@@ -80,10 +83,7 @@ fun SimpleActivity.startCallWithConfirmationCheck(
 
 fun SimpleActivity.startCallWithConfirmationCheck(contact: Contact) {
     if (config.showCallConfirmation) {
-        CallConfirmationDialog(
-            activity = this,
-            callee = contact.getNameToDisplay()
-        ) {
+        CallConfirmDialog(this, contact.getNameToDisplay(), contact.primaryNumber(), contact.photoUri) {
             initiateCall(contact) { placeCall(it) }
         }
     } else {
@@ -126,7 +126,7 @@ fun BaseSimpleActivity.callContactWithSimWithConfirmationCheck(
     useMainSIM: Boolean
 ) {
     if (config.showCallConfirmation) {
-        CallConfirmationDialog(this, name) {
+        CallConfirmDialog(this, name, recipient) {
             callContactWithSim(recipient, useMainSIM)
         }
     } else {
@@ -171,7 +171,7 @@ fun SimpleActivity.showSelectSimDialog(
             activity = this,
             phoneNumber = phoneNumber,
             onDismiss = {
-                if (this is DialerActivity) {
+                if (this is DialerActivity || this is WidgetCallActivity) {
                     finish()
                 }
             }
@@ -183,7 +183,7 @@ fun SimpleActivity.showSelectSimDialog(
             activity = this,
             phoneNumber = phoneNumber,
             onDismiss = {
-                if (this is DialerActivity) {
+                if (this is DialerActivity || this is WidgetCallActivity) {
                     finish()
                 }
             }

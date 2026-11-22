@@ -31,7 +31,7 @@ import com.bumptech.glide.Glide
 import com.goodwy.commons.adapters.MyRecyclerViewAdapter
 import com.goodwy.commons.databinding.ItemContactWithNumberGridBinding
 import com.goodwy.commons.databinding.ItemContactWithNumberInfoBinding
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.dialogs.ConfirmationDialog
 import com.goodwy.commons.extensions.*
@@ -287,7 +287,7 @@ class ContactsAdapter(
     private fun callContact() {
         val contact = getItemWithKey(selectedKeys.first()) ?: return
         if (activity.config.showCallConfirmation) {
-            CallConfirmationDialog(activity as SimpleActivity, contact.getNameToDisplay()) {
+            CallConfirmDialog(activity, contact.getNameToDisplay(), contact.primaryNumber(), contact.photoUri) {
                 activity.apply {
                     initiateCall(contact) { placeCall(it) }
                 }
@@ -900,7 +900,7 @@ class ContactsAdapter(
 
     private fun swipedCall(contact: Contact) {
         if (activity.config.showCallConfirmation) {
-            CallConfirmationDialog(activity as SimpleActivity, contact.getNameToDisplay()) {
+            CallConfirmDialog(activity, contact.getNameToDisplay(), contact.primaryNumber(), contact.photoUri) {
                 activity.apply {
                     initiateCall(contact) { placeCall(it) }
                 }

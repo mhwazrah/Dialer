@@ -81,4 +81,33 @@
     <string name="decline_with_message">Tolak dengan pesan</string>
     <string name="flip_to_silence">Balikkan ponsel untuk membisukan panggilan</string>
     <string name="announce_caller_name">Ucapkan nama penelepon</string>
+    <string name="add_quick_answer">Tambah balasan</string>
+    <string name="quick_answers_empty">Belum ada balasan. Ketuk Tambah balasan untuk membuat.</string>
+    <string name="announce_only_with_headset">Hanya saat headphone terhubung</string>
+    <string name="blocked_calls_filter">Diblokir</string>
+    <string name="block_reason_list">Ada di daftar blokir Anda</string>
+    <string name="block_reason_unknown">Tidak ada di kontak Anda</string>
+    <string name="block_reason_hidden">Nomor tersembunyi</string>
+    <string name="block_reason_system">Diblokir oleh sistem</string>
+    <string name="remind_in_minutes">Ingatkan dalam %d mnt</string>
+    <string name="reminder_set">Pengingat diatur: %s</string>
+    <string name="call_statistics">Statistik panggilan</string>
+    <string name="stats_last_7_days">7 hari</string>
+    <string name="stats_last_30_days">30 hari</string>
+    <string name="stats_all_time">Sepanjang waktu</string>
+    <string name="stats_talk_time">Waktu bicara</string>
+    <string name="stats_total_calls">Total</string>
+    <string name="stats_average_call">Rata-rata panggilan: %s</string>
+    <string name="stats_busiest_hour">Jam tersibuk: %s</string>
+    <string name="stats_top_contacts">Paling sering dihubungi</string>
+    <string name="stats_no_calls">Tidak ada panggilan pada periode ini</string>
+    <string name="widget_favorites_title">Favorit</string>
+    <string name="widget_recents_title">Panggilan terbaru</string>
+    <string name="widget_favorites_description">Hubungi kontak favorit dengan satu ketukan</string>
+    <string name="widget_recents_description">Panggilan terbaru Anda, ketuk sekali untuk menelepon balik</string>
+    <string name="widget_favorites_empty">Belum ada favorit. Buka MHW Phone untuk menambahkan, atau untuk mengizinkan akses ke kontak.</string>
+    <string name="widget_recents_empty">Tidak ada panggilan terbaru. Buka MHW Phone untuk mengizinkan akses ke log panggilan.</string>
+    <plurals name="stats_calls">
+        <item quantity="other">%d panggilan</item>
+    </plurals>
 </resources>

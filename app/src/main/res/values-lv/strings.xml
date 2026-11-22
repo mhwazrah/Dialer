@@ -22,4 +22,35 @@
     <string name="decline_with_message">Noraidīt ar ziņu</string>
     <string name="flip_to_silence">Apgrieziet tālruni, lai izslēgtu zvana skaņu</string>
     <string name="announce_caller_name">Izrunāt zvanītāja vārdu</string>
+    <string name="add_quick_answer">Pievienot atbildi</string>
+    <string name="quick_answers_empty">Atbilžu vēl nav. Pieskarieties Pievienot atbildi, lai izveidotu.</string>
+    <string name="announce_only_with_headset">Tikai ar pievienotām austiņām</string>
+    <string name="blocked_calls_filter">Bloķētie</string>
+    <string name="block_reason_list">Jūsu bloķēto sarakstā</string>
+    <string name="block_reason_unknown">Nav jūsu kontaktpersonās</string>
+    <string name="block_reason_hidden">Slēpts numurs</string>
+    <string name="block_reason_system">Bloķējusi sistēma</string>
+    <string name="remind_in_minutes">Atgādināt pēc %d min.</string>
+    <string name="reminder_set">Atgādinājums iestatīts: %s</string>
+    <string name="call_statistics">Zvanu statistika</string>
+    <string name="stats_last_7_days">7 dienas</string>
+    <string name="stats_last_30_days">30 dienas</string>
+    <string name="stats_all_time">Viss laiks</string>
+    <string name="stats_talk_time">Sarunu laiks</string>
+    <string name="stats_total_calls">Kopā</string>
+    <string name="stats_average_call">Vidējais zvans: %s</string>
+    <string name="stats_busiest_hour">Aktīvākā stunda: %s</string>
+    <string name="stats_top_contacts">Visbiežāk zvanītie</string>
+    <string name="stats_no_calls">Šajā periodā zvanu nav</string>
+    <string name="widget_favorites_title">Izlase</string>
+    <string name="widget_recents_title">Nesenie zvani</string>
+    <string name="widget_favorites_description">Zvaniet izlases kontaktpersonām ar vienu pieskārienu</string>
+    <string name="widget_recents_description">Jūsu pēdējie zvani, pieskarieties, lai zvanītu atpakaļ</string>
+    <string name="widget_favorites_empty">Izlases vēl nav. Atveriet MHW Phone, lai pievienotu vai atļautu piekļuvi kontaktpersonām.</string>
+    <string name="widget_recents_empty">Nesenu zvanu nav. Atveriet MHW Phone, lai atļautu piekļuvi zvanu žurnālam.</string>
+    <plurals name="stats_calls">
+        <item quantity="zero">%d zvanu</item>
+        <item quantity="one">%d zvans</item>
+        <item quantity="other">%d zvani</item>
+    </plurals>
 </resources>

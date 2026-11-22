@@ -84,4 +84,33 @@
     <string name="decline_with_message">ปฏิเสธพร้อมข้อความ</string>
     <string name="flip_to_silence">คว่ำโทรศัพท์เพื่อปิดเสียงสายเรียกเข้า</string>
     <string name="announce_caller_name">อ่านชื่อผู้โทรเมื่อมีสายเรียกเข้า</string>
+    <string name="add_quick_answer">เพิ่มคำตอบ</string>
+    <string name="quick_answers_empty">ยังไม่มีคำตอบ แตะเพิ่มคำตอบเพื่อสร้าง</string>
+    <string name="announce_only_with_headset">เฉพาะเมื่อเชื่อมต่อหูฟัง</string>
+    <string name="blocked_calls_filter">ที่บล็อก</string>
+    <string name="block_reason_list">อยู่ในรายการบล็อกของคุณ</string>
+    <string name="block_reason_unknown">ไม่อยู่ในรายชื่อติดต่อของคุณ</string>
+    <string name="block_reason_hidden">ซ่อนหมายเลข</string>
+    <string name="block_reason_system">ถูกระบบบล็อก</string>
+    <string name="remind_in_minutes">เตือนในอีก %d นาที</string>
+    <string name="reminder_set">ตั้งการเตือนแล้ว: %s</string>
+    <string name="call_statistics">สถิติการโทร</string>
+    <string name="stats_last_7_days">7 วัน</string>
+    <string name="stats_last_30_days">30 วัน</string>
+    <string name="stats_all_time">ทั้งหมด</string>
+    <string name="stats_talk_time">เวลาสนทนา</string>
+    <string name="stats_total_calls">รวม</string>
+    <string name="stats_average_call">การโทรเฉลี่ย: %s</string>
+    <string name="stats_busiest_hour">ชั่วโมงที่ยุ่งที่สุด: %s</string>
+    <string name="stats_top_contacts">โทรบ่อยที่สุด</string>
+    <string name="stats_no_calls">ไม่มีการโทรในช่วงนี้</string>
+    <string name="widget_favorites_title">รายการโปรด</string>
+    <string name="widget_recents_title">การโทรล่าสุด</string>
+    <string name="widget_favorites_description">โทรหาผู้ติดต่อโปรดได้ในการแตะเดียว</string>
+    <string name="widget_recents_description">การโทรล่าสุดของคุณ แตะครั้งเดียวเพื่อโทรกลับ</string>
+    <string name="widget_favorites_empty">ยังไม่มีรายการโปรด เปิด MHW Phone เพื่อเพิ่มหรืออนุญาตการเข้าถึงรายชื่อติดต่อ</string>
+    <string name="widget_recents_empty">ไม่มีการโทรล่าสุด เปิด MHW Phone เพื่ออนุญาตการเข้าถึงบันทึกการโทร</string>
+    <plurals name="stats_calls">
+        <item quantity="other">%d สาย</item>
+    </plurals>
 </resources>

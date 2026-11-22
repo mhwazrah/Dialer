@@ -60,10 +60,12 @@ class ConfigTest {
     }
 
     @Test
-    fun quickAnswersRoundTripExactlyThreeLines() {
-        config.quickAnswers = arrayListOf("a", "b", "c")
-        assertEquals(arrayListOf("a", "b", "c"), config.quickAnswers)
-        assertEquals("a\nb\nc", prefs.getString(QUICK_ANSWERS, null))
+    fun quickAnswersRoundTripAnyNumberOfLines() {
+        config.quickAnswers = arrayListOf("a", "b", "c", "d", "e")
+        assertEquals(arrayListOf("a", "b", "c", "d", "e"), config.quickAnswers)
+        assertEquals("a\nb\nc\nd\ne", prefs.getString(QUICK_ANSWERS, null))
+        config.quickAnswers = arrayListOf("only")
+        assertEquals(arrayListOf("only"), config.quickAnswers)
     }
 
     @Test
@@ -73,20 +75,11 @@ class ConfigTest {
     }
 
     @Test
-    fun quickAnswersWithWrongLineCountFallBackToDefaults() {
-        val defaults = config.quickAnswers
-        prefs.edit().putString(QUICK_ANSWERS, "a\nb").commit()
-        assertEquals(defaults, config.quickAnswers)
-        prefs.edit().putString(QUICK_ANSWERS, "a\nb\nc\nd").commit()
-        assertEquals(defaults, config.quickAnswers)
-        prefs.edit().putString(QUICK_ANSWERS, "").commit()
-        assertEquals(defaults, config.quickAnswers)
-    }
-
-    @Test
-    fun quickAnswersKeepEmptyLinesWhenThreeLinesSaved() {
-        config.quickAnswers = arrayListOf("", "b", "")
-        assertEquals(arrayListOf("", "b", ""), config.quickAnswers)
+    fun quickAnswersEmptiedStayEmptyAndBlankLinesAreDropped() {
+        config.quickAnswers = arrayListOf()
+        assertEquals(arrayListOf<String>(), config.quickAnswers)
+        prefs.edit().putString(QUICK_ANSWERS, "a\n\n  \nb").commit()
+        assertEquals(arrayListOf("a", "b"), config.quickAnswers)
     }
 
     @Test

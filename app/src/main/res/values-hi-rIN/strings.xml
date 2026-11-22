@@ -89,4 +89,34 @@
     <string name="decline_with_message">संदेश के साथ अस्वीकार करें</string>
     <string name="flip_to_silence">कॉल म्यूट करने के लिए फ़ोन पलटें</string>
     <string name="announce_caller_name">रिंग होने पर कॉलर का नाम बोलें</string>
+    <string name="add_quick_answer">जवाब जोड़ें</string>
+    <string name="quick_answers_empty">अभी कोई जवाब नहीं है। बनाने के लिए जवाब जोड़ें पर टैप करें।</string>
+    <string name="announce_only_with_headset">केवल हेडफ़ोन कनेक्ट होने पर</string>
+    <string name="blocked_calls_filter">ब्लॉक किए गए</string>
+    <string name="block_reason_list">आपकी ब्लॉक सूची में</string>
+    <string name="block_reason_unknown">आपके संपर्कों में नहीं</string>
+    <string name="block_reason_hidden">छिपा हुआ नंबर</string>
+    <string name="block_reason_system">सिस्टम द्वारा ब्लॉक किया गया</string>
+    <string name="remind_in_minutes">%d मिनट में याद दिलाएँ</string>
+    <string name="reminder_set">रिमाइंडर सेट: %s</string>
+    <string name="call_statistics">कॉल आँकड़े</string>
+    <string name="stats_last_7_days">7 दिन</string>
+    <string name="stats_last_30_days">30 दिन</string>
+    <string name="stats_all_time">सभी समय</string>
+    <string name="stats_talk_time">बातचीत का समय</string>
+    <string name="stats_total_calls">कुल</string>
+    <string name="stats_average_call">औसत कॉल: %s</string>
+    <string name="stats_busiest_hour">सबसे व्यस्त घंटा: %s</string>
+    <string name="stats_top_contacts">सबसे ज़्यादा कॉल किए गए</string>
+    <string name="stats_no_calls">इस अवधि में कोई कॉल नहीं</string>
+    <string name="widget_favorites_title">पसंदीदा</string>
+    <string name="widget_recents_title">हाल की कॉल</string>
+    <string name="widget_favorites_description">एक टैप में अपने पसंदीदा संपर्कों को कॉल करें</string>
+    <string name="widget_recents_description">आपकी हाल की कॉल, वापस कॉल करने के लिए एक टैप</string>
+    <string name="widget_favorites_empty">अभी कोई पसंदीदा नहीं है। कुछ जोड़ने या संपर्कों की अनुमति देने के लिए MHW Phone खोलें।</string>
+    <string name="widget_recents_empty">कोई हाल की कॉल नहीं। कॉल लॉग की अनुमति देने के लिए MHW Phone खोलें।</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d कॉल</item>
+        <item quantity="other">%d कॉल</item>
+    </plurals>
 </resources>

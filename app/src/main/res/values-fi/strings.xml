@@ -84,4 +84,34 @@
     <string name="decline_with_message">Hylkää viestillä</string>
     <string name="flip_to_silence">Käännä puhelin ympäri hiljentääksesi puhelut</string>
     <string name="announce_caller_name">Sano soittajan nimi</string>
+    <string name="add_quick_answer">Lisää vastaus</string>
+    <string name="quick_answers_empty">Ei vielä vastauksia. Luo vastaus napauttamalla Lisää vastaus.</string>
+    <string name="announce_only_with_headset">Vain kun kuulokkeet on liitetty</string>
+    <string name="blocked_calls_filter">Estetyt</string>
+    <string name="block_reason_list">Estolistallasi</string>
+    <string name="block_reason_unknown">Ei yhteystiedoissasi</string>
+    <string name="block_reason_hidden">Piilotettu numero</string>
+    <string name="block_reason_system">Järjestelmän estämä</string>
+    <string name="remind_in_minutes">Muistuta %d min kuluttua</string>
+    <string name="reminder_set">Muistutus asetettu: %s</string>
+    <string name="call_statistics">Puhelutilastot</string>
+    <string name="stats_last_7_days">7 päivää</string>
+    <string name="stats_last_30_days">30 päivää</string>
+    <string name="stats_all_time">Koko aika</string>
+    <string name="stats_talk_time">Puheaika</string>
+    <string name="stats_total_calls">Yhteensä</string>
+    <string name="stats_average_call">Keskimääräinen puhelu: %s</string>
+    <string name="stats_busiest_hour">Vilkkain tunti: %s</string>
+    <string name="stats_top_contacts">Eniten soitetut</string>
+    <string name="stats_no_calls">Ei puheluita tällä ajanjaksolla</string>
+    <string name="widget_favorites_title">Suosikit</string>
+    <string name="widget_recents_title">Viimeisimmät puhelut</string>
+    <string name="widget_favorites_description">Soita suosikkiyhteystiedoillesi yhdellä napautuksella</string>
+    <string name="widget_recents_description">Viimeisimmät puhelusi, soita takaisin napauttamalla</string>
+    <string name="widget_favorites_empty">Ei vielä suosikkeja. Avaa MHW Phone lisätäksesi niitä tai salliaksesi yhteystietojen käytön.</string>
+    <string name="widget_recents_empty">Ei viimeisimpiä puheluita. Avaa MHW Phone salliaksesi puhelulokin käytön.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d puhelu</item>
+        <item quantity="other">%d puhelua</item>
+    </plurals>
 </resources>

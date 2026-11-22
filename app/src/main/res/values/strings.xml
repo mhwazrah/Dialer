@@ -110,4 +110,34 @@
     <string name="decline_with_message">Decline with message</string>
     <string name="flip_to_silence">Flip phone over to silence calls</string>
     <string name="announce_caller_name">Speak caller\'s name when ringing</string>
+    <string name="add_quick_answer">Add reply</string>
+    <string name="quick_answers_empty">No replies yet. Tap Add reply to create one.</string>
+    <string name="announce_only_with_headset">Only when headphones are connected</string>
+    <string name="blocked_calls_filter">Blocked</string>
+    <string name="block_reason_list">On your block list</string>
+    <string name="block_reason_unknown">Not in your contacts</string>
+    <string name="block_reason_hidden">Hidden number</string>
+    <string name="block_reason_system">Blocked by the system</string>
+    <string name="remind_in_minutes">Remind in %d min</string>
+    <string name="reminder_set">Reminder set: %s</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d call</item>
+        <item quantity="other">%d calls</item>
+    </plurals>
+    <string name="call_statistics">Call statistics</string>
+    <string name="stats_last_7_days">7 days</string>
+    <string name="stats_last_30_days">30 days</string>
+    <string name="stats_all_time">All time</string>
+    <string name="stats_talk_time">Talk time</string>
+    <string name="stats_total_calls">Total</string>
+    <string name="stats_average_call">Average call: %s</string>
+    <string name="stats_busiest_hour">Busiest hour: %s</string>
+    <string name="stats_top_contacts">Most called</string>
+    <string name="stats_no_calls">No calls in this period</string>
+    <string name="widget_favorites_title">Favorites</string>
+    <string name="widget_recents_title">Recent calls</string>
+    <string name="widget_favorites_description">Call your favorite contacts in one tap</string>
+    <string name="widget_recents_description">Your latest calls, one tap to call back</string>
+    <string name="widget_favorites_empty">No favorites yet. Open MHW Phone to add some, or to allow access to contacts.</string>
+    <string name="widget_recents_empty">No recent calls. Open MHW Phone to allow access to the call log.</string>
 </resources>

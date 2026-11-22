@@ -1,5 +1,6 @@
 package com.mhw.phone.activities
 
+import java.text.NumberFormat
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
@@ -15,6 +16,7 @@ import com.mhw.phone.BuildConfig
 import com.mhw.phone.R
 import com.mhw.phone.databinding.ActivitySettingsBinding
 import com.mhw.phone.dialogs.ChangeTextDialog
+import com.mhw.phone.dialogs.QuickAnswersDialog
 import com.mhw.phone.extensions.*
 import com.mhw.phone.helpers.*
 import org.json.JSONException
@@ -391,69 +393,10 @@ class SettingsActivity : SimpleActivity() {
 
     private fun setupQuickAnswers() {
         binding.apply {
-            val getProperTextColor = getProperTextColor()
-            settingsQuickAnswerOne.applyColorFilter(getProperTextColor)
-            settingsQuickAnswerTwo.applyColorFilter(getProperTextColor)
-            settingsQuickAnswerThree.applyColorFilter(getProperTextColor)
-
-            settingsQuickAnswerOne.setOnClickListener {
-                val index = 0
-                ChangeTextDialog(
-                    this@SettingsActivity,
-                    currentText = config.quickAnswers[index],
-                    showNeutralButton = true
-                ) {
-                    if (it == "") {
-                        val text = getString(R.string.message_call_later)
-                        addQuickAnswer(index, text)
-                    } else {
-                        addQuickAnswer(index, it)
-                    }
-                    toast(config.quickAnswers[index])
-                }
-            }
-            settingsQuickAnswerTwo.setOnClickListener {
-                val index = 1
-                ChangeTextDialog(
-                    this@SettingsActivity,
-                    currentText = config.quickAnswers[index],
-                    showNeutralButton = true
-                ) {
-                    if (it == "") {
-                        val text = getString(R.string.message_on_my_way)
-                        addQuickAnswer(index, text)
-                    } else {
-                        addQuickAnswer(index, it)
-                    }
-                    toast(config.quickAnswers[index])
-                }
-            }
-            settingsQuickAnswerThree.setOnClickListener {
-                val index = 2
-                ChangeTextDialog(
-                    this@SettingsActivity,
-                    currentText = config.quickAnswers[index],
-                    showNeutralButton = true
-                ) {
-                    if (it == "") {
-                        val text = getString(R.string.message_cant_talk_right_now)
-                        addQuickAnswer(index, text)
-                    } else {
-                        addQuickAnswer(index, it)
-                    }
-                    toast(config.quickAnswers[index])
-                }
-            }
+            val showCount = { settingsQuickAnswersCount.text = NumberFormat.getInstance().format(config.quickAnswers.size) }
+            showCount()
+            settingsQuickAnswersHolder.setOnClickListener { QuickAnswersDialog(this@SettingsActivity) { showCount() } }
         }
-    }
-
-    private fun addQuickAnswer(index: Int, text: String) {
-        val quickAnswers = config.quickAnswers
-
-        quickAnswers.removeAt(index)
-        quickAnswers.add(index, text)
-
-        config.quickAnswers = quickAnswers
     }
 
     private fun setupFlashForAlerts() {
@@ -751,9 +694,16 @@ class SettingsActivity : SimpleActivity() {
     private fun setupAnnounceCallerName() {
         binding.apply {
             settingsAnnounceCallerName.isChecked = config.announceCallerName
+            settingsAnnounceOnlyWithHeadset.isChecked = config.announceOnlyWithHeadset
+            settingsAnnounceOnlyWithHeadsetHolder.beVisibleIf(config.announceCallerName)
             settingsAnnounceCallerNameHolder.setOnClickListener {
                 settingsAnnounceCallerName.toggle()
                 config.announceCallerName = settingsAnnounceCallerName.isChecked
+                settingsAnnounceOnlyWithHeadsetHolder.beVisibleIf(config.announceCallerName)
+            }
+            settingsAnnounceOnlyWithHeadsetHolder.setOnClickListener {
+                settingsAnnounceOnlyWithHeadset.toggle()
+                config.announceOnlyWithHeadset = settingsAnnounceOnlyWithHeadset.isChecked
             }
         }
     }

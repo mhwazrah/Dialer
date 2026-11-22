@@ -41,6 +41,7 @@ import com.mhw.phone.R
 import com.mhw.phone.databinding.ActivityCallBinding
 import com.mhw.phone.dialogs.ChangeTextDialog
 import com.mhw.phone.extensions.*
+import com.mhw.phone.helpers.startCallBackReminder
 import com.mhw.phone.helpers.*
 import com.mhw.phone.views.CallBackdropDrawable
 import com.mhw.phone.models.*
@@ -48,8 +49,6 @@ import com.mikhaellopez.rxanimation.*
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import com.mikhaellopez.rxanimation.fadeIn
 import com.mikhaellopez.rxanimation.fadeOut
-import org.greenrobot.eventbus.EventBus
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -1210,10 +1209,8 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
                     val popupMenu = PopupMenu(wrapper, callMessage, Gravity.END)
                     val quickAnswers = config.quickAnswers
                     popupMenu.menu.add(1, 1, 1, R.string.other).setIcon(R.drawable.ic_transparent)
-                    if (quickAnswers.size == 3) {
-                        popupMenu.menu.add(1, 2, 2, quickAnswers[0]).setIcon(R.drawable.ic_clock_vector)
-                        popupMenu.menu.add(1, 3, 3, quickAnswers[1]).setIcon(R.drawable.ic_run)
-                        popupMenu.menu.add(1, 4, 4, quickAnswers[2]).setIcon(R.drawable.ic_microphone_off_vector)
+                    quickAnswers.forEachIndexed { index, answer ->
+                        popupMenu.menu.add(1, index + 2, index + 2, answer).setIcon(R.drawable.ic_messages)
                     }
                     popupMenu.setOnMenuItemClickListener { item ->
                         when (item.itemId) {
@@ -1332,19 +1329,7 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         }
     }
 
-    private fun startTimer(duration: Int) {
-        // Row 1 is replaced in place and Start restarts the countdown itself; Start reads the row, so it follows the insert.
-        val newTimer = createNewTimer()
-        newTimer.id = 1
-        newTimer.title = callContact!!.name
-        newTimer.label = callContact!!.number
-        newTimer.seconds = duration
-        timerHelper.insertOrUpdateTimer(newTimer) {
-            EventBus.getDefault().post(TimerEvent.Start(1, duration.secondsToMillis))
-        }
-    }
-
-    private val Int.secondsToMillis get() = TimeUnit.SECONDS.toMillis(this.toLong())
+    private fun startTimer(duration: Int) = startCallBackReminder(callContact!!.name, callContact!!.number, duration)
 
     private fun sendSMS(number: String, text: String = " ") {
         Intent(Intent.ACTION_SENDTO).apply {

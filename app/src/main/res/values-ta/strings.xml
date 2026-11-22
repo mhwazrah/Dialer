@@ -76,4 +76,34 @@
     <string name="decline_with_message">செய்தியுடன் நிராகரி</string>
     <string name="flip_to_silence">அழைப்பை முடக்க ஃபோனைக் கவிழ்க்கவும்</string>
     <string name="announce_caller_name">ஒலிக்கும்போது அழைப்பவரின் பெயரைச் சொல்</string>
+    <string name="add_quick_answer">பதிலைச் சேர்</string>
+    <string name="quick_answers_empty">இன்னும் பதில்கள் இல்லை. உருவாக்க பதிலைச் சேர் என்பதைத் தட்டவும்.</string>
+    <string name="announce_only_with_headset">ஹெட்ஃபோன்கள் இணைக்கப்பட்டிருக்கும்போது மட்டும்</string>
+    <string name="blocked_calls_filter">தடுக்கப்பட்டவை</string>
+    <string name="block_reason_list">உங்கள் தடுப்புப் பட்டியலில் உள்ளது</string>
+    <string name="block_reason_unknown">உங்கள் தொடர்புகளில் இல்லை</string>
+    <string name="block_reason_hidden">மறைக்கப்பட்ட எண்</string>
+    <string name="block_reason_system">கணினியால் தடுக்கப்பட்டது</string>
+    <string name="remind_in_minutes">%d நிமிடத்தில் நினைவூட்டு</string>
+    <string name="reminder_set">நினைவூட்டல் அமைக்கப்பட்டது: %s</string>
+    <string name="call_statistics">அழைப்பு புள்ளிவிவரங்கள்</string>
+    <string name="stats_last_7_days">7 நாட்கள்</string>
+    <string name="stats_last_30_days">30 நாட்கள்</string>
+    <string name="stats_all_time">எல்லா நேரமும்</string>
+    <string name="stats_talk_time">பேசிய நேரம்</string>
+    <string name="stats_total_calls">மொத்தம்</string>
+    <string name="stats_average_call">சராசரி அழைப்பு: %s</string>
+    <string name="stats_busiest_hour">மிகவும் பரபரப்பான மணி: %s</string>
+    <string name="stats_top_contacts">அதிகம் அழைக்கப்பட்டவை</string>
+    <string name="stats_no_calls">இந்தக் காலத்தில் அழைப்புகள் இல்லை</string>
+    <string name="widget_favorites_title">பிடித்தவை</string>
+    <string name="widget_recents_title">சமீபத்திய அழைப்புகள்</string>
+    <string name="widget_favorites_description">பிடித்த தொடர்புகளை ஒரே தட்டலில் அழைக்கவும்</string>
+    <string name="widget_recents_description">உங்கள் சமீபத்திய அழைப்புகள், மீண்டும் அழைக்க ஒரு தட்டல்</string>
+    <string name="widget_favorites_empty">இன்னும் பிடித்தவை இல்லை. சேர்க்க அல்லது தொடர்புகளுக்கான அணுகலை அனுமதிக்க MHW Phone ஐத் திறக்கவும்.</string>
+    <string name="widget_recents_empty">சமீபத்திய அழைப்புகள் இல்லை. அழைப்புப் பதிவுக்கான அணுகலை அனுமதிக்க MHW Phone ஐத் திறக்கவும்.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d அழைப்பு</item>
+        <item quantity="other">%d அழைப்புகள்</item>
+    </plurals>
 </resources>

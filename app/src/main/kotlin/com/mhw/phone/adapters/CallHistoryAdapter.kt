@@ -1,5 +1,8 @@
 package com.mhw.phone.adapters
 
+import com.mhw.phone.helpers.BlockedCallLog
+import com.mhw.phone.helpers.blockReasonIn
+import com.mhw.phone.helpers.blockReasonText
 import android.annotation.SuppressLint
 import android.provider.CallLog.Calls
 import android.util.TypedValue
@@ -32,6 +35,7 @@ class CallHistoryAdapter(
     private lateinit var incomingCallText: String
     private lateinit var incomingMissedCallText: String
     private lateinit var blockedCallText: String
+    private val blockRecords by lazy { BlockedCallLog.read(activity) }
     private var fontSize: Float = activity.getTextSize()
     private val areMultipleSIMsAvailable = activity.areMultipleSIMsAvailable()
     private val missedCallColor = resources.getColor(R.color.red_missed, activity.theme)
@@ -227,10 +231,12 @@ class CallHistoryAdapter(
                     Calls.FEATURES_WIFI -> " (Wi-Fi)"
                     else -> ""
                 }
-                val isBlockedCall = (call.blockReason ?: 0) != 0
+                val blockReason = call.blockReasonIn(blockRecords)
                 itemRecentsTypeName.apply {
                     @SuppressLint("SetTextI18n")
-                    text = if (isBlockedCall) blockedCallText else type + features
+                    text = if (blockReason == null) type + features
+                    else "$blockedCallText · ${resources.getString(blockReasonText(blockReason))}"
+                    isSingleLine = blockReason == null // the reason wraps instead of being cut off
                     setTextColor(if (call.type == Calls.MISSED_TYPE) missedCallColor else textColor)
                     setTextSize(TypedValue.COMPLEX_UNIT_PX, currentFontSize * 0.8f)
                 }

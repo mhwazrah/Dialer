@@ -84,4 +84,34 @@
     <string name="decline_with_message">Rifuzi per mesaĝo</string>
     <string name="flip_to_silence">Renversu la telefonon por silentigi vokojn</string>
     <string name="announce_caller_name">Laŭtlegi la nomon de la vokanto</string>
+    <string name="add_quick_answer">Aldoni respondon</string>
+    <string name="quick_answers_empty">Ankoraŭ neniu respondo. Tuŝetu Aldoni respondon por krei.</string>
+    <string name="announce_only_with_headset">Nur kiam aŭdiloj estas konektitaj</string>
+    <string name="blocked_calls_filter">Blokitaj</string>
+    <string name="block_reason_list">En via blokolisto</string>
+    <string name="block_reason_unknown">Ne en viaj kontaktoj</string>
+    <string name="block_reason_hidden">Kaŝita numero</string>
+    <string name="block_reason_system">Blokita de la sistemo</string>
+    <string name="remind_in_minutes">Memorigi post %d min</string>
+    <string name="reminder_set">Memorigo agordita: %s</string>
+    <string name="call_statistics">Statistiko de vokoj</string>
+    <string name="stats_last_7_days">7 tagoj</string>
+    <string name="stats_last_30_days">30 tagoj</string>
+    <string name="stats_all_time">Ĉiam</string>
+    <string name="stats_talk_time">Parola tempo</string>
+    <string name="stats_total_calls">Entute</string>
+    <string name="stats_average_call">Averaĝa voko: %s</string>
+    <string name="stats_busiest_hour">Plej okupata horo: %s</string>
+    <string name="stats_top_contacts">Plej vokitaj</string>
+    <string name="stats_no_calls">Neniu voko en ĉi tiu periodo</string>
+    <string name="widget_favorites_title">Ŝatataj</string>
+    <string name="widget_recents_title">Lastaj vokoj</string>
+    <string name="widget_favorites_description">Vokas viajn ŝatatajn kontaktojn per unu tuŝeto</string>
+    <string name="widget_recents_description">Viaj plej novaj vokoj, unu tuŝeto por revoki</string>
+    <string name="widget_favorites_empty">Ankoraŭ neniu ŝatata. Malfermu MHW Phone por aldoni aŭ permesi aliron al kontaktoj.</string>
+    <string name="widget_recents_empty">Neniu lasta voko. Malfermu MHW Phone por permesi aliron al la voklisto.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d voko</item>
+        <item quantity="other">%d vokoj</item>
+    </plurals>
 </resources>

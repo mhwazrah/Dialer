@@ -81,4 +81,36 @@
     <string name="decline_with_message">Odmietnuť so správou</string>
     <string name="flip_to_silence">Otočením telefónu stlmíte hovor</string>
     <string name="announce_caller_name">Vysloviť meno volajúceho</string>
+    <string name="add_quick_answer">Pridať odpoveď</string>
+    <string name="quick_answers_empty">Zatiaľ žiadne odpovede. Ťuknutím na Pridať odpoveď ju vytvorte.</string>
+    <string name="announce_only_with_headset">Iba keď sú pripojené slúchadlá</string>
+    <string name="blocked_calls_filter">Blokované</string>
+    <string name="block_reason_list">Vo vašom zozname blokovaných</string>
+    <string name="block_reason_unknown">Nie je vo vašich kontaktoch</string>
+    <string name="block_reason_hidden">Skryté číslo</string>
+    <string name="block_reason_system">Zablokované systémom</string>
+    <string name="remind_in_minutes">Pripomenúť o %d min</string>
+    <string name="reminder_set">Pripomienka nastavená: %s</string>
+    <string name="call_statistics">Štatistiky hovorov</string>
+    <string name="stats_last_7_days">7 dní</string>
+    <string name="stats_last_30_days">30 dní</string>
+    <string name="stats_all_time">Celé obdobie</string>
+    <string name="stats_talk_time">Čas hovorov</string>
+    <string name="stats_total_calls">Spolu</string>
+    <string name="stats_average_call">Priemerný hovor: %s</string>
+    <string name="stats_busiest_hour">Najrušnejšia hodina: %s</string>
+    <string name="stats_top_contacts">Najčastejšie volané</string>
+    <string name="stats_no_calls">Žiadne hovory v tomto období</string>
+    <string name="widget_favorites_title">Obľúbené</string>
+    <string name="widget_recents_title">Nedávne hovory</string>
+    <string name="widget_favorites_description">Volajte obľúbeným kontaktom jedným ťuknutím</string>
+    <string name="widget_recents_description">Vaše posledné hovory, jedným ťuknutím zavoláte späť</string>
+    <string name="widget_favorites_empty">Zatiaľ žiadne obľúbené. Otvorte MHW Phone a pridajte ich alebo povoľte prístup ku kontaktom.</string>
+    <string name="widget_recents_empty">Žiadne nedávne hovory. Otvorte MHW Phone a povoľte prístup k zoznamu hovorov.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d hovor</item>
+        <item quantity="few">%d hovory</item>
+        <item quantity="many">%d hovoru</item>
+        <item quantity="other">%d hovorov</item>
+    </plurals>
 </resources>

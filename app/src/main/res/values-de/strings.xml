@@ -84,4 +84,34 @@
     <string name="decline_with_message">Mit Nachricht ablehnen</string>
     <string name="flip_to_silence">Telefon umdrehen, um Anrufe stummzuschalten</string>
     <string name="announce_caller_name">Namen des Anrufers ansagen</string>
+    <string name="add_quick_answer">Antwort hinzufügen</string>
+    <string name="quick_answers_empty">Noch keine Antworten. Tippen Sie auf Antwort hinzufügen, um eine zu erstellen.</string>
+    <string name="announce_only_with_headset">Nur bei angeschlossenem Kopfhörer</string>
+    <string name="blocked_calls_filter">Blockiert</string>
+    <string name="block_reason_list">Auf Ihrer Sperrliste</string>
+    <string name="block_reason_unknown">Nicht in Ihren Kontakten</string>
+    <string name="block_reason_hidden">Unterdrückte Nummer</string>
+    <string name="block_reason_system">Vom System blockiert</string>
+    <string name="remind_in_minutes">In %d Min. erinnern</string>
+    <string name="reminder_set">Erinnerung gesetzt: %s</string>
+    <string name="call_statistics">Anrufstatistik</string>
+    <string name="stats_last_7_days">7 Tage</string>
+    <string name="stats_last_30_days">30 Tage</string>
+    <string name="stats_all_time">Gesamt</string>
+    <string name="stats_talk_time">Gesprächszeit</string>
+    <string name="stats_total_calls">Gesamt</string>
+    <string name="stats_average_call">Durchschnittlicher Anruf: %s</string>
+    <string name="stats_busiest_hour">Aktivste Stunde: %s</string>
+    <string name="stats_top_contacts">Am häufigsten angerufen</string>
+    <string name="stats_no_calls">Keine Anrufe in diesem Zeitraum</string>
+    <string name="widget_favorites_title">Favoriten</string>
+    <string name="widget_recents_title">Letzte Anrufe</string>
+    <string name="widget_favorites_description">Favoriten mit einem Tipp anrufen</string>
+    <string name="widget_recents_description">Ihre letzten Anrufe, ein Tipp zum Zurückrufen</string>
+    <string name="widget_favorites_empty">Noch keine Favoriten. Öffnen Sie MHW Phone, um welche hinzuzufügen oder den Zugriff auf Kontakte zu erlauben.</string>
+    <string name="widget_recents_empty">Keine letzten Anrufe. Öffnen Sie MHW Phone, um den Zugriff auf das Anrufprotokoll zu erlauben.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d Anruf</item>
+        <item quantity="other">%d Anrufe</item>
+    </plurals>
 </resources>

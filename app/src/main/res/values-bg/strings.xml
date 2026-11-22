@@ -84,4 +84,34 @@
     <string name="decline_with_message">Отхвърляне със съобщение</string>
     <string name="flip_to_silence">Обърнете телефона, за да заглушите обаждането</string>
     <string name="announce_caller_name">Изговаряне на името на обаждащия се</string>
+    <string name="add_quick_answer">Добавяне на отговор</string>
+    <string name="quick_answers_empty">Още няма отговори. Докоснете Добавяне на отговор, за да създадете.</string>
+    <string name="announce_only_with_headset">Само при свързани слушалки</string>
+    <string name="blocked_calls_filter">Блокирани</string>
+    <string name="block_reason_list">В списъка ви за блокиране</string>
+    <string name="block_reason_unknown">Не е в контактите ви</string>
+    <string name="block_reason_hidden">Скрит номер</string>
+    <string name="block_reason_system">Блокирано от системата</string>
+    <string name="remind_in_minutes">Напомняне след %d мин</string>
+    <string name="reminder_set">Напомнянето е зададено: %s</string>
+    <string name="call_statistics">Статистика на обажданията</string>
+    <string name="stats_last_7_days">7 дни</string>
+    <string name="stats_last_30_days">30 дни</string>
+    <string name="stats_all_time">Всички</string>
+    <string name="stats_talk_time">Време на разговори</string>
+    <string name="stats_total_calls">Общо</string>
+    <string name="stats_average_call">Средно обаждане: %s</string>
+    <string name="stats_busiest_hour">Най-натоварен час: %s</string>
+    <string name="stats_top_contacts">Най-често търсени</string>
+    <string name="stats_no_calls">Няма обаждания за този период</string>
+    <string name="widget_favorites_title">Любими</string>
+    <string name="widget_recents_title">Скорошни обаждания</string>
+    <string name="widget_favorites_description">Обаждайте се на любимите си контакти с едно докосване</string>
+    <string name="widget_recents_description">Последните ви обаждания, едно докосване за обратно обаждане</string>
+    <string name="widget_favorites_empty">Още няма любими. Отворете MHW Phone, за да добавите, или да разрешите достъп до контактите.</string>
+    <string name="widget_recents_empty">Няма скорошни обаждания. Отворете MHW Phone, за да разрешите достъп до списъка с обаждания.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d обаждане</item>
+        <item quantity="other">%d обаждания</item>
+    </plurals>
 </resources>

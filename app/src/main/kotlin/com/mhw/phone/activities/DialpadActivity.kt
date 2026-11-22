@@ -25,7 +25,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.behaviorule.arturdumchev.library.pixels
 import com.behaviorule.arturdumchev.library.setHeight
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.dialogs.ConfirmationDialog
 import com.goodwy.commons.extensions.*
@@ -1820,7 +1820,7 @@ class DialpadActivity : SimpleActivity() {
     private fun actionCall(call: RecentCall) {
         val recentCall = call
         if (config.showCallConfirmation) {
-            CallConfirmationDialog(this, recentCall.name) {
+            CallConfirmDialog(this, recentCall.name, recentCall.phoneNumber, recentCall.photoUri) {
                 callRecentNumber(recentCall)
             }
         } else {

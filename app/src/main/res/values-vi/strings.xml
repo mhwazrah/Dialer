@@ -84,4 +84,33 @@
     <string name="decline_with_message">Từ chối kèm tin nhắn</string>
     <string name="flip_to_silence">Úp điện thoại xuống để tắt tiếng cuộc gọi</string>
     <string name="announce_caller_name">Đọc tên người gọi khi đổ chuông</string>
+    <string name="add_quick_answer">Thêm câu trả lời</string>
+    <string name="quick_answers_empty">Chưa có câu trả lời nào. Chạm Thêm câu trả lời để tạo.</string>
+    <string name="announce_only_with_headset">Chỉ khi đã kết nối tai nghe</string>
+    <string name="blocked_calls_filter">Đã chặn</string>
+    <string name="block_reason_list">Trong danh sách chặn của bạn</string>
+    <string name="block_reason_unknown">Không có trong danh bạ</string>
+    <string name="block_reason_hidden">Số ẩn</string>
+    <string name="block_reason_system">Bị hệ thống chặn</string>
+    <string name="remind_in_minutes">Nhắc sau %d phút</string>
+    <string name="reminder_set">Đã đặt nhắc nhở: %s</string>
+    <string name="call_statistics">Thống kê cuộc gọi</string>
+    <string name="stats_last_7_days">7 ngày</string>
+    <string name="stats_last_30_days">30 ngày</string>
+    <string name="stats_all_time">Tất cả</string>
+    <string name="stats_talk_time">Thời gian đàm thoại</string>
+    <string name="stats_total_calls">Tổng</string>
+    <string name="stats_average_call">Cuộc gọi trung bình: %s</string>
+    <string name="stats_busiest_hour">Giờ cao điểm: %s</string>
+    <string name="stats_top_contacts">Gọi nhiều nhất</string>
+    <string name="stats_no_calls">Không có cuộc gọi trong khoảng này</string>
+    <string name="widget_favorites_title">Yêu thích</string>
+    <string name="widget_recents_title">Cuộc gọi gần đây</string>
+    <string name="widget_favorites_description">Gọi liên hệ yêu thích chỉ với một lần chạm</string>
+    <string name="widget_recents_description">Các cuộc gọi gần đây của bạn, chạm một lần để gọi lại</string>
+    <string name="widget_favorites_empty">Chưa có mục yêu thích. Mở MHW Phone để thêm hoặc cho phép truy cập danh bạ.</string>
+    <string name="widget_recents_empty">Không có cuộc gọi gần đây. Mở MHW Phone để cho phép truy cập nhật ký cuộc gọi.</string>
+    <plurals name="stats_calls">
+        <item quantity="other">%d cuộc gọi</item>
+    </plurals>
 </resources>

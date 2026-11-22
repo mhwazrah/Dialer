@@ -83,4 +83,35 @@
     <string name="decline_with_message">Rifiuta con messaggio</string>
     <string name="flip_to_silence">Capovolgi il telefono per silenziare le chiamate</string>
     <string name="announce_caller_name">Pronuncia il nome del chiamante</string>
+    <string name="add_quick_answer">Aggiungi risposta</string>
+    <string name="quick_answers_empty">Nessuna risposta. Tocca Aggiungi risposta per crearne una.</string>
+    <string name="announce_only_with_headset">Solo con le cuffie collegate</string>
+    <string name="blocked_calls_filter">Bloccate</string>
+    <string name="block_reason_list">Nella tua lista di blocco</string>
+    <string name="block_reason_unknown">Non è nei tuoi contatti</string>
+    <string name="block_reason_hidden">Numero nascosto</string>
+    <string name="block_reason_system">Bloccata dal sistema</string>
+    <string name="remind_in_minutes">Ricorda tra %d min</string>
+    <string name="reminder_set">Promemoria impostato: %s</string>
+    <string name="call_statistics">Statistiche chiamate</string>
+    <string name="stats_last_7_days">7 giorni</string>
+    <string name="stats_last_30_days">30 giorni</string>
+    <string name="stats_all_time">Sempre</string>
+    <string name="stats_talk_time">Tempo di conversazione</string>
+    <string name="stats_total_calls">Totale</string>
+    <string name="stats_average_call">Chiamata media: %s</string>
+    <string name="stats_busiest_hour">Ora di punta: %s</string>
+    <string name="stats_top_contacts">Più chiamati</string>
+    <string name="stats_no_calls">Nessuna chiamata in questo periodo</string>
+    <string name="widget_favorites_title">Preferiti</string>
+    <string name="widget_recents_title">Chiamate recenti</string>
+    <string name="widget_favorites_description">Chiama i tuoi contatti preferiti con un tocco</string>
+    <string name="widget_recents_description">Le tue ultime chiamate, un tocco per richiamare</string>
+    <string name="widget_favorites_empty">Nessun preferito. Apri MHW Phone per aggiungerne o per consentire l\'accesso ai contatti.</string>
+    <string name="widget_recents_empty">Nessuna chiamata recente. Apri MHW Phone per consentire l\'accesso al registro chiamate.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d chiamata</item>
+        <item quantity="many">%d di chiamate</item>
+        <item quantity="other">%d chiamate</item>
+    </plurals>
 </resources>

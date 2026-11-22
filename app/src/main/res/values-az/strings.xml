@@ -12,4 +12,34 @@
     <string name="decline_with_message">Mesajla rədd et</string>
     <string name="flip_to_silence">Zəngi səssizləşdirmək üçün telefonu çevirin</string>
     <string name="announce_caller_name">Zəng zamanı zəng edənin adını səsləndir</string>
+    <string name="add_quick_answer">Cavab əlavə et</string>
+    <string name="quick_answers_empty">Hələ cavab yoxdur. Yaratmaq üçün Cavab əlavə et düyməsinə toxunun.</string>
+    <string name="announce_only_with_headset">Yalnız qulaqlıq qoşulduqda</string>
+    <string name="blocked_calls_filter">Bloklanıb</string>
+    <string name="block_reason_list">Bloklama siyahınızdadır</string>
+    <string name="block_reason_unknown">Kontaktlarınızda yoxdur</string>
+    <string name="block_reason_hidden">Gizli nömrə</string>
+    <string name="block_reason_system">Sistem tərəfindən bloklanıb</string>
+    <string name="remind_in_minutes">%d dəq sonra xatırlat</string>
+    <string name="reminder_set">Xatırlatma quruldu: %s</string>
+    <string name="call_statistics">Zəng statistikası</string>
+    <string name="stats_last_7_days">7 gün</string>
+    <string name="stats_last_30_days">30 gün</string>
+    <string name="stats_all_time">Bütün vaxt</string>
+    <string name="stats_talk_time">Danışıq müddəti</string>
+    <string name="stats_total_calls">Cəmi</string>
+    <string name="stats_average_call">Orta zəng: %s</string>
+    <string name="stats_busiest_hour">Ən məşğul saat: %s</string>
+    <string name="stats_top_contacts">Ən çox zəng edilənlər</string>
+    <string name="stats_no_calls">Bu dövrdə zəng yoxdur</string>
+    <string name="widget_favorites_title">Sevimlilər</string>
+    <string name="widget_recents_title">Son zənglər</string>
+    <string name="widget_favorites_description">Sevimli kontaktlarınıza bir toxunuşla zəng edin</string>
+    <string name="widget_recents_description">Son zənglər, geri zəng üçün bir toxunuş</string>
+    <string name="widget_favorites_empty">Hələ sevimli yoxdur. Əlavə etmək və ya kontaktlara icazə vermək üçün MHW Phone tətbiqini açın.</string>
+    <string name="widget_recents_empty">Son zəng yoxdur. Zəng jurnalına icazə vermək üçün MHW Phone tətbiqini açın.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d zəng</item>
+        <item quantity="other">%d zəng</item>
+    </plurals>
 </resources>

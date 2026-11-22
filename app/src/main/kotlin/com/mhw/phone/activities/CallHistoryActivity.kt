@@ -21,7 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.updatePaddingRelative
 import androidx.core.graphics.drawable.DrawableCompat
-import com.goodwy.commons.dialogs.CallConfirmationDialog
+import com.mhw.phone.dialogs.CallConfirmDialog
 import com.goodwy.commons.dialogs.ConfirmationAdvancedDialog
 import com.goodwy.commons.dialogs.ConfirmationDialog
 import com.goodwy.commons.dialogs.RadioGroupDialog
@@ -1083,7 +1083,7 @@ class CallHistoryActivity : SimpleActivity() {
             if (!hasSavedSim && lastSimId != null && areMultipleSIMsAvailable()) callContactWithSim(number, useMainSIM = lastSimId == 1)
             else placeCall(number)
         }
-        if (config.showCallConfirmation) CallConfirmationDialog(this as SimpleActivity, call.name) { start() } else start()
+        if (config.showCallConfirmation) CallConfirmDialog(this, call.name, call.phoneNumber, call.photoUri) { start() } else start()
     }
 
     // One-off call with a chosen SIM; the number's saved SIM is left as it is. A custom glass popup, not PopupMenu:

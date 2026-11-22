@@ -8,4 +8,34 @@
     <string name="decline_with_message">Одбиј со порака</string>
     <string name="flip_to_silence">Превртете го телефонот за да го стишите повикот</string>
     <string name="announce_caller_name">Изговори го името на повикувачот</string>
+    <string name="add_quick_answer">Додај одговор</string>
+    <string name="quick_answers_empty">Сè уште нема одговори. Допрете Додај одговор за да создадете.</string>
+    <string name="announce_only_with_headset">Само кога се поврзани слушалки</string>
+    <string name="blocked_calls_filter">Блокирани</string>
+    <string name="block_reason_list">На вашата листа за блокирање</string>
+    <string name="block_reason_unknown">Не е во вашите контакти</string>
+    <string name="block_reason_hidden">Скриен број</string>
+    <string name="block_reason_system">Блокирано од системот</string>
+    <string name="remind_in_minutes">Потсети за %d мин</string>
+    <string name="reminder_set">Потсетникот е поставен: %s</string>
+    <string name="call_statistics">Статистика на повици</string>
+    <string name="stats_last_7_days">7 дена</string>
+    <string name="stats_last_30_days">30 дена</string>
+    <string name="stats_all_time">Сето време</string>
+    <string name="stats_talk_time">Време на разговор</string>
+    <string name="stats_total_calls">Вкупно</string>
+    <string name="stats_average_call">Просечен повик: %s</string>
+    <string name="stats_busiest_hour">Најзафатен час: %s</string>
+    <string name="stats_top_contacts">Најчесто повикувани</string>
+    <string name="stats_no_calls">Нема повици во овој период</string>
+    <string name="widget_favorites_title">Омилени</string>
+    <string name="widget_recents_title">Неодамнешни повици</string>
+    <string name="widget_favorites_description">Повикајте ги омилените контакти со еден допир</string>
+    <string name="widget_recents_description">Вашите последни повици, еден допир за повторен повик</string>
+    <string name="widget_favorites_empty">Сè уште нема омилени. Отворете MHW Phone за да додадете или да дозволите пристап до контактите.</string>
+    <string name="widget_recents_empty">Нема неодамнешни повици. Отворете MHW Phone за да дозволите пристап до дневникот на повици.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d повик</item>
+        <item quantity="other">%d повици</item>
+    </plurals>
 </resources>

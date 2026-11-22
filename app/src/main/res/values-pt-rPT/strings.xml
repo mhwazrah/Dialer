@@ -84,4 +84,35 @@
     <string name="decline_with_message">Rejeitar com mensagem</string>
     <string name="flip_to_silence">Virar o telemóvel para silenciar chamadas</string>
     <string name="announce_caller_name">Dizer o nome de quem liga</string>
+    <string name="add_quick_answer">Adicionar resposta</string>
+    <string name="quick_answers_empty">Ainda não há respostas. Toque em Adicionar resposta para criar uma.</string>
+    <string name="announce_only_with_headset">Somente com fones de ouvido conectados</string>
+    <string name="blocked_calls_filter">Bloqueadas</string>
+    <string name="block_reason_list">Na sua lista de bloqueio</string>
+    <string name="block_reason_unknown">Não está nos seus contactos</string>
+    <string name="block_reason_hidden">Número oculto</string>
+    <string name="block_reason_system">Bloqueada pelo sistema</string>
+    <string name="remind_in_minutes">Lembrar em %d min</string>
+    <string name="reminder_set">Lembrete definido: %s</string>
+    <string name="call_statistics">Estatísticas de chamadas</string>
+    <string name="stats_last_7_days">7 dias</string>
+    <string name="stats_last_30_days">30 dias</string>
+    <string name="stats_all_time">Sempre</string>
+    <string name="stats_talk_time">Tempo de chamada</string>
+    <string name="stats_total_calls">Total</string>
+    <string name="stats_average_call">Chamada média: %s</string>
+    <string name="stats_busiest_hour">Hora mais movimentada: %s</string>
+    <string name="stats_top_contacts">Mais chamados</string>
+    <string name="stats_no_calls">Sem chamadas neste período</string>
+    <string name="widget_favorites_title">Favoritos</string>
+    <string name="widget_recents_title">Chamadas recentes</string>
+    <string name="widget_favorites_description">Ligue para os seus contactos favoritos com um toque</string>
+    <string name="widget_recents_description">As suas últimas chamadas, um toque para ligar de volta</string>
+    <string name="widget_favorites_empty">Ainda não há favoritos. Abra o MHW Phone para adicionar ou para permitir o acesso aos contactos.</string>
+    <string name="widget_recents_empty">Sem chamadas recentes. Abra o MHW Phone para permitir o acesso ao registo de chamadas.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d chamada</item>
+        <item quantity="many">%d de chamadas</item>
+        <item quantity="other">%d chamadas</item>
+    </plurals>
 </resources>

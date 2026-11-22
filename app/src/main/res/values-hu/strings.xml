@@ -81,4 +81,34 @@
     <string name="decline_with_message">Elutasítás üzenettel</string>
     <string name="flip_to_silence">Fordítsa le a telefont a hívás némításához</string>
     <string name="announce_caller_name">A hívó nevének felolvasása</string>
+    <string name="add_quick_answer">Válasz hozzáadása</string>
+    <string name="quick_answers_empty">Még nincs válasz. Koppintson a Válasz hozzáadása elemre egy létrehozásához.</string>
+    <string name="announce_only_with_headset">Csak csatlakoztatott fejhallgatóval</string>
+    <string name="blocked_calls_filter">Letiltott</string>
+    <string name="block_reason_list">A tiltólistán</string>
+    <string name="block_reason_unknown">Nincs a névjegyei között</string>
+    <string name="block_reason_hidden">Rejtett szám</string>
+    <string name="block_reason_system">A rendszer letiltotta</string>
+    <string name="remind_in_minutes">Emlékeztető %d perc múlva</string>
+    <string name="reminder_set">Emlékeztető beállítva: %s</string>
+    <string name="call_statistics">Hívásstatisztika</string>
+    <string name="stats_last_7_days">7 nap</string>
+    <string name="stats_last_30_days">30 nap</string>
+    <string name="stats_all_time">Összes</string>
+    <string name="stats_talk_time">Beszélgetési idő</string>
+    <string name="stats_total_calls">Összesen</string>
+    <string name="stats_average_call">Átlagos hívás: %s</string>
+    <string name="stats_busiest_hour">Legforgalmasabb óra: %s</string>
+    <string name="stats_top_contacts">Leggyakrabban hívott</string>
+    <string name="stats_no_calls">Nincs hívás ebben az időszakban</string>
+    <string name="widget_favorites_title">Kedvencek</string>
+    <string name="widget_recents_title">Legutóbbi hívások</string>
+    <string name="widget_favorites_description">Hívja kedvenc névjegyeit egy koppintással</string>
+    <string name="widget_recents_description">Legutóbbi hívásai, egy koppintással visszahívhat</string>
+    <string name="widget_favorites_empty">Még nincs kedvenc. Nyissa meg az MHW Phone alkalmazást a hozzáadáshoz, vagy a névjegyek elérésének engedélyezéséhez.</string>
+    <string name="widget_recents_empty">Nincs legutóbbi hívás. Nyissa meg az MHW Phone alkalmazást a hívásnapló elérésének engedélyezéséhez.</string>
+    <plurals name="stats_calls">
+        <item quantity="one">%d hívás</item>
+        <item quantity="other">%d hívás</item>
+    </plurals>
 </resources>

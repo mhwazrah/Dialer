@@ -2,6 +2,14 @@
 
     <style name="AppTheme" parent="AppTheme.Base" />
 
+    <!-- The widget's call stop: the app theme (Material buttons, dialog styles) on a see-through window -->
+    <style name="WidgetCallTheme" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <!-- Overrides the library's base of the theme it applies at runtime (AppTheme.Blue_600_core): the same items, plus the
          app's confirmation-dialog theme. Keep in step with the library's definition when it is updated. -->
     <style name="AppTheme.Base.Core" parent="Theme.Material3.Dark.NoActionBar" tools:ignore="UnusedResources">
@@ -89,4 +97,17 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- Period chips on the call statistics screen, like the Recents filters -->
+    <style name="StatsPeriodButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">38dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:paddingStart">@dimen/activity_margin</item>
+        <item name="android:paddingEnd">@dimen/activity_margin</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
 </resources>
