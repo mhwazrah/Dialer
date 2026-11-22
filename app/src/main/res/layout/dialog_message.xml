@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Overrides the library's confirmation message (same ids and view class): roomier padding, start-aligned so Arabic reads
+     right to left -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/message_scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.goodwy.commons.views.MyTextView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4dp"
+        android:paddingStart="28dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="28dp"
+        android:paddingBottom="12dp"
+        android:textAlignment="viewStart"
+        android:textSize="18sp" />
+
+</ScrollView>

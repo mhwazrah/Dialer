@@ -30,4 +30,10 @@
     <!-- Ongoing-call notification buttons when not active (follows the system light/dark notification) -->
     <color name="notification_action_idle_fill">#1F000000</color>
     <color name="notification_action_idle_icon">#DE000000</color>
+
+    <!-- Confirmation dialogs: the library colours button text with the app's primary colour, so the confirm button is a
+         soft fill and cancel a hairline outline. One neutral grey for both themes: the dialog sheet follows the app theme
+         while the always-dark call screens load night resources, so a night variant would land on a light sheet. -->
+    <color name="dialog_button_tonal">#29808C99</color>
+    <color name="dialog_button_outline">#73808C99</color>
 </resources>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources the library inflates by name (overrides of its own) or reaches through the theme: lint cannot see those uses -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@layout/dialog_message,@layout/dialog_call_confirmation,@drawable/bg_dialog_icon,@drawable/btn_dialog_outline,@drawable/btn_dialog_tonal,@color/dialog_button_tonal,@color/dialog_button_outline,@style/DialogButtonBar,@style/DialogCancelButton,@style/DialogConfirmButton" />
