@@ -4,7 +4,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import com.goodwy.commons.helpers.ensureBackgroundThread
 import com.mhw.phone.extensions.startCallWithConfirmationCheck
+import com.mhw.phone.widgets.isShownInWidgets
 
 /**
  * Invisible stop between a widget row and the call, so a widget call goes through the same SIM choice and call
@@ -30,7 +32,17 @@ class WidgetCallActivity : SimpleActivity() {
             return
         }
         val name = intent.getStringExtra(EXTRA_NAME).orEmpty()
-        startCallWithConfirmationCheck(number, name, photoUri = intent.getStringExtra(EXTRA_PHOTO), onCancel = ::finish)
+        val photoUri = intent.getStringExtra(EXTRA_PHOTO)
+        ensureBackgroundThread {
+            val shown = isShownInWidgets(number)
+            runOnUiThread {
+                when {
+                    isFinishing || isDestroyed -> Unit
+                    shown -> startCallWithConfirmationCheck(number, name, photoUri = photoUri, onCancel = ::finish)
+                    else -> finish() // not a number the widgets list: never call it
+                }
+            }
+        }
     }
 
     // Invisible: no app backdrop or theme colour behind the dialog, the home screen stays in view

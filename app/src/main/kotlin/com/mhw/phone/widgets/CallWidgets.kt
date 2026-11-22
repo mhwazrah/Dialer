@@ -130,6 +130,16 @@ private class CallWidgetFactory(private val context: Context, private val favori
     }
 }
 
+/**
+ * Whether [number] is one the widgets show. A widget tap's number is filled in by the widget host, so it is checked
+ * against our own lists before calling: another app hosting the widget cannot use it to call any number. Blocking.
+ */
+fun Context.isShownInWidgets(number: String): Boolean = try {
+    (readFavorites() + readRecents()).any { it.number == number }
+} catch (_: SecurityException) {
+    false
+}
+
 private fun Context.readFavorites(): List<WidgetEntry> {
     if (!hasPermission(PERMISSION_READ_CONTACTS)) return emptyList()
     val projection = arrayOf(Phone.CONTACT_ID, Phone.DISPLAY_NAME_PRIMARY, Phone.NUMBER, Phone.PHOTO_THUMBNAIL_URI)
