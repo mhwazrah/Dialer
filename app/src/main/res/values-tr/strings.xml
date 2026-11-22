@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 gün</string>
     <string name="stats_all_time">Tüm zamanlar</string>
     <string name="stats_talk_time">Konuşma süresi</string>
-    <string name="stats_total_calls">Toplam</string>
     <string name="stats_average_call">Ortalama arama: %s</string>
     <string name="stats_busiest_hour">En yoğun saat: %s</string>
     <string name="stats_top_contacts">En çok arananlar</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d arama</item>
         <item quantity="other">%d arama</item>
     </plurals>
+    <string name="stats_vs_previous">Önceki döneme göre %1$s</string>
+    <string name="stats_answer_rate">Yanıtlama oranı</string>
+    <string name="stats_longest_call">En uzun arama</string>
+    <string name="stats_calls_per_day">Günlük arama</string>
+    <string name="stats_people">Kişiler</string>
+    <string name="stats_calls_over_time">Zaman içinde aramalar</string>
+    <string name="stats_call_mix">Arama dağılımı</string>
+    <string name="stats_by_hour">Saate göre</string>
+    <string name="stats_by_weekday">Haftanın gününe göre</string>
+    <string name="stats_busiest_day">En yoğun gün: %s</string>
+    <string name="stats_talk_split">Gelen %1$s · Giden %2$s</string>
+    <string name="stats_per_day_average">Günde %s</string>
 </resources>

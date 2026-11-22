@@ -37,7 +37,6 @@
     <string name="stats_last_30_days">30 dienas</string>
     <string name="stats_all_time">Viss laiks</string>
     <string name="stats_talk_time">Sarunu laiks</string>
-    <string name="stats_total_calls">Kopā</string>
     <string name="stats_average_call">Vidējais zvans: %s</string>
     <string name="stats_busiest_hour">Aktīvākā stunda: %s</string>
     <string name="stats_top_contacts">Visbiežāk zvanītie</string>
@@ -53,4 +52,16 @@
         <item quantity="one">%d zvans</item>
         <item quantity="other">%d zvani</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s salīdzinājumā ar iepriekšējo periodu</string>
+    <string name="stats_answer_rate">Atbildēšanas līmenis</string>
+    <string name="stats_longest_call">Garākais zvans</string>
+    <string name="stats_calls_per_day">Zvani dienā</string>
+    <string name="stats_people">Cilvēki</string>
+    <string name="stats_calls_over_time">Zvani laika gaitā</string>
+    <string name="stats_call_mix">Zvanu sastāvs</string>
+    <string name="stats_by_hour">Pa stundām</string>
+    <string name="stats_by_weekday">Pa nedēļas dienām</string>
+    <string name="stats_busiest_day">Aizņemtākā diena: %s</string>
+    <string name="stats_talk_split">Ienākošie %1$s · Izejošie %2$s</string>
+    <string name="stats_per_day_average">%s dienā</string>
 </resources>

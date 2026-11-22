@@ -96,7 +96,6 @@
     <string name="stats_last_30_days">30 dní</string>
     <string name="stats_all_time">Celé obdobie</string>
     <string name="stats_talk_time">Čas hovorov</string>
-    <string name="stats_total_calls">Spolu</string>
     <string name="stats_average_call">Priemerný hovor: %s</string>
     <string name="stats_busiest_hour">Najrušnejšia hodina: %s</string>
     <string name="stats_top_contacts">Najčastejšie volané</string>
@@ -113,4 +112,16 @@
         <item quantity="many">%d hovoru</item>
         <item quantity="other">%d hovorov</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s oproti predchádzajúcemu obdobiu</string>
+    <string name="stats_answer_rate">Miera prijatých</string>
+    <string name="stats_longest_call">Najdlhší hovor</string>
+    <string name="stats_calls_per_day">Hovorov za deň</string>
+    <string name="stats_people">Ľudia</string>
+    <string name="stats_calls_over_time">Hovory v čase</string>
+    <string name="stats_call_mix">Typy hovorov</string>
+    <string name="stats_by_hour">Podľa hodiny</string>
+    <string name="stats_by_weekday">Podľa dňa v týždni</string>
+    <string name="stats_busiest_day">Najrušnejší deň: %s</string>
+    <string name="stats_talk_split">Prichádzajúce %1$s · Odchádzajúce %2$s</string>
+    <string name="stats_per_day_average">%s za deň</string>
 </resources>

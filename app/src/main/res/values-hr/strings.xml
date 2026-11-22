@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 dana</string>
     <string name="stats_all_time">Cijelo vrijeme</string>
     <string name="stats_talk_time">Vrijeme razgovora</string>
-    <string name="stats_total_calls">Ukupno</string>
     <string name="stats_average_call">Prosječan poziv: %s</string>
     <string name="stats_busiest_hour">Najprometniji sat: %s</string>
     <string name="stats_top_contacts">Najviše zvani</string>
@@ -115,4 +114,16 @@
         <item quantity="few">%d poziva</item>
         <item quantity="other">%d poziva</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s u odnosu na prethodno razdoblje</string>
+    <string name="stats_answer_rate">Stopa odgovora</string>
+    <string name="stats_longest_call">Najduži poziv</string>
+    <string name="stats_calls_per_day">Poziva dnevno</string>
+    <string name="stats_people">Osobe</string>
+    <string name="stats_calls_over_time">Pozivi kroz vrijeme</string>
+    <string name="stats_call_mix">Vrste poziva</string>
+    <string name="stats_by_hour">Po satu</string>
+    <string name="stats_by_weekday">Po danu u tjednu</string>
+    <string name="stats_busiest_day">Najprometniji dan: %s</string>
+    <string name="stats_talk_split">Dolazni %1$s · Odlazni %2$s</string>
+    <string name="stats_per_day_average">%s dnevno</string>
 </resources>

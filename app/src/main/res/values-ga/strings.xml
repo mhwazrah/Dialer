@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 lá</string>
     <string name="stats_all_time">An t-am ar fad</string>
     <string name="stats_talk_time">Am cainte</string>
-    <string name="stats_total_calls">Iomlán</string>
     <string name="stats_average_call">Meánghlao: %s</string>
     <string name="stats_busiest_hour">Uair is gnóthaí: %s</string>
     <string name="stats_top_contacts">Glaonna is minice</string>
@@ -117,4 +116,16 @@
         <item quantity="many">%d nglaonna</item>
         <item quantity="other">%d glao</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s vs an tréimhse roimhe</string>
+    <string name="stats_answer_rate">Ráta freagartha</string>
+    <string name="stats_longest_call">Glao is faide</string>
+    <string name="stats_calls_per_day">Glaonna in aghaidh an lae</string>
+    <string name="stats_people">Daoine</string>
+    <string name="stats_calls_over_time">Glaonna le himeacht ama</string>
+    <string name="stats_call_mix">Meascán glaonna</string>
+    <string name="stats_by_hour">De réir uaire</string>
+    <string name="stats_by_weekday">De réir lae den tseachtain</string>
+    <string name="stats_busiest_day">Lá is gnóthaí: %s</string>
+    <string name="stats_talk_split">Isteach %1$s · Amach %2$s</string>
+    <string name="stats_per_day_average">%s in aghaidh an lae</string>
 </resources>

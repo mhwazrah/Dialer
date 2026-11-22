@@ -58,97 +58,253 @@
                     android:text="@string/stats_all_time" />
             </LinearLayout>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/stats_summary_card"
-                style="@style/SettingsSectionHolder"
-                android:layout_marginTop="@dimen/activity_margin"
-                app:cardCornerRadius="@dimen/glass_card_radius"
-                app:cardElevation="0dp">
+            <LinearLayout
+                android:id="@+id/stats_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/activity_margin">
-
-                    <com.goodwy.commons.views.MyTextView
-                        android:id="@+id/stats_talk_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="34sp"
-                        android:textStyle="bold"
-                        tools:text="5h 12m" />
-
-                    <com.goodwy.commons.views.MyTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.6"
-                        android:gravity="center"
-                        android:text="@string/stats_talk_time" />
+                <!-- Headline: talk time, its change against the previous period, then four indicators -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_summary_card"
+                    style="@style/SettingsSectionHolder"
+                    android:layout_marginTop="@dimen/activity_margin"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_margin"
-                        android:baselineAligned="false"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_margin">
 
-                        <include
-                            android:id="@+id/stats_total"
-                            layout="@layout/item_stat_tile" />
+                        <com.goodwy.commons.views.MyTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.6"
+                            android:gravity="center"
+                            android:text="@string/stats_talk_time" />
 
-                        <include
-                            android:id="@+id/stats_incoming"
-                            layout="@layout/item_stat_tile" />
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_talk_time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textSize="36sp"
+                            android:textStyle="bold"
+                            tools:text="5h 12m" />
 
-                        <include
-                            android:id="@+id/stats_outgoing"
-                            layout="@layout/item_stat_tile" />
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_trend"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="▲ 12% vs previous period" />
 
-                        <include
-                            android:id="@+id/stats_missed"
-                            layout="@layout/item_stat_tile" />
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_talk_split"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:alpha="0.6"
+                            android:gravity="center"
+                            android:textSize="13sp"
+                            tools:text="Incoming 2h 10m · Outgoing 3h 2m" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/activity_margin"
+                            android:baselineAligned="false"
+                            android:orientation="horizontal">
+
+                            <include
+                                android:id="@+id/stats_answer_rate"
+                                layout="@layout/item_stat_tile" />
+
+                            <include
+                                android:id="@+id/stats_longest"
+                                layout="@layout/item_stat_tile" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/medium_margin"
+                            android:baselineAligned="false"
+                            android:orientation="horizontal">
+
+                            <include
+                                android:id="@+id/stats_per_day"
+                                layout="@layout/item_stat_tile" />
+
+                            <include
+                                android:id="@+id/stats_people"
+                                layout="@layout/item_stat_tile" />
+                        </LinearLayout>
                     </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-                    <com.goodwy.commons.views.MyTextView
-                        android:id="@+id/stats_average"
+                <TextView
+                    android:id="@+id/stats_activity_label"
+                    style="@style/SettingsSectionLabelStyle"
+                    android:text="@string/stats_calls_over_time" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_activity_card"
+                    style="@style/SettingsSectionHolder"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_margin"
-                        android:alpha="0.8"
-                        android:gravity="center"
-                        tools:text="Average call: 3m 20s" />
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_margin">
 
-                    <com.goodwy.commons.views.MyTextView
-                        android:id="@+id/stats_busiest_hour"
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_activity_summary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.7"
+                            android:textAlignment="viewStart"
+                            tools:text="82 calls · average 2.7 a day" />
+
+                        <com.mhw.phone.views.BarChartView
+                            android:id="@+id/stats_activity_chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp"
+                            android:layout_marginTop="@dimen/medium_margin" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/stats_mix_label"
+                    style="@style/SettingsSectionLabelStyle"
+                    android:text="@string/stats_call_mix" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_mix_card"
+                    style="@style/SettingsSectionHolder"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/small_margin"
-                        android:alpha="0.8"
-                        android:gravity="center"
-                        tools:text="Busiest hour: 18:00" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_margin">
 
-            <TextView
-                android:id="@+id/stats_top_label"
-                style="@style/SettingsSectionLabelStyle"
-                android:text="@string/stats_top_contacts" />
+                        <com.mhw.phone.views.MixBarView
+                            android:id="@+id/stats_mix_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="16dp" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/stats_top_card"
-                style="@style/SettingsSectionHolder"
-                app:cardCornerRadius="@dimen/glass_card_radius"
-                app:cardElevation="0dp">
+                        <LinearLayout
+                            android:id="@+id/stats_mix_legend"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/medium_margin"
+                            android:orientation="vertical" />
 
-                <LinearLayout
-                    android:id="@+id/stats_top_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingVertical="@dimen/small_margin" />
-            </androidx.cardview.widget.CardView>
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_average"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:alpha="0.7"
+                            android:textAlignment="viewStart"
+                            tools:text="Average call: 3m 20s" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/stats_hour_label"
+                    style="@style/SettingsSectionLabelStyle"
+                    android:text="@string/stats_by_hour" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_hour_card"
+                    style="@style/SettingsSectionHolder"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_margin">
+
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_busiest_hour"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.7"
+                            android:textAlignment="viewStart"
+                            tools:text="Busiest hour: 6 PM" />
+
+                        <com.mhw.phone.views.BarChartView
+                            android:id="@+id/stats_hour_chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:layout_marginTop="@dimen/medium_margin" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/stats_weekday_label"
+                    style="@style/SettingsSectionLabelStyle"
+                    android:text="@string/stats_by_weekday" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_weekday_card"
+                    style="@style/SettingsSectionHolder"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_margin">
+
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/stats_busiest_day"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.7"
+                            android:textAlignment="viewStart"
+                            tools:text="Busiest day: Sunday" />
+
+                        <com.mhw.phone.views.BarChartView
+                            android:id="@+id/stats_weekday_chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:layout_marginTop="@dimen/medium_margin" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/stats_top_label"
+                    style="@style/SettingsSectionLabelStyle"
+                    android:text="@string/stats_top_contacts" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/stats_top_card"
+                    style="@style/SettingsSectionHolder"
+                    app:cardCornerRadius="@dimen/glass_card_radius"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:id="@+id/stats_top_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingVertical="@dimen/small_margin" />
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
 
             <com.goodwy.commons.views.MyTextView
                 android:id="@+id/stats_empty"

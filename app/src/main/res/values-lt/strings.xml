@@ -77,7 +77,6 @@
     <string name="stats_last_30_days">30 dienų</string>
     <string name="stats_all_time">Visas laikas</string>
     <string name="stats_talk_time">Pokalbių laikas</string>
-    <string name="stats_total_calls">Iš viso</string>
     <string name="stats_average_call">Vidutinis skambutis: %s</string>
     <string name="stats_busiest_hour">Judriausia valanda: %s</string>
     <string name="stats_top_contacts">Dažniausiai skambinta</string>
@@ -94,4 +93,16 @@
         <item quantity="many">%d skambučio</item>
         <item quantity="other">%d skambučių</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s, palyginti su ankstesniu laikotarpiu</string>
+    <string name="stats_answer_rate">Atsiliepimo dažnis</string>
+    <string name="stats_longest_call">Ilgiausias skambutis</string>
+    <string name="stats_calls_per_day">Skambučiai per dieną</string>
+    <string name="stats_people">Žmonės</string>
+    <string name="stats_calls_over_time">Skambučiai laikui bėgant</string>
+    <string name="stats_call_mix">Skambučių sudėtis</string>
+    <string name="stats_by_hour">Pagal valandą</string>
+    <string name="stats_by_weekday">Pagal savaitės dieną</string>
+    <string name="stats_busiest_day">Judriausia diena: %s</string>
+    <string name="stats_talk_split">Gaunami %1$s · Išeinantys %2$s</string>
+    <string name="stats_per_day_average">%s per dieną</string>
 </resources>

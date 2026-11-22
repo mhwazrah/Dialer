@@ -91,7 +91,6 @@
     <string name="stats_last_30_days">30 நாட்கள்</string>
     <string name="stats_all_time">எல்லா நேரமும்</string>
     <string name="stats_talk_time">பேசிய நேரம்</string>
-    <string name="stats_total_calls">மொத்தம்</string>
     <string name="stats_average_call">சராசரி அழைப்பு: %s</string>
     <string name="stats_busiest_hour">மிகவும் பரபரப்பான மணி: %s</string>
     <string name="stats_top_contacts">அதிகம் அழைக்கப்பட்டவை</string>
@@ -106,4 +105,16 @@
         <item quantity="one">%d அழைப்பு</item>
         <item quantity="other">%d அழைப்புகள்</item>
     </plurals>
+    <string name="stats_vs_previous">முந்தைய காலத்தை விட %1$s</string>
+    <string name="stats_answer_rate">பதிலளிப்பு விகிதம்</string>
+    <string name="stats_longest_call">நீண்ட அழைப்பு</string>
+    <string name="stats_calls_per_day">ஒரு நாளுக்கு அழைப்புகள்</string>
+    <string name="stats_people">நபர்கள்</string>
+    <string name="stats_calls_over_time">காலப்போக்கில் அழைப்புகள்</string>
+    <string name="stats_call_mix">அழைப்பு வகைகள்</string>
+    <string name="stats_by_hour">மணி வாரியாக</string>
+    <string name="stats_by_weekday">வாரநாள் வாரியாக</string>
+    <string name="stats_busiest_day">மிகவும் பரபரப்பான நாள்: %s</string>
+    <string name="stats_talk_split">உள்வரும் %1$s · வெளிச்செல்லும் %2$s</string>
+    <string name="stats_per_day_average">நாளுக்கு %s</string>
 </resources>

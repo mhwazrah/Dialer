@@ -96,7 +96,6 @@
     <string name="stats_last_30_days">30 hari</string>
     <string name="stats_all_time">Sepanjang waktu</string>
     <string name="stats_talk_time">Waktu bicara</string>
-    <string name="stats_total_calls">Total</string>
     <string name="stats_average_call">Rata-rata panggilan: %s</string>
     <string name="stats_busiest_hour">Jam tersibuk: %s</string>
     <string name="stats_top_contacts">Paling sering dihubungi</string>
@@ -110,4 +109,16 @@
     <plurals name="stats_calls">
         <item quantity="other">%d panggilan</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s dibanding periode sebelumnya</string>
+    <string name="stats_answer_rate">Tingkat jawab</string>
+    <string name="stats_longest_call">Panggilan terlama</string>
+    <string name="stats_calls_per_day">Panggilan per hari</string>
+    <string name="stats_people">Orang</string>
+    <string name="stats_calls_over_time">Panggilan dari waktu ke waktu</string>
+    <string name="stats_call_mix">Ragam panggilan</string>
+    <string name="stats_by_hour">Per jam</string>
+    <string name="stats_by_weekday">Per hari dalam seminggu</string>
+    <string name="stats_busiest_day">Hari tersibuk: %s</string>
+    <string name="stats_talk_split">Masuk %1$s · Keluar %2$s</string>
+    <string name="stats_per_day_average">%s per hari</string>
 </resources>

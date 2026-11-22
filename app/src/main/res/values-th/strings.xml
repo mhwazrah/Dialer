@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 วัน</string>
     <string name="stats_all_time">ทั้งหมด</string>
     <string name="stats_talk_time">เวลาสนทนา</string>
-    <string name="stats_total_calls">รวม</string>
     <string name="stats_average_call">การโทรเฉลี่ย: %s</string>
     <string name="stats_busiest_hour">ชั่วโมงที่ยุ่งที่สุด: %s</string>
     <string name="stats_top_contacts">โทรบ่อยที่สุด</string>
@@ -113,4 +112,16 @@
     <plurals name="stats_calls">
         <item quantity="other">%d สาย</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s เทียบกับช่วงก่อนหน้า</string>
+    <string name="stats_answer_rate">อัตราการรับสาย</string>
+    <string name="stats_longest_call">สายที่นานที่สุด</string>
+    <string name="stats_calls_per_day">สายต่อวัน</string>
+    <string name="stats_people">บุคคล</string>
+    <string name="stats_calls_over_time">การโทรตามช่วงเวลา</string>
+    <string name="stats_call_mix">สัดส่วนการโทร</string>
+    <string name="stats_by_hour">ตามชั่วโมง</string>
+    <string name="stats_by_weekday">ตามวันในสัปดาห์</string>
+    <string name="stats_busiest_day">วันที่โทรมากที่สุด: %s</string>
+    <string name="stats_talk_split">สายเข้า %1$s · สายออก %2$s</string>
+    <string name="stats_per_day_average">%s ต่อวัน</string>
 </resources>

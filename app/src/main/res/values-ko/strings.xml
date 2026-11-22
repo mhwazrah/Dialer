@@ -91,7 +91,6 @@
     <string name="stats_last_30_days">30일</string>
     <string name="stats_all_time">전체 기간</string>
     <string name="stats_talk_time">통화 시간</string>
-    <string name="stats_total_calls">전체</string>
     <string name="stats_average_call">평균 통화: %s</string>
     <string name="stats_busiest_hour">가장 바쁜 시간: %s</string>
     <string name="stats_top_contacts">자주 건 번호</string>
@@ -105,4 +104,16 @@
     <plurals name="stats_calls">
         <item quantity="other">통화 %d건</item>
     </plurals>
+    <string name="stats_vs_previous">이전 기간 대비 %1$s</string>
+    <string name="stats_answer_rate">응답률</string>
+    <string name="stats_longest_call">가장 긴 통화</string>
+    <string name="stats_calls_per_day">일별 통화</string>
+    <string name="stats_people">사람</string>
+    <string name="stats_calls_over_time">기간별 통화 추이</string>
+    <string name="stats_call_mix">통화 구성</string>
+    <string name="stats_by_hour">시간대별</string>
+    <string name="stats_by_weekday">요일별</string>
+    <string name="stats_busiest_day">가장 바쁜 날: %s</string>
+    <string name="stats_talk_split">수신 %1$s · 발신 %2$s</string>
+    <string name="stats_per_day_average">하루 %s</string>
 </resources>

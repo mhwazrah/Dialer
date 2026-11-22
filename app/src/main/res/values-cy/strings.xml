@@ -23,7 +23,6 @@
     <string name="stats_last_30_days">30 diwrnod</string>
     <string name="stats_all_time">Pob amser</string>
     <string name="stats_talk_time">Amser siarad</string>
-    <string name="stats_total_calls">Cyfanswm</string>
     <string name="stats_average_call">Galwad gyfartalog: %s</string>
     <string name="stats_busiest_hour">Awr brysuraf: %s</string>
     <string name="stats_top_contacts">Galwyd fwyaf</string>
@@ -42,4 +41,16 @@
         <item quantity="many">%d galwad</item>
         <item quantity="other">%d galwad</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s o\'i gymharu â\'r cyfnod blaenorol</string>
+    <string name="stats_answer_rate">Cyfradd ateb</string>
+    <string name="stats_longest_call">Galwad hiraf</string>
+    <string name="stats_calls_per_day">Galwadau y dydd</string>
+    <string name="stats_people">Pobl</string>
+    <string name="stats_calls_over_time">Galwadau dros amser</string>
+    <string name="stats_call_mix">Cymysgedd galwadau</string>
+    <string name="stats_by_hour">Yn ôl awr</string>
+    <string name="stats_by_weekday">Yn ôl diwrnod yr wythnos</string>
+    <string name="stats_busiest_day">Diwrnod prysuraf: %s</string>
+    <string name="stats_talk_split">Sy\'n dod i mewn %1$s · Sy\'n mynd allan %2$s</string>
+    <string name="stats_per_day_average">%s y dydd</string>
 </resources>

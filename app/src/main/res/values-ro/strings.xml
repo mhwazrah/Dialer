@@ -91,7 +91,6 @@
     <string name="stats_last_30_days">30 de zile</string>
     <string name="stats_all_time">Tot timpul</string>
     <string name="stats_talk_time">Timp de convorbire</string>
-    <string name="stats_total_calls">Total</string>
     <string name="stats_average_call">Apel mediu: %s</string>
     <string name="stats_busiest_hour">Ora cea mai aglomerată: %s</string>
     <string name="stats_top_contacts">Cele mai apelate</string>
@@ -107,4 +106,16 @@
         <item quantity="few">%d apeluri</item>
         <item quantity="other">%d de apeluri</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s față de perioada anterioară</string>
+    <string name="stats_answer_rate">Rata de răspuns</string>
+    <string name="stats_longest_call">Cel mai lung apel</string>
+    <string name="stats_calls_per_day">Apeluri pe zi</string>
+    <string name="stats_people">Persoane</string>
+    <string name="stats_calls_over_time">Apeluri în timp</string>
+    <string name="stats_call_mix">Tipuri de apeluri</string>
+    <string name="stats_by_hour">După oră</string>
+    <string name="stats_by_weekday">După ziua săptămânii</string>
+    <string name="stats_busiest_day">Cea mai aglomerată zi: %s</string>
+    <string name="stats_talk_split">Primite %1$s · Efectuate %2$s</string>
+    <string name="stats_per_day_average">%s pe zi</string>
 </resources>

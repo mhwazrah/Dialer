@@ -108,7 +108,6 @@
     <string name="stats_last_30_days">30 يومًا</string>
     <string name="stats_all_time">كل الوقت</string>
     <string name="stats_talk_time">مدة التحدث</string>
-    <string name="stats_total_calls">الإجمالي</string>
     <string name="stats_average_call">متوسط المكالمة: %s</string>
     <string name="stats_busiest_hour">أكثر ساعة نشاطًا: %s</string>
     <string name="stats_top_contacts">الأكثر اتصالًا</string>
@@ -119,4 +118,16 @@
     <string name="widget_recents_description">آخر مكالماتك، لمسة واحدة لمعاودة الاتصال</string>
     <string name="widget_favorites_empty">لا توجد مفضلة بعد. افتح MHW Phone لإضافتها أو للسماح بالوصول إلى جهات الاتصال.</string>
     <string name="widget_recents_empty">لا توجد مكالمات حديثة. افتح MHW Phone للسماح بالوصول إلى سجل المكالمات.</string>
+    <string name="stats_vs_previous">%1$s مقارنة بالفترة السابقة</string>
+    <string name="stats_answer_rate">نسبة الرد</string>
+    <string name="stats_longest_call">أطول مكالمة</string>
+    <string name="stats_calls_per_day">مكالمات يوميًا</string>
+    <string name="stats_people">أشخاص</string>
+    <string name="stats_calls_over_time">المكالمات عبر الوقت</string>
+    <string name="stats_call_mix">توزيع المكالمات</string>
+    <string name="stats_by_hour">حسب الساعة</string>
+    <string name="stats_by_weekday">حسب يوم الأسبوع</string>
+    <string name="stats_busiest_day">أكثر يوم نشاطًا: %s</string>
+    <string name="stats_talk_split">واردة %1$s · صادرة %2$s</string>
+    <string name="stats_per_day_average">%s يوميًا</string>
 </resources>

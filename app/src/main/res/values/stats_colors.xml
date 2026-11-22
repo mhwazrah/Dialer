@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Call statistics: the "rejected" share of the call mix (incoming, outgoing and missed use the app's colours) -->
+    <color name="stats_rejected">#FFF2A93B</color>
+</resources>

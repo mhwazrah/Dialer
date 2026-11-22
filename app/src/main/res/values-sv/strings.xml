@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 dagar</string>
     <string name="stats_all_time">Alltid</string>
     <string name="stats_talk_time">Samtalstid</string>
-    <string name="stats_total_calls">Totalt</string>
     <string name="stats_average_call">Genomsnittligt samtal: %s</string>
     <string name="stats_busiest_hour">Mest aktiva timmen: %s</string>
     <string name="stats_top_contacts">Mest uppringda</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d samtal</item>
         <item quantity="other">%d samtal</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s jämfört med föregående period</string>
+    <string name="stats_answer_rate">Svarsfrekvens</string>
+    <string name="stats_longest_call">Längsta samtal</string>
+    <string name="stats_calls_per_day">Samtal per dag</string>
+    <string name="stats_people">Personer</string>
+    <string name="stats_calls_over_time">Samtal över tid</string>
+    <string name="stats_call_mix">Samtalsfördelning</string>
+    <string name="stats_by_hour">Per timme</string>
+    <string name="stats_by_weekday">Per veckodag</string>
+    <string name="stats_busiest_day">Mest aktiva dag: %s</string>
+    <string name="stats_talk_split">Inkommande %1$s · Utgående %2$s</string>
+    <string name="stats_per_day_average">%s om dagen</string>
 </resources>

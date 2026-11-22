@@ -1,5 +1,9 @@
 package com.mhw.phone.activities
 
+import com.mhw.phone.extensions.loadBrandedContactImage
+import com.goodwy.commons.models.contacts.Contact
+import android.widget.ImageView
+import android.content.res.Resources
 import com.goodwy.commons.dialogs.RadioGroupDialog
 import com.goodwy.commons.models.RadioItem
 import android.content.DialogInterface.BUTTON_POSITIVE
@@ -80,13 +84,15 @@ class BlockedNumbersActivity : SimpleActivity() {
         binding.blockedToolbar.setBackgroundColor(Color.TRANSPARENT)
 
         binding.apply {
-            arrayOf(blockedSwitchesCard, blockedListCard).forEach {
+            arrayOf(blockedSwitchesCard, blockedListCard, blockedBackupCard).forEach {
                 it.setCardBackgroundColor(Color.TRANSPARENT)
                 it.setBackgroundResource(R.drawable.bg_glass_card)
             }
             updateTextColors(blockedHolder)
-            blockedListLabel.setTextColor(getProperPrimaryColor())
-            blockedAddIcon.applyColorFilter(getProperTextColor())
+            val primaryColor = getProperPrimaryColor()
+            arrayOf(blockedListLabel, blockedBackupLabel, blockedAddLabel).forEach { it.setTextColor(primaryColor) }
+            blockedAddIcon.applyColorFilter(primaryColor)
+            arrayOf(blockedExportChevron, blockedImportChevron).forEach { it.applyColorFilter(getProperTextColor()) }
         }
         setupSwitches()
         loadBlockedNumbers()
@@ -172,24 +178,36 @@ class BlockedNumbersActivity : SimpleActivity() {
             } catch (_: SecurityException) {
                 arrayListOf()
             }
-            // Name of the contact each number belongs to, when it is saved in the phone
-            val names = numbers.associate { blocked ->
-                blocked.number to runCatching { ContactsRepository.findByNumber(this, blocked.number)?.getNameToDisplay() }.getOrNull()
+            // The contact each number belongs to, when it is saved in the phone
+            val contacts = numbers.associate { blocked ->
+                blocked.number to runCatching { ContactsRepository.findByNumber(this, blocked.number) }.getOrNull()
             }
-            runOnUiThread { if (!isDestroyed) showBlockedNumbers(numbers, names) }
+            runOnUiThread { if (!isDestroyed) showBlockedNumbers(numbers, contacts) }
         }
     }
 
-    private fun showBlockedNumbers(numbers: List<BlockedNumber>, names: Map<String, String?>) = binding.apply {
+    private fun showBlockedNumbers(numbers: List<BlockedNumber>, contacts: Map<String, Contact?>) = binding.apply {
         blockedList.removeAllViews()
+        val textColor = getProperTextColor()
         numbers.forEach { blocked ->
             val item = ItemBlockedNumberBinding.inflate(layoutInflater, blockedList, false)
-            val name = names[blocked.number]?.takeIf { it.isNotBlank() && it != blocked.number }
+            val contact = contacts[blocked.number]
+            val name = contact?.getNameToDisplay()?.takeIf { it.isNotBlank() && it != blocked.number }
             item.blockedNumberName.text = name
             item.blockedNumberName.beVisibleIf(name != null)
             item.blockedNumberText.text = blocked.number
             if (name != null) item.blockedNumberText.alpha = SECONDARY_TEXT_ALPHA
-            item.blockedNumberDelete.applyColorFilter(getProperTextColor())
+            if (name != null) {
+                item.blockedNumberAvatar.loadBrandedContactImage(contact.photoUri, name)
+            } else {
+                // Not a saved contact (or a pattern like +234*): the block sign on a tonal circle
+                item.blockedNumberAvatar.setBackgroundResource(R.drawable.bg_dialog_icon)
+                item.blockedNumberAvatar.setImageResource(R.drawable.ic_block_vector)
+                item.blockedNumberAvatar.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                item.blockedNumberAvatar.setPadding(AVATAR_ICON_PADDING, AVATAR_ICON_PADDING, AVATAR_ICON_PADDING, AVATAR_ICON_PADDING)
+                item.blockedNumberAvatar.applyColorFilter(textColor)
+            }
+            item.blockedNumberDelete.applyColorFilter(textColor)
             item.blockedNumberDelete.setOnClickListener { deleteBlockedNumberAsync(blocked.number) }
             blockedList.addView(item.root)
         }
@@ -238,5 +256,6 @@ class BlockedNumbersActivity : SimpleActivity() {
 
     private companion object {
         const val SECONDARY_TEXT_ALPHA = 0.7f // the number under a contact name
+        val AVATAR_ICON_PADDING = (9 * Resources.getSystem().displayMetrics.density).toInt()
     }
 }

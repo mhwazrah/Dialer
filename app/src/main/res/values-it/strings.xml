@@ -98,7 +98,6 @@
     <string name="stats_last_30_days">30 giorni</string>
     <string name="stats_all_time">Sempre</string>
     <string name="stats_talk_time">Tempo di conversazione</string>
-    <string name="stats_total_calls">Totale</string>
     <string name="stats_average_call">Chiamata media: %s</string>
     <string name="stats_busiest_hour">Ora di punta: %s</string>
     <string name="stats_top_contacts">Più chiamati</string>
@@ -114,4 +113,16 @@
         <item quantity="many">%d di chiamate</item>
         <item quantity="other">%d chiamate</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s rispetto al periodo precedente</string>
+    <string name="stats_answer_rate">Percentuale di risposta</string>
+    <string name="stats_longest_call">Chiamata più lunga</string>
+    <string name="stats_calls_per_day">Chiamate al giorno</string>
+    <string name="stats_people">Persone</string>
+    <string name="stats_calls_over_time">Chiamate nel tempo</string>
+    <string name="stats_call_mix">Tipi di chiamata</string>
+    <string name="stats_by_hour">Per ora</string>
+    <string name="stats_by_weekday">Per giorno della settimana</string>
+    <string name="stats_busiest_day">Giorno più intenso: %s</string>
+    <string name="stats_talk_split">In entrata %1$s · In uscita %2$s</string>
+    <string name="stats_per_day_average">%s al giorno</string>
 </resources>

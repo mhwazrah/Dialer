@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 dagen</string>
     <string name="stats_all_time">Altijd</string>
     <string name="stats_talk_time">Gesprekstijd</string>
-    <string name="stats_total_calls">Totaal</string>
     <string name="stats_average_call">Gemiddeld gesprek: %s</string>
     <string name="stats_busiest_hour">Drukste uur: %s</string>
     <string name="stats_top_contacts">Meest gebeld</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d gesprek</item>
         <item quantity="other">%d gesprekken</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s t.o.v. vorige periode</string>
+    <string name="stats_answer_rate">Opneempercentage</string>
+    <string name="stats_longest_call">Langste gesprek</string>
+    <string name="stats_calls_per_day">Gesprekken per dag</string>
+    <string name="stats_people">Mensen</string>
+    <string name="stats_calls_over_time">Gesprekken in de tijd</string>
+    <string name="stats_call_mix">Gespreksverdeling</string>
+    <string name="stats_by_hour">Per uur</string>
+    <string name="stats_by_weekday">Per weekdag</string>
+    <string name="stats_busiest_day">Drukste dag: %s</string>
+    <string name="stats_talk_split">Inkomend %1$s · Uitgaand %2$s</string>
+    <string name="stats_per_day_average">%s per dag</string>
 </resources>

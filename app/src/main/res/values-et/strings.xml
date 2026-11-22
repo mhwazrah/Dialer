@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 päeva</string>
     <string name="stats_all_time">Kogu aeg</string>
     <string name="stats_talk_time">Kõneaeg</string>
-    <string name="stats_total_calls">Kokku</string>
     <string name="stats_average_call">Keskmine kõne: %s</string>
     <string name="stats_busiest_hour">Kõige tihedam tund: %s</string>
     <string name="stats_top_contacts">Enim helistatud</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d kõne</item>
         <item quantity="other">%d kõnet</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s võrreldes eelmise perioodiga</string>
+    <string name="stats_answer_rate">Vastamismäär</string>
+    <string name="stats_longest_call">Pikim kõne</string>
+    <string name="stats_calls_per_day">Kõnesid päevas</string>
+    <string name="stats_people">Inimesed</string>
+    <string name="stats_calls_over_time">Kõned ajas</string>
+    <string name="stats_call_mix">Kõnede jaotus</string>
+    <string name="stats_by_hour">Tunni järgi</string>
+    <string name="stats_by_weekday">Nädalapäeva järgi</string>
+    <string name="stats_busiest_day">Kiireim päev: %s</string>
+    <string name="stats_talk_split">Sissetulevad %1$s · Väljaminevad %2$s</string>
+    <string name="stats_per_day_average">%s päevas</string>
 </resources>

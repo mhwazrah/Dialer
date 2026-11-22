@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30日間</string>
     <string name="stats_all_time">全期間</string>
     <string name="stats_talk_time">通話時間</string>
-    <string name="stats_total_calls">合計</string>
     <string name="stats_average_call">平均通話時間: %s</string>
     <string name="stats_busiest_hour">最も忙しい時間帯: %s</string>
     <string name="stats_top_contacts">よく発信した相手</string>
@@ -113,4 +112,16 @@
     <plurals name="stats_calls">
         <item quantity="other">%d件の通話</item>
     </plurals>
+    <string name="stats_vs_previous">前の期間と比べて %1$s</string>
+    <string name="stats_answer_rate">応答率</string>
+    <string name="stats_longest_call">最長の通話</string>
+    <string name="stats_calls_per_day">1日あたりの通話</string>
+    <string name="stats_people">連絡先</string>
+    <string name="stats_calls_over_time">通話の推移</string>
+    <string name="stats_call_mix">通話の内訳</string>
+    <string name="stats_by_hour">時間帯別</string>
+    <string name="stats_by_weekday">曜日別</string>
+    <string name="stats_busiest_day">最も多い日: %s</string>
+    <string name="stats_talk_split">着信 %1$s · 発信 %2$s</string>
+    <string name="stats_per_day_average">1日%s</string>
 </resources>

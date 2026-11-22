@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 ימים</string>
     <string name="stats_all_time">כל הזמן</string>
     <string name="stats_talk_time">זמן שיחה</string>
-    <string name="stats_total_calls">סה״כ</string>
     <string name="stats_average_call">שיחה ממוצעת: %s</string>
     <string name="stats_busiest_hour">השעה העמוסה ביותר: %s</string>
     <string name="stats_top_contacts">הכי הרבה שיחות</string>
@@ -115,4 +114,16 @@
         <item quantity="two">%d שיחות</item>
         <item quantity="other">%d שיחות</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s לעומת התקופה הקודמת</string>
+    <string name="stats_answer_rate">שיעור מענה</string>
+    <string name="stats_longest_call">השיחה הארוכה ביותר</string>
+    <string name="stats_calls_per_day">שיחות ביום</string>
+    <string name="stats_people">אנשים</string>
+    <string name="stats_calls_over_time">שיחות לאורך זמן</string>
+    <string name="stats_call_mix">הרכב השיחות</string>
+    <string name="stats_by_hour">לפי שעה</string>
+    <string name="stats_by_weekday">לפי יום בשבוע</string>
+    <string name="stats_busiest_day">היום העמוס ביותר: %s</string>
+    <string name="stats_talk_split">נכנסות %1$s · יוצאות %2$s</string>
+    <string name="stats_per_day_average">%s ביום</string>
 </resources>

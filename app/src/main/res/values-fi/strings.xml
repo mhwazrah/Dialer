@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 päivää</string>
     <string name="stats_all_time">Koko aika</string>
     <string name="stats_talk_time">Puheaika</string>
-    <string name="stats_total_calls">Yhteensä</string>
     <string name="stats_average_call">Keskimääräinen puhelu: %s</string>
     <string name="stats_busiest_hour">Vilkkain tunti: %s</string>
     <string name="stats_top_contacts">Eniten soitetut</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d puhelu</item>
         <item quantity="other">%d puhelua</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s edelliseen jaksoon verrattuna</string>
+    <string name="stats_answer_rate">Vastausprosentti</string>
+    <string name="stats_longest_call">Pisin puhelu</string>
+    <string name="stats_calls_per_day">Puheluita päivässä</string>
+    <string name="stats_people">Henkilöt</string>
+    <string name="stats_calls_over_time">Puhelut ajan myötä</string>
+    <string name="stats_call_mix">Puhelujen jakauma</string>
+    <string name="stats_by_hour">Tunneittain</string>
+    <string name="stats_by_weekday">Viikonpäivittäin</string>
+    <string name="stats_busiest_day">Vilkkain päivä: %s</string>
+    <string name="stats_talk_split">Saapuneet %1$s · Soitetut %2$s</string>
+    <string name="stats_per_day_average">%s päivässä</string>
 </resources>

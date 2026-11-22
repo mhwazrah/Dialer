@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 tagoj</string>
     <string name="stats_all_time">Ĉiam</string>
     <string name="stats_talk_time">Parola tempo</string>
-    <string name="stats_total_calls">Entute</string>
     <string name="stats_average_call">Averaĝa voko: %s</string>
     <string name="stats_busiest_hour">Plej okupata horo: %s</string>
     <string name="stats_top_contacts">Plej vokitaj</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d voko</item>
         <item quantity="other">%d vokoj</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s kompare al la antaŭa periodo</string>
+    <string name="stats_answer_rate">Responda proporcio</string>
+    <string name="stats_longest_call">Plej longa voko</string>
+    <string name="stats_calls_per_day">Vokoj tage</string>
+    <string name="stats_people">Homoj</string>
+    <string name="stats_calls_over_time">Vokoj laŭ tempo</string>
+    <string name="stats_call_mix">Voka miksaĵo</string>
+    <string name="stats_by_hour">Laŭ horo</string>
+    <string name="stats_by_weekday">Laŭ semajntago</string>
+    <string name="stats_busiest_day">Plej okupata tago: %s</string>
+    <string name="stats_talk_split">Envenaj %1$s · Elirantaj %2$s</string>
+    <string name="stats_per_day_average">%s tage</string>
 </resources>

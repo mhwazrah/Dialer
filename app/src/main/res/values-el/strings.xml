@@ -90,7 +90,6 @@
     <string name="stats_last_30_days">30 ημέρες</string>
     <string name="stats_all_time">Όλες</string>
     <string name="stats_talk_time">Χρόνος ομιλίας</string>
-    <string name="stats_total_calls">Σύνολο</string>
     <string name="stats_average_call">Μέση κλήση: %s</string>
     <string name="stats_busiest_hour">Πιο πολυάσχολη ώρα: %s</string>
     <string name="stats_top_contacts">Πιο συχνές κλήσεις</string>
@@ -105,4 +104,16 @@
         <item quantity="one">%d κλήση</item>
         <item quantity="other">%d κλήσεις</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s σε σχέση με την προηγούμενη περίοδο</string>
+    <string name="stats_answer_rate">Ποσοστό απάντησης</string>
+    <string name="stats_longest_call">Μεγαλύτερη κλήση</string>
+    <string name="stats_calls_per_day">Κλήσεις ανά ημέρα</string>
+    <string name="stats_people">Άτομα</string>
+    <string name="stats_calls_over_time">Κλήσεις στον χρόνο</string>
+    <string name="stats_call_mix">Κατανομή κλήσεων</string>
+    <string name="stats_by_hour">Ανά ώρα</string>
+    <string name="stats_by_weekday">Ανά ημέρα της εβδομάδας</string>
+    <string name="stats_busiest_day">Πιο πολυάσχολη ημέρα: %s</string>
+    <string name="stats_talk_split">Εισερχόμενες %1$s · Εξερχόμενες %2$s</string>
+    <string name="stats_per_day_average">%s ανά ημέρα</string>
 </resources>

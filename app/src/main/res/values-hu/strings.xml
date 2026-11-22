@@ -96,7 +96,6 @@
     <string name="stats_last_30_days">30 nap</string>
     <string name="stats_all_time">Összes</string>
     <string name="stats_talk_time">Beszélgetési idő</string>
-    <string name="stats_total_calls">Összesen</string>
     <string name="stats_average_call">Átlagos hívás: %s</string>
     <string name="stats_busiest_hour">Legforgalmasabb óra: %s</string>
     <string name="stats_top_contacts">Leggyakrabban hívott</string>
@@ -111,4 +110,16 @@
         <item quantity="one">%d hívás</item>
         <item quantity="other">%d hívás</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s az előző időszakhoz képest</string>
+    <string name="stats_answer_rate">Fogadási arány</string>
+    <string name="stats_longest_call">Leghosszabb hívás</string>
+    <string name="stats_calls_per_day">Hívások naponta</string>
+    <string name="stats_people">Személyek</string>
+    <string name="stats_calls_over_time">Hívások az idő függvényében</string>
+    <string name="stats_call_mix">Hívástípusok</string>
+    <string name="stats_by_hour">Óránként</string>
+    <string name="stats_by_weekday">Hét napjai szerint</string>
+    <string name="stats_busiest_day">Legforgalmasabb nap: %s</string>
+    <string name="stats_talk_split">Bejövő %1$s · Kimenő %2$s</string>
+    <string name="stats_per_day_average">%s naponta</string>
 </resources>

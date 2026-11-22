@@ -23,7 +23,6 @@
     <string name="stats_last_30_days">30 ਦਿਨ</string>
     <string name="stats_all_time">ਸਾਰਾ ਸਮਾਂ</string>
     <string name="stats_talk_time">ਗੱਲਬਾਤ ਦਾ ਸਮਾਂ</string>
-    <string name="stats_total_calls">ਕੁੱਲ</string>
     <string name="stats_average_call">ਔਸਤ ਕਾਲ: %s</string>
     <string name="stats_busiest_hour">ਸਭ ਤੋਂ ਵਿਅਸਤ ਘੰਟਾ: %s</string>
     <string name="stats_top_contacts">ਸਭ ਤੋਂ ਵੱਧ ਕਾਲ ਕੀਤੇ</string>
@@ -38,4 +37,16 @@
         <item quantity="one">%d ਕਾਲ</item>
         <item quantity="other">%d ਕਾਲਾਂ</item>
     </plurals>
+    <string name="stats_vs_previous">ਪਿਛਲੀ ਮਿਆਦ ਦੇ ਮੁਕਾਬਲੇ %1$s</string>
+    <string name="stats_answer_rate">ਜਵਾਬ ਦਰ</string>
+    <string name="stats_longest_call">ਸਭ ਤੋਂ ਲੰਬੀ ਕਾਲ</string>
+    <string name="stats_calls_per_day">ਪ੍ਰਤੀ ਦਿਨ ਕਾਲਾਂ</string>
+    <string name="stats_people">ਲੋਕ</string>
+    <string name="stats_calls_over_time">ਸਮੇਂ ਦੇ ਨਾਲ ਕਾਲਾਂ</string>
+    <string name="stats_call_mix">ਕਾਲਾਂ ਦੀ ਵੰਡ</string>
+    <string name="stats_by_hour">ਘੰਟੇ ਅਨੁਸਾਰ</string>
+    <string name="stats_by_weekday">ਹਫ਼ਤੇ ਦੇ ਦਿਨ ਅਨੁਸਾਰ</string>
+    <string name="stats_busiest_day">ਸਭ ਤੋਂ ਵਿਅਸਤ ਦਿਨ: %s</string>
+    <string name="stats_talk_split">ਆਉਣ ਵਾਲੀਆਂ %1$s · ਜਾਣ ਵਾਲੀਆਂ %2$s</string>
+    <string name="stats_per_day_average">ਪ੍ਰਤੀ ਦਿਨ %s</string>
 </resources>

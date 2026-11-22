@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 ngày</string>
     <string name="stats_all_time">Tất cả</string>
     <string name="stats_talk_time">Thời gian đàm thoại</string>
-    <string name="stats_total_calls">Tổng</string>
     <string name="stats_average_call">Cuộc gọi trung bình: %s</string>
     <string name="stats_busiest_hour">Giờ cao điểm: %s</string>
     <string name="stats_top_contacts">Gọi nhiều nhất</string>
@@ -113,4 +112,16 @@
     <plurals name="stats_calls">
         <item quantity="other">%d cuộc gọi</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s so với kỳ trước</string>
+    <string name="stats_answer_rate">Tỷ lệ trả lời</string>
+    <string name="stats_longest_call">Cuộc gọi dài nhất</string>
+    <string name="stats_calls_per_day">Cuộc gọi mỗi ngày</string>
+    <string name="stats_people">Người</string>
+    <string name="stats_calls_over_time">Cuộc gọi theo thời gian</string>
+    <string name="stats_call_mix">Cơ cấu cuộc gọi</string>
+    <string name="stats_by_hour">Theo giờ</string>
+    <string name="stats_by_weekday">Theo ngày trong tuần</string>
+    <string name="stats_busiest_day">Ngày bận nhất: %s</string>
+    <string name="stats_talk_split">Đến %1$s · Đi %2$s</string>
+    <string name="stats_per_day_average">%s mỗi ngày</string>
 </resources>

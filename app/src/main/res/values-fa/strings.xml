@@ -91,7 +91,6 @@
     <string name="stats_last_30_days">۳۰ روز</string>
     <string name="stats_all_time">همه زمان‌ها</string>
     <string name="stats_talk_time">مدت مکالمه</string>
-    <string name="stats_total_calls">مجموع</string>
     <string name="stats_average_call">میانگین تماس: %s</string>
     <string name="stats_busiest_hour">شلوغ‌ترین ساعت: %s</string>
     <string name="stats_top_contacts">بیشترین تماس‌ها</string>
@@ -106,4 +105,16 @@
         <item quantity="one">%d تماس</item>
         <item quantity="other">%d تماس</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s نسبت به دوره قبل</string>
+    <string name="stats_answer_rate">نرخ پاسخگویی</string>
+    <string name="stats_longest_call">طولانی‌ترین تماس</string>
+    <string name="stats_calls_per_day">تماس در روز</string>
+    <string name="stats_people">افراد</string>
+    <string name="stats_calls_over_time">تماس‌ها در طول زمان</string>
+    <string name="stats_call_mix">ترکیب تماس‌ها</string>
+    <string name="stats_by_hour">بر اساس ساعت</string>
+    <string name="stats_by_weekday">بر اساس روز هفته</string>
+    <string name="stats_busiest_day">پرتماس‌ترین روز: %s</string>
+    <string name="stats_talk_split">ورودی %1$s · خروجی %2$s</string>
+    <string name="stats_per_day_average">%s در روز</string>
 </resources>

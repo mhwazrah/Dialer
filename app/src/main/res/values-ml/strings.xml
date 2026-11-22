@@ -78,7 +78,6 @@
     <string name="stats_last_30_days">30 ദിവസം</string>
     <string name="stats_all_time">എല്ലാ സമയവും</string>
     <string name="stats_talk_time">സംസാര സമയം</string>
-    <string name="stats_total_calls">ആകെ</string>
     <string name="stats_average_call">ശരാശരി കോൾ: %s</string>
     <string name="stats_busiest_hour">ഏറ്റവും തിരക്കേറിയ മണിക്കൂർ: %s</string>
     <string name="stats_top_contacts">ഏറ്റവും കൂടുതൽ വിളിച്ചവ</string>
@@ -93,4 +92,16 @@
         <item quantity="one">%d കോൾ</item>
         <item quantity="other">%d കോളുകൾ</item>
     </plurals>
+    <string name="stats_vs_previous">മുൻ കാലയളവിനെ അപേക്ഷിച്ച് %1$s</string>
+    <string name="stats_answer_rate">മറുപടി നിരക്ക്</string>
+    <string name="stats_longest_call">ഏറ്റവും നീണ്ട കോൾ</string>
+    <string name="stats_calls_per_day">പ്രതിദിന കോളുകൾ</string>
+    <string name="stats_people">ആളുകൾ</string>
+    <string name="stats_calls_over_time">കാലക്രമേണ കോളുകൾ</string>
+    <string name="stats_call_mix">കോൾ വിഭജനം</string>
+    <string name="stats_by_hour">മണിക്കൂർ അനുസരിച്ച്</string>
+    <string name="stats_by_weekday">ആഴ്ചയിലെ ദിവസം അനുസരിച്ച്</string>
+    <string name="stats_busiest_day">ഏറ്റവും തിരക്കുള്ള ദിവസം: %s</string>
+    <string name="stats_talk_split">ഇൻകമിംഗ് %1$s · ഔട്ട്ഗോയിംഗ് %2$s</string>
+    <string name="stats_per_day_average">ദിവസം %s</string>
 </resources>

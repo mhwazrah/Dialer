@@ -32,7 +32,6 @@
     <string name="stats_last_30_days">30 دن</string>
     <string name="stats_all_time">سارا وقت</string>
     <string name="stats_talk_time">گل بات دا وقت</string>
-    <string name="stats_total_calls">کل</string>
     <string name="stats_average_call">اوسط کال: %s</string>
     <string name="stats_busiest_hour">سب توں مصروف گھنٹہ: %s</string>
     <string name="stats_top_contacts">سب توں ودھ کال کیتے</string>
@@ -47,4 +46,16 @@
         <item quantity="one">%d کال</item>
         <item quantity="other">%d کالاں</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s پچھلے دور دے مقابلے وچ</string>
+    <string name="stats_answer_rate">جواب دین دی شرح</string>
+    <string name="stats_longest_call">سبھ توں لمبی کال</string>
+    <string name="stats_calls_per_day">روزانہ کالاں</string>
+    <string name="stats_people">لوک</string>
+    <string name="stats_calls_over_time">وقت دے نال کالاں</string>
+    <string name="stats_call_mix">کالاں دی ونڈ</string>
+    <string name="stats_by_hour">گھنٹے مطابق</string>
+    <string name="stats_by_weekday">ہفتے دے دن مطابق</string>
+    <string name="stats_busiest_day">سبھ توں مصروف دن: %s</string>
+    <string name="stats_talk_split">آؤندیاں %1$s · جاندیاں %2$s</string>
+    <string name="stats_per_day_average">%s روزانہ</string>
 </resources>

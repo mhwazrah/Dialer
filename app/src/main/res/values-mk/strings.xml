@@ -23,7 +23,6 @@
     <string name="stats_last_30_days">30 дена</string>
     <string name="stats_all_time">Сето време</string>
     <string name="stats_talk_time">Време на разговор</string>
-    <string name="stats_total_calls">Вкупно</string>
     <string name="stats_average_call">Просечен повик: %s</string>
     <string name="stats_busiest_hour">Најзафатен час: %s</string>
     <string name="stats_top_contacts">Најчесто повикувани</string>
@@ -38,4 +37,16 @@
         <item quantity="one">%d повик</item>
         <item quantity="other">%d повици</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s во однос на претходниот период</string>
+    <string name="stats_answer_rate">Стапка на одговарање</string>
+    <string name="stats_longest_call">Најдолг повик</string>
+    <string name="stats_calls_per_day">Повици дневно</string>
+    <string name="stats_people">Луѓе</string>
+    <string name="stats_calls_over_time">Повици низ времето</string>
+    <string name="stats_call_mix">Состав на повици</string>
+    <string name="stats_by_hour">По час</string>
+    <string name="stats_by_weekday">По ден во неделата</string>
+    <string name="stats_busiest_day">Најзафатен ден: %s</string>
+    <string name="stats_talk_split">Дојдовни %1$s · Појдовни %2$s</string>
+    <string name="stats_per_day_average">%s дневно</string>
 </resources>

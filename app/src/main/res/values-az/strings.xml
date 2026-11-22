@@ -27,7 +27,6 @@
     <string name="stats_last_30_days">30 gün</string>
     <string name="stats_all_time">Bütün vaxt</string>
     <string name="stats_talk_time">Danışıq müddəti</string>
-    <string name="stats_total_calls">Cəmi</string>
     <string name="stats_average_call">Orta zəng: %s</string>
     <string name="stats_busiest_hour">Ən məşğul saat: %s</string>
     <string name="stats_top_contacts">Ən çox zəng edilənlər</string>
@@ -42,4 +41,16 @@
         <item quantity="one">%d zəng</item>
         <item quantity="other">%d zəng</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s əvvəlki dövrlə müqayisədə</string>
+    <string name="stats_answer_rate">Cavab dərəcəsi</string>
+    <string name="stats_longest_call">Ən uzun zəng</string>
+    <string name="stats_calls_per_day">Gündəlik zənglər</string>
+    <string name="stats_people">Şəxslər</string>
+    <string name="stats_calls_over_time">Zənglərin zamana görə dinamikası</string>
+    <string name="stats_call_mix">Zəng növləri</string>
+    <string name="stats_by_hour">Saata görə</string>
+    <string name="stats_by_weekday">Həftə gününə görə</string>
+    <string name="stats_busiest_day">Ən məşğul gün: %s</string>
+    <string name="stats_talk_split">Gələn %1$s · Gedən %2$s</string>
+    <string name="stats_per_day_average">Gündə %s</string>
 </resources>

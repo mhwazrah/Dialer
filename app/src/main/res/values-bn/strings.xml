@@ -23,7 +23,6 @@
     <string name="stats_last_30_days">৩০ দিন</string>
     <string name="stats_all_time">সব সময়</string>
     <string name="stats_talk_time">কথা বলার সময়</string>
-    <string name="stats_total_calls">মোট</string>
     <string name="stats_average_call">গড় কল: %s</string>
     <string name="stats_busiest_hour">সবচেয়ে ব্যস্ত ঘণ্টা: %s</string>
     <string name="stats_top_contacts">সবচেয়ে বেশি কল করা</string>
@@ -38,4 +37,16 @@
         <item quantity="one">%dটি কল</item>
         <item quantity="other">%dটি কল</item>
     </plurals>
+    <string name="stats_vs_previous">আগের সময়ের তুলনায় %1$s</string>
+    <string name="stats_answer_rate">উত্তরের হার</string>
+    <string name="stats_longest_call">দীর্ঘতম কল</string>
+    <string name="stats_calls_per_day">প্রতিদিনের কল</string>
+    <string name="stats_people">ব্যক্তি</string>
+    <string name="stats_calls_over_time">সময় অনুযায়ী কল</string>
+    <string name="stats_call_mix">কলের ধরন</string>
+    <string name="stats_by_hour">ঘণ্টা অনুযায়ী</string>
+    <string name="stats_by_weekday">সপ্তাহের দিন অনুযায়ী</string>
+    <string name="stats_busiest_day">সবচেয়ে ব্যস্ত দিন: %s</string>
+    <string name="stats_talk_split">ইনকামিং %1$s · আউটগোয়িং %2$s</string>
+    <string name="stats_per_day_average">দিনে %s</string>
 </resources>

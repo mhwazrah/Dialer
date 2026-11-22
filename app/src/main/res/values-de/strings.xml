@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 Tage</string>
     <string name="stats_all_time">Gesamt</string>
     <string name="stats_talk_time">Gesprächszeit</string>
-    <string name="stats_total_calls">Gesamt</string>
     <string name="stats_average_call">Durchschnittlicher Anruf: %s</string>
     <string name="stats_busiest_hour">Aktivste Stunde: %s</string>
     <string name="stats_top_contacts">Am häufigsten angerufen</string>
@@ -114,4 +113,16 @@
         <item quantity="one">%d Anruf</item>
         <item quantity="other">%d Anrufe</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s ggü. Vorperiode</string>
+    <string name="stats_answer_rate">Annahmequote</string>
+    <string name="stats_longest_call">Längster Anruf</string>
+    <string name="stats_calls_per_day">Anrufe pro Tag</string>
+    <string name="stats_people">Personen</string>
+    <string name="stats_calls_over_time">Anrufe im Zeitverlauf</string>
+    <string name="stats_call_mix">Anrufarten</string>
+    <string name="stats_by_hour">Nach Stunde</string>
+    <string name="stats_by_weekday">Nach Wochentag</string>
+    <string name="stats_busiest_day">Aktivster Tag: %s</string>
+    <string name="stats_talk_split">Eingehend %1$s · Ausgehend %2$s</string>
+    <string name="stats_per_day_average">%s pro Tag</string>
 </resources>

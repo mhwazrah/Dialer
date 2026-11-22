@@ -65,7 +65,6 @@
     <string name="stats_last_30_days">30 dager</string>
     <string name="stats_all_time">All tid</string>
     <string name="stats_talk_time">Taletid</string>
-    <string name="stats_total_calls">Totalt</string>
     <string name="stats_average_call">Gjennomsnittlig samtale: %s</string>
     <string name="stats_busiest_hour">Travleste time: %s</string>
     <string name="stats_top_contacts">Mest ringt</string>
@@ -80,4 +79,16 @@
         <item quantity="one">%d samtale</item>
         <item quantity="other">%d samtaler</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s mot forrige periode</string>
+    <string name="stats_answer_rate">Svarprosent</string>
+    <string name="stats_longest_call">Lengste samtale</string>
+    <string name="stats_calls_per_day">Samtaler per dag</string>
+    <string name="stats_people">Personer</string>
+    <string name="stats_calls_over_time">Samtaler over tid</string>
+    <string name="stats_call_mix">Samtalefordeling</string>
+    <string name="stats_by_hour">Per time</string>
+    <string name="stats_by_weekday">Per ukedag</string>
+    <string name="stats_busiest_day">Travleste dag: %s</string>
+    <string name="stats_talk_split">Innkommende %1$s · Utgående %2$s</string>
+    <string name="stats_per_day_average">%s per dag</string>
 </resources>

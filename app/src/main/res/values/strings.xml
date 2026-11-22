@@ -129,7 +129,6 @@
     <string name="stats_last_30_days">30 days</string>
     <string name="stats_all_time">All time</string>
     <string name="stats_talk_time">Talk time</string>
-    <string name="stats_total_calls">Total</string>
     <string name="stats_average_call">Average call: %s</string>
     <string name="stats_busiest_hour">Busiest hour: %s</string>
     <string name="stats_top_contacts">Most called</string>
@@ -140,4 +139,18 @@
     <string name="widget_recents_description">Your latest calls, one tap to call back</string>
     <string name="widget_favorites_empty">No favorites yet. Open MHW Phone to add some, or to allow access to contacts.</string>
     <string name="widget_recents_empty">No recent calls. Open MHW Phone to allow access to the call log.</string>
+    <string name="stats_vs_previous">%1$s vs previous period</string>
+    <string name="stats_answer_rate">Answer rate</string>
+    <string name="stats_longest_call">Longest call</string>
+    <string name="stats_calls_per_day">Calls per day</string>
+    <string name="stats_people">People</string>
+    <string name="stats_calls_over_time">Calls over time</string>
+    <string name="stats_call_mix">Call mix</string>
+    <string name="stats_by_hour">By hour</string>
+    <string name="stats_by_weekday">By weekday</string>
+    <string name="stats_busiest_day">Busiest day: %s</string>
+    <string name="stats_talk_split">Incoming %1$s · Outgoing %2$s</string>
+    <string name="stats_per_day_average">%s a day</string>
+    <!-- Two figures side by side, e.g. "26 · 31%" -->
+    <string name="stats_two_parts" translatable="false">%1$s · %2$s</string>
 </resources>

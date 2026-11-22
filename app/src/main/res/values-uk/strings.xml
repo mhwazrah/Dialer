@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 днів</string>
     <string name="stats_all_time">Весь час</string>
     <string name="stats_talk_time">Час розмов</string>
-    <string name="stats_total_calls">Усього</string>
     <string name="stats_average_call">Середній дзвінок: %s</string>
     <string name="stats_busiest_hour">Найзавантаженіша година: %s</string>
     <string name="stats_top_contacts">Найчастіші дзвінки</string>
@@ -116,4 +115,16 @@
         <item quantity="many">%d дзвінків</item>
         <item quantity="other">%d дзвінка</item>
     </plurals>
+    <string name="stats_vs_previous">%1$s порівняно з минулим періодом</string>
+    <string name="stats_answer_rate">Частка відповідей</string>
+    <string name="stats_longest_call">Найдовший дзвінок</string>
+    <string name="stats_calls_per_day">Дзвінків на день</string>
+    <string name="stats_people">Люди</string>
+    <string name="stats_calls_over_time">Дзвінки за часом</string>
+    <string name="stats_call_mix">Типи дзвінків</string>
+    <string name="stats_by_hour">За годинами</string>
+    <string name="stats_by_weekday">За днями тижня</string>
+    <string name="stats_busiest_day">Найактивніший день: %s</string>
+    <string name="stats_talk_split">Вхідні %1$s · Вихідні %2$s</string>
+    <string name="stats_per_day_average">%s на день</string>
 </resources>

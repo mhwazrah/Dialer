@@ -99,7 +99,6 @@
     <string name="stats_last_30_days">30 天</string>
     <string name="stats_all_time">全部時間</string>
     <string name="stats_talk_time">通話時間</string>
-    <string name="stats_total_calls">總計</string>
     <string name="stats_average_call">平均通話：%s</string>
     <string name="stats_busiest_hour">最繁忙時段：%s</string>
     <string name="stats_top_contacts">最常撥打</string>
@@ -113,4 +112,16 @@
     <plurals name="stats_calls">
         <item quantity="other">%d 通電話</item>
     </plurals>
+    <string name="stats_vs_previous">較上一週期 %1$s</string>
+    <string name="stats_answer_rate">接聽率</string>
+    <string name="stats_longest_call">最長通話</string>
+    <string name="stats_calls_per_day">每日通話</string>
+    <string name="stats_people">聯絡人</string>
+    <string name="stats_calls_over_time">通話趨勢</string>
+    <string name="stats_call_mix">通話組成</string>
+    <string name="stats_by_hour">按小時</string>
+    <string name="stats_by_weekday">按星期</string>
+    <string name="stats_busiest_day">最繁忙的一天：%s</string>
+    <string name="stats_talk_split">來電 %1$s · 去電 %2$s</string>
+    <string name="stats_per_day_average">每日 %s</string>
 </resources>

@@ -118,6 +118,60 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/blocked_list_card"
                 style="@style/SettingsSectionHolder"
+                app:cardCornerRadius="@dimen/glass_card_radius"
+                app:cardElevation="0dp">
+
+                <!-- Add first (start-aligned, like every list row), then the numbers or the empty note -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="@dimen/small_margin">
+
+                    <LinearLayout
+                        android:id="@+id/blocked_add_holder"
+                        style="@style/ListRowStyle">
+
+                        <ImageView
+                            android:id="@+id/blocked_add_icon"
+                            style="@style/ListRowLeadingIcon"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_plus_vector" />
+
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/blocked_add_label"
+                            style="@style/ListRowTitle"
+                            android:text="@string/add_a_blocked_number" />
+                    </LinearLayout>
+
+                    <com.goodwy.commons.views.MyTextView
+                        android:id="@+id/blocked_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.6"
+                        android:paddingHorizontal="@dimen/activity_margin"
+                        android:paddingTop="@dimen/small_margin"
+                        android:paddingBottom="@dimen/activity_margin"
+                        android:text="@string/not_blocking_anyone"
+                        android:textAlignment="viewStart"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/blocked_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/blocked_backup_label"
+                style="@style/SettingsSectionLabelStyle"
+                android:text="@string/backups" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/blocked_backup_card"
+                style="@style/SettingsSectionHolder"
                 android:layout_marginBottom="@dimen/activity_margin"
                 app:cardCornerRadius="@dimen/glass_card_radius"
                 app:cardElevation="0dp">
@@ -128,39 +182,21 @@
                     android:orientation="vertical">
 
                     <RelativeLayout
-                        android:id="@+id/blocked_add_holder"
-                        style="@style/SettingsHolderStyle">
-
-                        <ImageView
-                            android:id="@+id/blocked_add_icon"
-                            android:layout_width="@dimen/normal_icon_size"
-                            android:layout_height="@dimen/normal_icon_size"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_plus_vector" />
-
-                        <com.goodwy.commons.views.MyTextView
-                            style="@style/SettingsTextLabelStyle"
-                            android:layout_centerVertical="true"
-                            android:layout_toStartOf="@+id/blocked_add_icon"
-                            android:text="@string/add_a_blocked_number" />
-                    </RelativeLayout>
-
-                    <LinearLayout
-                        android:id="@+id/blocked_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-
-                    <RelativeLayout
                         android:id="@+id/blocked_export_holder"
                         style="@style/SettingsHolderStyle">
 
                         <com.goodwy.commons.views.MyTextView
                             style="@style/SettingsTextLabelStyle"
                             android:layout_centerVertical="true"
+                            android:layout_marginEnd="68dp"
                             android:text="@string/export_blocked_numbers" />
+
+                        <ImageView
+                            android:id="@+id/blocked_export_chevron"
+                            style="@style/SettingsChevronStyle"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="@string/export_blocked_numbers" />
                     </RelativeLayout>
 
                     <RelativeLayout
@@ -170,18 +206,16 @@
                         <com.goodwy.commons.views.MyTextView
                             style="@style/SettingsTextLabelStyle"
                             android:layout_centerVertical="true"
+                            android:layout_marginEnd="68dp"
                             android:text="@string/import_blocked_numbers" />
-                    </RelativeLayout>
 
-                    <com.goodwy.commons.views.MyTextView
-                        android:id="@+id/blocked_empty"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.6"
-                        android:gravity="center"
-                        android:padding="@dimen/activity_margin"
-                        android:text="@string/not_blocking_anyone"
-                        android:visibility="gone" />
+                        <ImageView
+                            android:id="@+id/blocked_import_chevron"
+                            style="@style/SettingsChevronStyle"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="@string/import_blocked_numbers" />
+                    </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
