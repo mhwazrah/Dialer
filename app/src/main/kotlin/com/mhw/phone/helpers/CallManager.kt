@@ -382,6 +382,10 @@ internal fun speakerToggleTarget(route: Int, supportedRoutes: Int, previousRoute
 /** Caller photo size on the call screen: twice [baseSize], at most a quarter of [screenHeight] (never below [baseSize]). */
 internal fun ringingAvatarSize(baseSize: Int, screenHeight: Int): Int = minOf(baseSize * 2, maxOf(baseSize, screenHeight / 4))
 
+/** The equal gap that spaces [rowHeights] between [top] and [bottom]: one gap above, between and below the rows. */
+internal fun evenRowGap(top: Int, bottom: Int, rowHeights: List<Int>): Int =
+    (bottom - top - rowHeights.sum()) / (rowHeights.size + 1)
+
 interface CallManagerListener {
     fun onStateChanged()
     fun onAudioStateChanged(audioState: AudioRoute)

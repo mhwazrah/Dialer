@@ -188,8 +188,13 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
             }
             binding.dialpadInput.disableKeyboard()
         }
-        // Keep an enlarged photo clear of the buttons (see fitEnlargedAvatar); posted, so it never resizes mid-layout
-        binding.callHolder.addOnLayoutChangeListener { holder, _, _, _, _, _, _, _, _ -> holder.post { fitEnlargedAvatar() } }
+        // Fit the enlarged photo, then space the rows evenly (see distributeRows); posted, so nothing resizes mid-layout
+        binding.callHolder.addOnLayoutChangeListener { holder, _, _, _, _, _, _, _, _ ->
+            holder.post {
+                fitEnlargedAvatar()
+                distributeRows()
+            }
+        }
         updateCallContactInfo(CallManager.getPrimaryCall())
 
         binding.apply {
@@ -232,6 +237,7 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         val isSmallScreen =
             resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK == Configuration.SCREENLAYOUT_SIZE_SMALL
         if (config.callButtonStyle == IOS17 || isSmallScreen) {
+            evenRows = false
             binding.callEndLabel.beVisible()
             binding.callAddContactHolder.beGone()
 
@@ -1634,14 +1640,74 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
     // Largest enlarged size that left the status line clear of the buttons on this screen (found by fitEnlargedAvatar)
     private var avatarFitLimit = Int.MAX_VALUE
 
-    // The dialing and connected layouts have their buttons much higher than the incoming one, so on a short screen the
-    // enlarged photo can push the name and status under them: shrink it by the overlap (never below the layout's size)
-    // and remember the limit.
+    // The rows between the caller block (photo to status) and the bottom controls (end button, or the answer slider) are
+    // spaced so every gap is equal; the caller block and the bottom controls stay where the layout puts them.
+    // Off for the compact two-row style (IOS17 / small screens), whose rows hang off the end button.
+    private var evenRows = true
+
+    private class RowPlan(val top: Int, val bottom: Int, val rows: List<Pair<View, Int>>) {
+        val gap get() = evenRowGap(top, bottom, rows.map { it.second })
+    }
+
+    private val minRowGap by lazy { resources.getDimensionPixelSize(com.goodwy.commons.R.dimen.activity_margin) }
+
+    /** Layout position of [view] in call_holder's coordinates (translation, e.g. the arrow animations, ignored). */
+    private fun layoutRect(view: View): Rect = Rect().also {
+        view.getDrawingRect(it)
+        binding.callHolder.offsetDescendantRectToMyCoords(view, it)
+    }
+
+    private fun lowestBottom(vararg views: View): Int = views.filter { it.isVisible() }.maxOfOrNull { layoutRect(it).bottom } ?: 0
+
+    private fun planRows(): RowPlan? {
+        if (!evenRows || isDestroyed || !binding.callStatusHolder.isVisible()) return null
+        val top = lowestBottom(binding.callStatusHolder, binding.holdStatusLabel)
+        return if (binding.incomingCallHolder.isVisible()) incomingRowPlan(top) else ongoingRowPlan(top)
+    }
+
+    /**
+     * Height of a row of buttons with their labels below, from the views' sizes (positions of buttons that were just
+     * shown are not laid out yet); null while a visible one has not been measured.
+     */
+    private fun rowHeight(vararg buttons: Pair<View, View>): Int? {
+        val shown = buttons.filter { it.first.isVisible() }
+        if (shown.isEmpty() || shown.any { (button, label) -> button.height == 0 || label.height == 0 }) return null
+        return shown.maxOf { (button, label) ->
+            button.height + (label.layoutParams as ViewGroup.MarginLayoutParams).topMargin + label.height
+        }
+    }
+
+    // Remind / decline-with-message, centred between the caller block and the answer slider (or the answer buttons)
+    private fun incomingRowPlan(top: Int): RowPlan? = with(binding) {
+        if (callAcceptAndDecline.isVisible()) return null
+        val anchor = listOf(callRemind, callMessage).firstOrNull { it.isVisible() } ?: return null
+        val height = rowHeight(callRemind to callRemindLabel, callMessage to callMessageLabel) ?: return null
+        val bottom = layoutRect(if (callDraggableVertical.isVisible()) callUpArrow else callAccept).top
+        RowPlan(top, bottom, listOf(anchor to height))
+    }
+
+    // Mute / dialpad / speaker, then add / hold / add-number (or swap / merge), above the end button
+    private fun ongoingRowPlan(top: Int): RowPlan? = with(binding) {
+        if (!ongoingCallHolder.isVisible() || !callToggleMicrophone.isVisible() || !callEnd.isVisible()) return null
+        val firstHeight = rowHeight(
+            callToggleMicrophone to callToggleMicrophoneLabel, callDialpadHolder to callDialpadLabel,
+            callToggleSpeaker to callToggleSpeakerLabel
+        ) ?: return null
+        val secondHeight = rowHeight(
+            callAddHolder to callAddLabel, callSwapHolder to callSwapLabel, callToggleHold to callToggleLabel,
+            callMergeHolder to callMergeLabel, callAddContactHolder to callAddContactLabel
+        ) ?: return null
+        RowPlan(top, layoutRect(callEnd).top, listOf(callDialpadHolder to firstHeight, callAddHolder to secondHeight))
+    }
+
+    // On a short screen the enlarged photo can leave too little room for the rows: shrink it by the shortfall (never
+    // below the layout's size) and remember the limit. Runs before the rows are placed.
     private fun fitEnlargedAvatar() {
-        val overlap = enlargedAvatarOverlap()
+        val plan = planRows()
         val params = binding.callerAvatar.layoutParams
-        if (overlap <= 0 || params == null) return
-        avatarFitLimit = maxOf(avatarBaseSize, params.width - overlap)
+        val shortfall = if (plan == null) 0 else (minRowGap - plan.gap) * (plan.rows.size + 1)
+        if (shortfall <= 0 || params == null || params.width <= avatarBaseSize) return
+        avatarFitLimit = maxOf(avatarBaseSize, params.width - shortfall)
         if (avatarFitLimit != params.width) {
             params.width = avatarFitLimit
             params.height = avatarFitLimit
@@ -1649,18 +1715,41 @@ class CallActivity : SimpleActivity(), AlwaysDarkScreen {
         }
     }
 
-    // How far the status line reaches into the first row of buttons while the photo is enlarged; 0 when clear
-    private fun enlargedAvatarOverlap(): Int {
-        val width = binding.callerAvatar.layoutParams?.width ?: 0
-        val firstButtons = if (binding.incomingCallHolder.isVisible()) binding.callRemind else binding.callToggleMicrophone
-        val applies = !isDestroyed && avatarBaseSize > 0 && width > avatarBaseSize &&
-            firstButtons.isVisible() && binding.callStatusLabel.isVisible()
-        if (!applies) return 0
-        val window = IntArray(2)
-        binding.callStatusLabel.getLocationInWindow(window)
-        val statusBottom = window[1] + binding.callStatusLabel.height
-        firstButtons.getLocationInWindow(window)
-        return statusBottom + resources.getDimensionPixelSize(com.goodwy.commons.R.dimen.medium_margin) - window[1]
+    // Writes only when a value changes: the call timer relayouts the screen every second
+    private fun distributeRows() {
+        val plan = planRows() ?: return
+        val gap = plan.gap
+        if (gap < minRowGap) return // does not fit: keep the layout's own positions
+        val (firstAnchor, firstHeight) = plan.rows.first()
+        val firstTop = plan.top + gap
+        placeFirstRow(firstAnchor, firstTop)
+        if (plan.rows.size > 1) placeSecondRow(firstTop, firstTop + firstHeight + gap)
+    }
+
+    // The first row's anchor hangs from its holder's top: bias 0 plus a top margin puts it at [top]
+    private fun placeFirstRow(anchor: View, top: Int) {
+        val holder = anchor.parent as ViewGroup
+        val margin = top - layoutRect(holder).top - holder.paddingTop
+        val anchors = if (anchor == binding.callDialpadHolder) listOf(anchor) else listOf(binding.callRemind, binding.callMessage)
+        anchors.forEach { view ->
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            if (params.verticalBias == 0f && params.topMargin == margin) return@forEach
+            params.verticalBias = 0f
+            params.topMargin = margin
+            view.layoutParams = params
+        }
+    }
+
+    // The second row's buttons hang below the speaker button (directly, or through a hidden button of the same row),
+    // which is centred on the first row's anchor and as tall
+    private fun placeSecondRow(firstTop: Int, top: Int) = with(binding) {
+        val margin = top - (firstTop + callToggleSpeaker.height)
+        listOf(callAddHolder, callSwapHolder, callToggleHold, callMergeHolder, callAddContactHolder).forEach { view ->
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            if (params.topMargin == margin) return@forEach
+            params.topMargin = margin
+            view.layoutParams = params
+        }
     }
 
     private fun enlargeAvatar() {

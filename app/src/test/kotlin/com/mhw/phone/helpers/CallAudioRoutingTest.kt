@@ -42,4 +42,12 @@ class CallAudioRoutingTest {
         assertEquals(160, ringingAvatarSize(baseSize = 100, screenHeight = 640)) // short: capped
         assertEquals(100, ringingAvatarSize(baseSize = 100, screenHeight = 300)) // never smaller than normal
     }
+
+    @Test
+    fun rowGapIsEqualAboveBetweenAndBelowTheRows() {
+        // 1000 px, two rows of 250 and 200 px: 550 px left over, three gaps of 183
+        assertEquals(183, evenRowGap(top = 0, bottom = 1000, rowHeights = listOf(250, 200)))
+        assertEquals(50, evenRowGap(top = 100, bottom = 300, rowHeights = listOf(100))) // one row: centred
+        assertEquals(-33, evenRowGap(top = 0, bottom = 300, rowHeights = listOf(200, 200))) // does not fit: negative
+    }
 }
