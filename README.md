@@ -14,7 +14,7 @@
 <img src="docs/screenshots/recents.jpg" width="200" alt="Recents"/>
 <img src="docs/screenshots/statistics.jpg" width="200" alt="Call statistics"/>
 <img src="docs/screenshots/call-confirmation.jpg" width="200" alt="Call confirmation"/>
-<img src="docs/screenshots/widget-recents.jpg" width="200" alt="Recent calls widget"/>
+<img src="docs/screenshots/call-screen-light.jpg" width="200" alt="Incoming call, light theme"/>
 
 </div>
 
@@ -76,11 +76,13 @@ messenger shortcuts and more.
 ## Screenshots
 
 <div align="center">
+<img src="docs/screenshots/call-screen-dark.jpg" width="200" alt="In a call, dark theme"/>
 <img src="docs/screenshots/statistics-charts.jpg" width="200" alt="Statistics charts"/>
 <img src="docs/screenshots/statistics-arabic-dark.jpg" width="200" alt="Statistics in Arabic, dark theme"/>
 <img src="docs/screenshots/blocked-numbers.jpg" width="200" alt="Blocked numbers"/>
 <img src="docs/screenshots/quick-replies.jpg" width="200" alt="Quick replies"/>
 <img src="docs/screenshots/widget-favorites.jpg" width="200" alt="Favorites widget"/>
+<img src="docs/screenshots/widget-recents.jpg" width="200" alt="Recent calls widget"/>
 </div>
 
 ## Building
