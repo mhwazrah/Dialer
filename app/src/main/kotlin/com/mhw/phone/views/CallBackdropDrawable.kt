@@ -31,13 +31,15 @@ class CallBackdropDrawable(context: Context, light: Boolean) : Drawable() {
     private val basePaint = Paint()
     private val fieldPaints = List(2) { Paint(Paint.ANTI_ALIAS_FLAG) }
     private val fieldMatrix = Matrix()
-    private val bubbleFills = List(BUBBLES.size) { Paint(Paint.ANTI_ALIAS_FLAG) }
-    private val bubbleShines = List(BUBBLES.size) { Paint(Paint.ANTI_ALIAS_FLAG) }
+    // Paint alpha scales each bubble's shaders by its opacity
+    private val bubbleFills = BUBBLES.map { Paint(Paint.ANTI_ALIAS_FLAG).apply { alpha = (it.opacity * 255).toInt() } }
+    private val bubbleShines = BUBBLES.map { Paint(Paint.ANTI_ALIAS_FLAG).apply { alpha = (it.opacity * 255).toInt() } }
     private val bubbleRim = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = density
         color = palette.bubbleRim
     }
+    private val rimAlpha = palette.bubbleRim ushr 24
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = 2 * density
@@ -144,10 +146,12 @@ class CallBackdropDrawable(context: Context, light: Boolean) : Drawable() {
     // Lissajous float: each bubble loops on its own periods around its home spot, breathing a little
     private fun drawBubbles(canvas: Canvas, b: Rect) {
         BUBBLES.forEachIndexed { i, bubble ->
-            val tx = 2 * PI.toFloat() * (elapsedMs % bubble.periodMs) / bubble.periodMs + bubble.phase
-            val ty = 2 * PI.toFloat() * (elapsedMs % (bubble.periodMs * 13 / 10)) / (bubble.periodMs * 1.3f) + bubble.phase
+            val phase = i * 2.4f // spreads the bubbles' starting points around their loops
+            val tx = 2 * PI.toFloat() * (elapsedMs % bubble.periodMs) / bubble.periodMs + phase
+            val ty = 2 * PI.toFloat() * (elapsedMs % (bubble.periodMs * 13 / 10)) / (bubble.periodMs * 1.3f) + phase
             val r = bubble.radiusDp * density
             val scale = 1f + 0.06f * sin(tx * 2)
+            bubbleRim.alpha = (rimAlpha * bubble.opacity).toInt()
             canvas.withTranslation(
                 b.left + bubble.x * b.width() + sin(tx) * bubble.swayDp * density,
                 b.top + bubble.y * b.height() + cos(ty) * bubble.swayDp * 0.8f * density
@@ -183,8 +187,8 @@ class CallBackdropDrawable(context: Context, light: Boolean) : Drawable() {
     @Deprecated("Deprecated in Java")
     override fun getOpacity(): Int = PixelFormat.OPAQUE
 
-    /** Home spot as a fraction of the screen, size, sway distance, loop length and phase. */
-    private class Bubble(val x: Float, val y: Float, val radiusDp: Float, val swayDp: Float, val periodMs: Long, val phase: Float)
+    /** Home spot as a fraction of the screen, size, sway distance, loop length and opacity (1 = full). */
+    private class Bubble(val x: Float, val y: Float, val radiusDp: Float, val swayDp: Float, val periodMs: Long, val opacity: Float = 1f)
 
     private class Palette(
         val base: IntArray,
@@ -204,15 +208,15 @@ class CallBackdropDrawable(context: Context, light: Boolean) : Drawable() {
 
         // Big ones at the edges, small ones in between; the lowest stay small and faint near the answer slider
         val BUBBLES = listOf(
-            Bubble(0.12f, 0.10f, 70f, 28f, 23_000, 0.0f),
-            Bubble(0.88f, 0.20f, 42f, 22f, 19_000, 1.7f),
-            Bubble(0.66f, 0.06f, 20f, 18f, 17_000, 3.1f),
-            Bubble(0.30f, 0.40f, 26f, 30f, 27_000, 4.4f),
-            Bubble(0.94f, 0.50f, 88f, 26f, 31_000, 2.3f),
-            Bubble(0.06f, 0.66f, 54f, 24f, 25_000, 5.2f),
-            Bubble(0.58f, 0.60f, 16f, 20f, 21_000, 0.9f),
-            Bubble(0.80f, 0.84f, 34f, 22f, 29_000, 3.8f),
-            Bubble(0.24f, 0.92f, 22f, 18f, 18_000, 2.8f),
+            Bubble(0.12f, 0.10f, 70f, 28f, 23_000),
+            Bubble(0.88f, 0.20f, 42f, 22f, 19_000),
+            Bubble(0.66f, 0.06f, 20f, 18f, 17_000),
+            Bubble(0.30f, 0.40f, 26f, 30f, 27_000),
+            Bubble(0.98f, 0.50f, 60f, 22f, 31_000, opacity = 0.5f), // behind the right-hand buttons: small and faint
+            Bubble(0.06f, 0.66f, 54f, 24f, 25_000),
+            Bubble(0.58f, 0.60f, 16f, 20f, 21_000),
+            Bubble(0.80f, 0.84f, 34f, 22f, 29_000),
+            Bubble(0.24f, 0.92f, 22f, 18f, 18_000),
         )
 
         val DARK = Palette(
