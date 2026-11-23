@@ -11,6 +11,8 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-7f52ff?style=flat-square&logo=kotlin&logoColor=white)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)
 
+[![Download APK](https://img.shields.io/badge/Download-APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mhwazrah/Dialer/releases/latest)
+
 <img src="docs/screenshots/recents.jpg" width="200" alt="Recents"/>
 <img src="docs/screenshots/statistics.jpg" width="200" alt="Call statistics"/>
 <img src="docs/screenshots/call-confirmation.jpg" width="200" alt="Call confirmation"/>
