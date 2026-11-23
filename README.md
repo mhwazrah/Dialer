@@ -27,7 +27,7 @@ handling, statistics, widgets and full Arabic support. Set it as your default ph
 
 ### 🎨 Design
 - **Liquid Glass look** throughout: frosted cards and bars that stay readable, a pill-style dialpad with bigger keys, and page titles in the top bar.
-- **Dark animated call screen**, with the caller's photo twice as large and evenly spaced buttons on the incoming, dialing and in-call screens.
+- **Animated call screen** in light or dark with the theme: floating glass bubbles, a larger caller photo and evenly spaced buttons on the incoming, dialing and in-call screens.
 - **Redesigned dialogs**: tonal buttons, and a call confirmation that shows the caller's photo, name and number with a soft pulse.
 - **Simplified settings**: fewer, clearer options, with the glass style on every screen.
 

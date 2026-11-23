@@ -379,8 +379,12 @@ internal fun speakerToggleTarget(route: Int, supportedRoutes: Int, previousRoute
     }
 }
 
-/** Caller photo size on the call screen: twice [baseSize], at most a quarter of [screenHeight] (never below [baseSize]). */
-internal fun ringingAvatarSize(baseSize: Int, screenHeight: Int): Int = minOf(baseSize * 2, maxOf(baseSize, screenHeight / 4))
+/**
+ * Caller photo size on the call screen: 85% of twice [baseSize], capped at 85% of a quarter of [screenHeight]
+ * (never below [baseSize]).
+ */
+internal fun ringingAvatarSize(baseSize: Int, screenHeight: Int): Int =
+    maxOf(baseSize, minOf(baseSize * 2, maxOf(baseSize, screenHeight / 4)) * 85 / 100)
 
 /** The equal gap that spaces [rowHeights] between [top] and [bottom]: one gap above, between and below the rows. */
 internal fun evenRowGap(top: Int, bottom: Int, rowHeights: List<Int>): Int =

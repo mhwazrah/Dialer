@@ -45,8 +45,8 @@ class ConferenceActivity : SimpleActivity(), AlwaysDarkScreen {
         setupTopAppBar(binding.conferenceAppbar, NavigationIcon.Arrow)
         binding.conferenceAppbar.setBackgroundColor(Color.TRANSPARENT)
         binding.conferenceToolbar.setBackgroundColor(Color.TRANSPARENT)
-        // Always dark, like the call screen it belongs to: the same navy backdrop and white content
-        binding.root.background = CallBackdropDrawable(this)
+        // Always dark: the call screen's dark navy backdrop (still) and white content
+        binding.root.background = CallBackdropDrawable(this, light = false)
         binding.conferenceToolbar.setTitleTextColor(Color.WHITE)
         // Commons colours the arrow with a colour filter (a tint would be ignored); mutate so other screens keep theirs
         binding.conferenceToolbar.navigationIcon = binding.conferenceToolbar.navigationIcon?.mutate()?.apply {

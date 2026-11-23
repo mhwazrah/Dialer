@@ -34,7 +34,7 @@ import com.mhw.phone.R
 // Single source of truth for the app's Liquid Glass look: every screen paints the same
 // backdrop and every glass panel is configured here, so the style can be tuned in one place.
 
-/** A screen that is always dark (the call screen), whatever the app theme. */
+/** A screen that is always dark (the conference screen), whatever the app theme. */
 interface AlwaysDarkScreen
 
 /** Whether the user's theme is light, judged from the theme's background colour; false on an [AlwaysDarkScreen]. */

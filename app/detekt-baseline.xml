@@ -61,7 +61,7 @@
     <ID>ExplicitItLambdaParameter:DialpadActivity.kt$DialpadActivity${ it -&gt; if (loadAll) recentsHelper.updateRecentOutgoingNumbers(it) val calls = if (config.groupAllCalls) it.distinctBy { it.phoneNumber } else it prepareCallLog(calls, callback) }</ID>
     <ID>ExplicitItLambdaParameter:RecentsFragment.kt$RecentsFragment${ it -&gt; if (loadAll) recentsHelper.updateRecentOutgoingNumbers(it) val calls = if (context.config.groupAllCalls) it.distinctBy { it.phoneNumber } else it finalizeCallLog(calls, callback) }</ID>
     <ID>FunctionParameterNaming:MainActivity.kt$MainActivity$light_: Int</ID>
-    <ID>LargeClass:CallActivity.kt$CallActivity : SimpleActivityAlwaysDarkScreen</ID>
+    <ID>LargeClass:CallActivity.kt$CallActivity : SimpleActivity</ID>
     <ID>LargeClass:CallHistoryActivity.kt$CallHistoryActivity : SimpleActivity</ID>
     <ID>LargeClass:DialpadActivity.kt$DialpadActivity : SimpleActivity</ID>
     <ID>LargeClass:MainActivity.kt$MainActivity : SimpleActivity</ID>
@@ -266,7 +266,7 @@
     <ID>TooGenericExceptionCaught:TimerService.kt$e: Exception</ID>
     <ID>TooManyFunctions:App.kt$App : RightAppDefaultLifecycleObserver</ID>
     <ID>TooManyFunctions:BlockedNumbersActivity.kt$BlockedNumbersActivity : SimpleActivity</ID>
-    <ID>TooManyFunctions:CallActivity.kt$CallActivity : SimpleActivityAlwaysDarkScreen</ID>
+    <ID>TooManyFunctions:CallActivity.kt$CallActivity : SimpleActivity</ID>
     <ID>TooManyFunctions:CallHistoryActivity.kt$CallHistoryActivity : SimpleActivity</ID>
     <ID>TooManyFunctions:CallHistoryAdapter.kt$CallHistoryAdapter : MyRecyclerViewListAdapter</ID>
     <ID>TooManyFunctions:CallManager.kt$CallManager$Companion</ID>

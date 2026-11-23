@@ -37,9 +37,9 @@ class CallAudioRoutingTest {
     }
 
     @Test
-    fun ringingAvatarDoublesButStaysWithinAQuarterOfTheScreen() {
-        assertEquals(200, ringingAvatarSize(baseSize = 100, screenHeight = 1000)) // tall: full x2
-        assertEquals(160, ringingAvatarSize(baseSize = 100, screenHeight = 640)) // short: capped
+    fun ringingAvatarIs85PercentOfDoubleAndStaysWithinAQuarterOfTheScreen() {
+        assertEquals(170, ringingAvatarSize(baseSize = 100, screenHeight = 1000)) // tall: 85% of x2
+        assertEquals(136, ringingAvatarSize(baseSize = 100, screenHeight = 640)) // short: 85% of the cap
         assertEquals(100, ringingAvatarSize(baseSize = 100, screenHeight = 300)) // never smaller than normal
     }
 

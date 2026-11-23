@@ -12,7 +12,7 @@ import com.mhw.phone.helpers.applyAppTheme
 
 open class SimpleActivity : BaseSimpleActivity() {
     // Follow the app theme (not the system) for -night resources, so dark-theme variants of the glass drawables (e.g.
-    // darker row cards) load; the call screens are always dark. Set before attaching, AppCompat gives this activity its
+    // darker row cards) load; the conference screen is always dark. Set before attaching, AppCompat gives this activity its
     // own override configuration. Set in onCreate it rewrote the Resources shared with the other screens (the call
     // screen handles uiMode itself), so a list row built behind a call got the dark card under light text.
     override fun attachBaseContext(newBase: Context) {
